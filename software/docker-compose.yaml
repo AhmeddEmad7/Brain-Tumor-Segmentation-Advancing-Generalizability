@@ -1,0 +1,121 @@
+version: "3.8"
+
+volumes:
+  reporting_db_data:
+  api_gateway_db_data:
+
+services:
+
+  frontend:
+    build: ./frontend
+    container_name: gp_frontend
+    ports:
+       - "5000:5000"
+    depends_on:
+      - api_gateway
+
+  api_gateway:
+    build: ./backend/ApiGateway
+    container_name: gp_api_gateway
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/ApiGateway:/usr/src/app
+    depends_on:
+      - api_gateway_db
+      - orthanc
+
+  api_gateway_db:
+    image: postgres:latest
+    container_name: gp_gatway_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - api_gateway_db_data:/var/lib/postgresql/data
+    restart: always
+
+  orthanc:
+    build: ./backend/Services/Orthanc
+    container_name: gp_orthanc
+    ports:
+      - "8042:8042"
+      - "4242:4242"
+    volumes:
+      - ./backend/Services/Orthanc/config/orthanc.json:/etc/orthanc/orthanc.json
+      - ./backend/Services/Orthanc/config/dicomweb.json:/etc/orthanc/dicomweb.json
+      - ./backend/Services/Orthanc/config/scripts:/usr/share/orthanc/scripts
+      - ./backend/Services/Orthanc/storage:/var/lib/orthanc/db-v6
+
+  redisinsight:
+    image: redis/redis-stack:latest
+    container_name: gp_redisinsight
+    ports:
+      - "8001:8001"
+      - "6379:6379"
+    volumes:
+      - ./backend/Services/Redis:/data
+    restart: always
+
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: gp_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=mmm_ai
+      - RABBITMQ_DEFAULT_PASS=mmm_mq_ai_p
+    volumes:
+      - ./backend/Services/RabbitMQ:/var/lib/rabbitmq
+
+  nifti_storage:
+    build: ./backend/Services/NiftiStorage/
+    container_name: gp_nifti_storage
+    ports:
+      - "7070:8080"
+    volumes:
+      - ./backend/Services/NiftiStorage:/usr/src/app
+
+  # motion_artifacts_inference:
+  #   build: ./backend/Services/Inference/Motion Artifacts
+  #   container_name: gp_motion_artifacts_inference
+  #   volumes:
+  #     - ./backend/Services/Inference/Motion Artifacts:/usr/src/app
+  #   depends_on:
+  #     - rabbitmq
+
+  # segmentation_inference:
+  #   build: ./backend/Services/Inference/Segmentation
+  #   container_name: gp_segmentation_inference
+  #   volumes:
+  #     - ./backend/Services/Inference/Segmentation:/usr/src/app
+  #   depends_on:
+  #     - rabbitmq
+
+  reporting_db:
+    image: postgres:latest
+    container_name: gp_reporting_db
+    volumes:
+      - reporting_db_data:/var/lib/postgresql/data/
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=GP
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+
+  reporting_service:
+    build: ./backend/Services/Reporting
+    container_name: gp_reporting_service
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./backend/Services/Reporting:/usr/src/app:ro
+    depends_on:
+      - reporting_db
+

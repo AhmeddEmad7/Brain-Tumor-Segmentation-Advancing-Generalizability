@@ -91,13 +91,13 @@ class DicomUtil {
         // Determine the orientation based on the maximum dot product
         const max_dot = Math.max(dot_axial, dot_sagittal, dot_coronal);
         if (max_dot === dot_axial) {
-            return Enums.OrientationAxis.CORONAL;
+            return Enums.OrientationAxis.AXIAL;
         } else if (max_dot === dot_sagittal) {
-            return Enums.OrientationAxis.CORONAL;
+            return Enums.OrientationAxis.SAGITTAL;
         } else if (max_dot === dot_coronal) {
             return Enums.OrientationAxis.CORONAL;
         } else {
-            return Enums.OrientationAxis.CORONAL;
+            return Enums.OrientationAxis.ACQUISITION;
         }
     }
 

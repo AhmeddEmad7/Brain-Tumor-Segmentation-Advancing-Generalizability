@@ -87,16 +87,17 @@ class DicomUtil {
         const dot_sagittal = DicomUtil.dotProduct(orientation_array, sagittal);
         const dot_coronal = DicomUtil.dotProduct(orientation_array, coronal);
 
+        // CORONAL Edit
         // Determine the orientation based on the maximum dot product
         const max_dot = Math.max(dot_axial, dot_sagittal, dot_coronal);
         if (max_dot === dot_axial) {
-            return Enums.OrientationAxis.AXIAL;
+            return Enums.OrientationAxis.CORONAL;
         } else if (max_dot === dot_sagittal) {
-            return Enums.OrientationAxis.SAGITTAL;
+            return Enums.OrientationAxis.CORONAL;
         } else if (max_dot === dot_coronal) {
             return Enums.OrientationAxis.CORONAL;
         } else {
-            return Enums.OrientationAxis.ACQUISITION;
+            return Enums.OrientationAxis.CORONAL;
         }
     }
 

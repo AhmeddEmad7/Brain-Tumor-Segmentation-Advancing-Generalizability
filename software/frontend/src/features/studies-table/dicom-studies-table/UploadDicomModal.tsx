@@ -68,7 +68,7 @@ const UploadDicomModal = ({ isOpen, onClose }: UploadDicomModalProps) => {
         >
             <Box className={'flex flex-col gap-y-4'}>
                 <Dropzone multiple={true} disabled={isUploading} onDropAccepted={(files) => setFiles(files)}>
-                    {({ getRootProps, acceptedFiles }) => (
+                    {({ getRootProps,getInputProps, acceptedFiles }) => (
                         <div className={'flex flex-col gap-2'}>
                             <span className={`text-xl font-semibold ${fileError && 'text-red-400'}`}>
                                 DICOM Files
@@ -80,10 +80,11 @@ const UploadDicomModal = ({ isOpen, onClose }: UploadDicomModalProps) => {
                                 }
                             >
                                 <div className={'flex h-full w-full items-center justify-center'}>
+                                <input {...getInputProps()} />
                                     <label
                                         htmlFor="dropzone-file"
                                         className={`flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/90 ${isUploading && 'cursor-default'}`}
-                                    >
+                                        >
                                         <div
                                             className={'flex flex-col items-center justify-center pb-6 pt-5'}
                                         >

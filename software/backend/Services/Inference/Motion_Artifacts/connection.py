@@ -31,6 +31,7 @@ def start_connection():
         channel.basic_consume(queue='inf_motion_correction', on_message_callback=callback.motion_correction_callback)
 
         channel.start_consuming()
+        
     except Exception as e:
         print(f'Error: {e}')
         start_connection()

@@ -8,27 +8,117 @@ import json
 import SimpleITK
 import subprocess
 import numpy as np
-import pydicom_seg
+# import pydicom_seg
 import time
+import nibabel as nib
 from pydicom.filereader import dcmread
+from scipy.ndimage import zoom
 from src.colors import GENERIC_ANATOMY_COLORS
-
+from .Teacher_Inference.Inference import inference
+from src.colored_dicom import convert_array_to_dicom_seg
+import redis
 load_dotenv()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 studies_dir = os.path.join(os.path.dirname(current_dir), 'studies')
 
 client = dicomweb_client.api.DICOMwebClient(f"{os.getenv('ORTHANC_URL')}/dicom-web")
+client_redis = redis.Redis(host="localhost", port=6379, db=0)
 
 if not os.path.exists(studies_dir):
     print(f"Creating directory {studies_dir}")
     os.mkdir(studies_dir)
+
+color_dict = {
+    0:(0,0,0), ## background
+    1:(255,0,0), ##  
+    2:(0,255,0), ## green Edema
+    3:(0,0,255) ## blue Enhancing Tumor
+}
+
+
+def map_color_to_label(mask, color_dict=color_dict) -> np.ndarray:
+    # Create an empty array for the colored overlay with the same shape as the MRI but with an additional dimension for color channels
+    colored_mask = np.zeros((mask.shape[0], mask.shape[1], mask.shape[2], 3), dtype=np.uint8)
+    
+    for label, color in color_dict.items():
+        if label == 0:
+            continue  # Skip background
+        color = np.array(color)  # Keep color values in [0, 255] range
+        # color = np.array(color)/255  # Keep color values in [0, 255] range
+        for i in range(mask.shape[0]):  # Process each slice
+            indices = (mask[i] == label)
+            colored_mask[i][indices] = color
+    
+    return colored_mask
+
+
+def overlay_mask(mri, colored_mask, alpha=0.5) -> np.ndarray:
+    if mri.ndim == 2:
+        # If MRI is 2D, stack it to create an RGB image
+        mri_rgb = np.stack([mri]*3, axis=-1)
+    elif mri.ndim == 3:
+        # If MRI is 3D, add a new axis for RGB channels
+        mri_rgb = np.repeat(mri[..., np.newaxis], 3, axis=-1)
+
+    # Normalize MRI to be in the range of 0-255 if necessary
+    if np.max(mri_rgb) > 255:
+        mri_rgb = (mri_rgb / np.max(mri_rgb)) * 200
+
+    # Convert MRI to uint8
+    mri_rgb = mri_rgb.astype(np.uint8)
+
+    # Only blend where the mask has values (non-background)
+    mask_indices = np.any(colored_mask != 0, axis=-1)
+    blended_image = mri_rgb.copy()
+
+    # Apply blending only to the areas covered by the mask
+    blended_image[mask_indices] = (
+        (0) * mri_rgb[mask_indices] + alpha * colored_mask[mask_indices]
+    ).astype(np.uint8)
+
+    return blended_image
+
+
+def save_array_nifti(output_array,i):
+
+    affine = np.eye(4)
+    output_nifti = nib.Nifti1Image(output_array, affine=affine)
+    output_path = os.path.join(os.path.dirname(studies_dir), f'test{i}.nii.gz')
+    nib.save(output_nifti, output_path)
+    print(f"Saved NIfTI at: {output_path}")
+    
+    
+## me7taga 3omda fe tzbet al axis 
+def resize_nifti_to_array(input_file, target_shape, interpolation_order=1) -> np.ndarray:
+    # Load NIfTI file
+    img = nib.load(input_file)
+    data = img.get_fdata()
+    # print("data of nifti load", data)
+    original_shape = data.shape
+    
+    # Calculate zoom factors for each dimension
+    zoom_factors = [t / o for t, o in zip(target_shape, original_shape)]
+    
+    # Perform resizing with interpolation
+    resized_data = zoom(data, zoom_factors, order=interpolation_order)
+    
+    return resized_data 
 
 
 def get_dicom_series(study_uid, series_uid, tag):
     print(f"Retrieving series {series_uid} from study {study_uid} as {tag}...")
 
     instances = client.retrieve_series(study_instance_uid=study_uid, series_instance_uid=series_uid)
-
+    
+    instance_metadata = client.retrieve_instance_metadata(study_instance_uid=study_uid, series_instance_uid=series_uid, sop_instance_uid=instances[0].SOPInstanceUID)
+    
+    if instance_metadata:
+                # Assuming the metadata is returned as a list and the first item contains the desired data
+                # global_metadata = instance_metadata
+                client_redis.set(f"metadata/{series_uid}", json.dumps(instance_metadata),ex=1800) #30 min
+                # print("on redis successfully", instance_metadata)
+        # print("Metadata updated in global variable:", instance_metadata)
+    
     print(f"Retrieved {len(instances)} instances")
 
     # save the dicom files in a directory
@@ -56,6 +146,39 @@ def get_dicom_series(study_uid, series_uid, tag):
     return os.path.join(current_study_path, f"{tag}.nii.gz")
 
 
+def dicom_to_nifti(dicom_dir, output_dir, file_name):
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Call dcm2niix
+    subprocess.run(["dcm2niix", "-z", "y", "-f", f"{file_name}", "-o", output_dir, dicom_dir], check=True)
+    
+    
+def segmentation(t1c_path, t1n_path, t2f_path, t2w_path):
+    ## get the segmentation mask
+    prediction = inference(t1c_path, t1n_path, t2f_path, t2w_path)
+    
+    img = nib.load(t1c_path)
+    
+    ## resize the segmentation target shape be same as the segmentation mask
+    mri_data = resize_nifti_to_array(t2w_path, prediction.shape)
+    
+    ## make color for the segmentation mask 
+    colored_mask = map_color_to_label(prediction)
+    print("prediction shape ", prediction.shape)
+    
+    ## put the segmentation mask on the brain 
+    masked_brain = overlay_mask(mri_data, colored_mask)
+    
+    save_array_nifti(mri_data,1) 
+    ## rescale the output shape be same as dicom need to be 
+    masked_brain_rescaled = (masked_brain * 255).astype(np.uint8)
+    save_array_nifti(masked_brain_rescaled,2) 
+
+    return masked_brain_rescaled
+
+
+
 def load_nifti_image(file_path):
     image = SimpleITK.ReadImage(file_path)
     # convert to np array
@@ -63,12 +186,6 @@ def load_nifti_image(file_path):
     return image_np
 
 
-def dicom_to_nifti(dicom_dir, output_dir, file_name):
-    # Ensure output directory exists
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Call dcm2niix
-    subprocess.run(["dcm2niix", "-z", "y", "-f", f"{file_name}", "-o", output_dir, dicom_dir], check=True)
 
 
 def itk_image_to_dicom_seg(label, series_dir, template, output_file) -> str:

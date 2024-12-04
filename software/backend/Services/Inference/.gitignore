@@ -1,3 +1,5 @@
 studies
 sample-data
 sample-data
+.venv/
+venv/

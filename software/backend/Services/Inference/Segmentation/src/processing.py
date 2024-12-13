@@ -8,15 +8,19 @@ import json
 import SimpleITK
 import subprocess
 import numpy as np
-# import pydicom_seg
+import pydicom_seg
 import time
 import nibabel as nib
 from pydicom.filereader import dcmread
 from scipy.ndimage import zoom
+import pydicom
+from pydicom.dataset import Dataset, FileMetaDataset
+from pydicom.uid import ExplicitVRLittleEndian, generate_uid, SegmentationStorage
 from src.colors import GENERIC_ANATOMY_COLORS
 from .Teacher_Inference.Inference import inference
 from src.colored_dicom import convert_array_to_dicom_seg
 import redis
+
 load_dotenv()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 studies_dir = os.path.join(os.path.dirname(current_dir), 'studies')
@@ -34,6 +38,13 @@ color_dict = {
     2:(0,255,0), ## green Edema
     3:(0,0,255) ## blue Enhancing Tumor
 }
+
+label_info = [
+    {"name": "Label1", "necrosis": "Description of Label1", "color": (255, 0, 0)},
+    {"name": "Label2", "edima": "Description of Label2", "color": (0, 255, 0)},
+    {"name": "Label3", "description": "Description of Label3", "color": (0, 0, 255)},
+    # Add more labels as needed
+]
 
 
 def map_color_to_label(mask, color_dict=color_dict) -> np.ndarray:
@@ -79,13 +90,14 @@ def overlay_mask(mri, colored_mask, alpha=0.5) -> np.ndarray:
     return blended_image
 
 
-def save_array_nifti(output_array,i):
+def save_array_nifti(output_array,output_path,i):
 
     affine = np.eye(4)
     output_nifti = nib.Nifti1Image(output_array, affine=affine)
-    output_path = os.path.join(os.path.dirname(studies_dir), f'test{i}.nii.gz')
+    output_path = os.path.join(os.path.dirname(output_path), f'mask{i}.nii.gz')
     nib.save(output_nifti, output_path)
-    print(f"Saved NIfTI at: {output_path}")
+    print(f"Saved NIfTI Mask at: {output_path}")
+    return output_path
     
     
 ## me7taga 3omda fe tzbet al axis 
@@ -154,30 +166,12 @@ def dicom_to_nifti(dicom_dir, output_dir, file_name):
     subprocess.run(["dcm2niix", "-z", "y", "-f", f"{file_name}", "-o", output_dir, dicom_dir], check=True)
     
     
-def segmentation(t1c_path, t1n_path, t2f_path, t2w_path):
-    ## get the segmentation mask
-    prediction = inference(t1c_path, t1n_path, t2f_path, t2w_path)
-    
-    img = nib.load(t1c_path)
-    
-    ## resize the segmentation target shape be same as the segmentation mask
-    mri_data = resize_nifti_to_array(t2w_path, prediction.shape)
-    
-    ## make color for the segmentation mask 
-    colored_mask = map_color_to_label(prediction)
-    print("prediction shape ", prediction.shape)
-    
-    ## put the segmentation mask on the brain 
-    masked_brain = overlay_mask(mri_data, colored_mask)
-    
-    save_array_nifti(mri_data,1) 
-    ## rescale the output shape be same as dicom need to be 
-    masked_brain_rescaled = (masked_brain * 255).astype(np.uint8)
-    save_array_nifti(masked_brain_rescaled,2) 
-
-    return masked_brain_rescaled
-
-
+def segmentation(t1c_path, t1n_path, t2f_path, t2w_path,output_dir):
+    ## get the segmentation mask then save as Nifti file
+    prediction_path = inference(t1c_path, t1n_path, t2f_path, t2w_path,output_dir)
+    # Mask_path = save_array_nifti(prediction,studies_dir,0)
+    print("Mask_path saved as Nifti file")
+    return prediction_path
 
 def load_nifti_image(file_path):
     image = SimpleITK.ReadImage(file_path)
@@ -188,30 +182,6 @@ def load_nifti_image(file_path):
 
 
 
-def itk_image_to_dicom_seg(label, series_dir, template, output_file) -> str:
-    meta_data = output_file + ".json"
-    output_file = output_file + ".dcm"
-
-    with open(meta_data, "w") as fp:
-        json.dump(template, fp)
-
-    print("meta_data", meta_data)
-    print("output_file", output_file)
-
-    command = "itkimage2segimage"
-    args = [
-        "--inputImageList",
-        label,
-        "--inputDICOMDirectory",
-        series_dir,
-        "--outputDICOM",
-        output_file,
-        "--inputMetadata",
-        meta_data,
-    ]
-    run_command(command, args)
-    os.unlink(meta_data)
-    return output_file
 
 
 def nifti_to_dicom_seg(series_dir, label, label_info, output_file, file_ext="*", use_itk=True) -> str:
@@ -301,6 +271,34 @@ def nifti_to_dicom_seg(series_dir, label, label_info, output_file, file_ext="*",
 
     print(f"nifti_to_dicom_seg latency : {time.time() - start} (sec)")
     return output_file
+
+
+def itk_image_to_dicom_seg(label, series_dir, template, output_file) -> str:
+    meta_data = output_file + ".json"
+    output_file = output_file + ".dcm"
+
+    with open(meta_data, "w") as fp:
+        json.dump(template, fp)
+
+    print("meta_data", meta_data)
+    print("output_file", output_file)
+
+    # command = "itkimage2segimage" 
+    command = r"C:\Users\hazem\dcmqi\build\dcmqi-build\bin\Release\itkimage2segimage"
+    args = [
+        "--inputImageList",
+        label,
+        "--inputDICOMDirectory",
+        series_dir,
+        "--outputDICOM",
+        output_file,
+        "--inputMetadata",
+        meta_data,
+    ]
+    returncode = run_command(command, args)
+    os.unlink(meta_data)
+    return output_file
+
 
 
 def run_command(command, args=None):

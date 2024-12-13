@@ -7,7 +7,7 @@ import dicomweb_client.api
 import pydicom
 import requests
 import redis
-from Software.backend.Services.Inference.Segmentation.src.processing import get_dicom_series, nifti_to_dicom_seg , segmentation 
+from src.processing import get_dicom_series, nifti_to_dicom_seg , segmentation 
 from src.colored_dicom import convert_array_to_dicom_seg
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -58,16 +58,18 @@ def segmentation_callback(ch, method, properties, body):
     start_time = time.time()
 
     ###### INSERT THE MODEL FUNCTION HERE ######
-    
-    masked_brain_rescaled = segmentation(t1, t2, flair, t1ce)
+    output_dir = os.path.join(studies_dir, study_uid)
+    segmentation_mask_nifti_path = segmentation(t1, t2, flair, t1ce,output_dir)
+    # segmentation_mask = np.flip(segmentation_mask, axis=1)
     # End the timer
     end_time = time.time()
 
     elapsed_time = end_time - start_time
     print(f"Segmentation completed in {elapsed_time} seconds")
     
-    # # save the corrected volume
-    # nib.save(nib.Nifti1Image(np.array(new_segmentation), np.eye(4)),
+    # save the corrected volume
+    print("Saving the segmentation mask As nifti...")
+    # nib.save(nib.Nifti1Image(np.array(segmentation_mask), np.eye(4)),
     #          os.path.join(studies_dir, study_uid, 'segmentation.nii.gz'))
 
     print("Converting to DICOM SEG...")
@@ -76,37 +78,29 @@ def segmentation_callback(ch, method, properties, body):
     print("data retreive from redis")
     print("Loaded Metadata:", metadata)
     metadata = json.loads(metadata)
-    # convert to DICOM SEG
-    print("output from")
-    output_folder_dicom = os.path.join(studies_dir, study_uid , 'segmentation')
-    print("output retreive") 
-    
-    os.makedirs(output_folder_dicom, exist_ok=True)
-    
-    print("starting converting")
-    try:
-        convert_array_to_dicom_seg(masked_brain_rescaled, output_folder_dicom, metadata)
-    except Exception as e:
-        print(f"An error occurred during DICOM SEG conversion: {e}")
-        
-    print("DICOM converted created successfully")
-    # nifti_to_dicom_seg(
-    #     os.path.join(studies_dir, t1),
-    #     os.path.join(studies_dir, study_uid, 'segmentation.nii.gz'),
-    #     None,
-    #     os.path.join(studies_dir, study_uid, 'segmentation.dcm')
-    # )
+    print("Start making the dicom seg")
+    output_file_segmentation = nifti_to_dicom_seg(
+        os.path.join(studies_dir, study_uid, 't1'),
+        segmentation_mask_nifti_path,
+        label_info,
+        os.path.join(studies_dir, study_uid, 'segmentation')
+    )
 
     print("Sending to Orthanc...")
-    upload_dicom_series_orthanc(output_folder_dicom)
-    # dcm_seg_dataset = pydicom.dcmread(os.path.join(studies_dir, 'segmentation.dcm'))
-
+    
+    dcm_seg_dataset = pydicom.dcmread(os.path.join(studies_dir, study_uid,'segmentation.dcm'))
+    print("Store to Orthanc...")
     # send the results to orthanc
-    # client.store_instances(dwatasets=[dcm_seg_dataset])
-
+    client.store_instances(datasets=[dcm_seg_dataset])
+    print("store in orthanc Success")
     ch.basic_ack(delivery_tag=method.delivery_tag)
     
     
+label_info = [
+    {"name": "Label1", "description": "Necrosis region", "color": (255, 0, 0), "model_name": "Teacher_model_after_epoch_105_v1.0"},
+    {"name": "Label2", "description": "Edema region", "color": (0, 255, 0), "model_name": "AIModel_v1.0"},
+    {"name": "Label3", "description": "Enhancing Tumor", "color": (0, 0, 255), "model_name": "AIModel_v1.0"},
+]
 def upload_dicom_series_orthanc(dicom_dir):
     dicom_files = [os.path.join(dicom_dir, f) for f in os.listdir(dicom_dir) if os.path.isfile(os.path.join(dicom_dir, f))]
     for dicom_file in dicom_files:

@@ -75,7 +75,7 @@ const SegmentItem = ({
                 onMouseEnter={() => setIsNumberBoxHovering(true)}
                 onMouseLeave={() => setIsNumberBoxHovering(false)}
             >
-                {isNumberBoxHovering && showDelete ? (
+                {isNumberBoxHovering && showDelete  ? (
                     <FontAwesomeIcon
                         icon={faXmark}
                         className={classnames('h-[8px] w-[8px]', {

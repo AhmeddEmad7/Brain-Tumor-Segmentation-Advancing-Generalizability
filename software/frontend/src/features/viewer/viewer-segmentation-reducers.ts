@@ -17,7 +17,17 @@ const segmentationAdditionMapper = (segmentationData: { id: string; volumeId: st
         label: segmentationData.id,
         isVisible: true,
         type: 'LABELMAP',
-        segments: []
+        segments: [
+            {
+                opacity: 255,
+                isActive: true,
+                segmentIndex: 1,
+                color: [255, 0, 0],
+                label: 'Segment 1',
+                isVisible: true,
+                isLocked: false
+            }
+        ]
     } as ISegmentation;
 };
 
@@ -105,25 +115,52 @@ const viewerSegmentationReducer = {
         state: IStoreViewerSlice,
         action: PayloadAction<{ segmentationId: string; segmentIndex: number }>
     ) {
+        const renderingEngine = cornerstone.getRenderingEngine(state.renderingEngineId);
+        const viewport = renderingEngine?.getViewport(
+            state.selectedViewportId
+        ) as cornerstone.Types.IVolumeViewport;
+    
+        const segmentation = state.segmentations.find(
+            (seg) => seg.id === action.payload.segmentationId
+        );
+    
+        if (!segmentation) {
+            console.error('Segmentation not found:', action.payload.segmentationId);
+            return state; // Return state unchanged if not found
+        }
+    
+        // Remove segment from Cornerstone.js
+        cornerstoneTools.segmentation.config.visibility.setSegmentVisibility(
+            state.currentToolGroupId,
+            segmentation.uid,
+            action.payload.segmentIndex,
+            false // Make it invisible in the viewer
+        );
+    
+        // Remove segment from state
+        const updatedSegments = segmentation.segments.filter(
+            (segment) => segment.segmentIndex !== action.payload.segmentIndex
+        );
+    
+        // Trigger viewport re-render
+        viewport?.render();
+    
         return {
             ...state,
-            segmentations: state.segmentations.map((segmentation) => {
-                if (segmentation.id === action.payload.segmentationId) {
-                    const updatedSegments = segmentation.segments.slice(0, -1);
-                    const updatedActiveSegmentIndex =
-                        segmentation.activeSegmentIndex === action.payload.segmentIndex
-                            ? 0
-                            : segmentation.activeSegmentIndex;
-                    return {
-                        ...segmentation,
-                        segments: updatedSegments,
-                        activeSegmentIndex: updatedActiveSegmentIndex
-                    };
-                }
-                return segmentation;
-            })
+            segmentations: state.segmentations.map((seg) =>
+                seg.id === action.payload.segmentationId
+                    ? {
+                          ...seg,
+                          segments: updatedSegments,
+                          activeSegmentIndex:
+                              seg.activeSegmentIndex === action.payload.segmentIndex ? 0 : seg.activeSegmentIndex,
+                          isVisible: updatedSegments.length > 0 // Hide segmentation if no segments remain
+                      }
+                    : seg
+            )
         };
     },
+    
 
     handleSegmentClick(
         state: IStoreViewerSlice,
@@ -171,6 +208,64 @@ const viewerSegmentationReducer = {
                     isActive: false
                 };
             })
+        };
+    },
+
+    handleSegmentVisibilityToggle(
+        state: IStoreViewerSlice,
+        action: PayloadAction<{ segmentationId: string; segmentIndex: number }>
+    ) {
+        const renderingEngine = cornerstone.getRenderingEngine(state.renderingEngineId);
+        const viewport = renderingEngine?.getViewport(
+            state.selectedViewportId
+        ) as cornerstone.Types.IVolumeViewport;
+    
+        const segmentation = state.segmentations.find(
+            (seg) => seg.id === action.payload.segmentationId
+        );
+    
+        if (!segmentation) {
+            console.log('Segmentation not found');
+            return; 
+        }
+    
+        const segment = segmentation.segments.find(
+            (seg) => seg.segmentIndex === action.payload.segmentIndex
+        );
+    
+        if (!segment){ 
+            console.log('Segment not found');
+            return
+        };
+    
+        // // Toggle visibility state in Redux
+        // segment.isVisible = !segment.isVisible;
+        console.log('Updated Segment Visibility:', segment.isVisible);
+    
+        // Update Cornerstone.js visibility
+        cornerstoneTools.segmentation.config.visibility.setSegmentVisibility(
+            state.currentToolGroupId,
+            segmentation.uid,
+            segment.segmentIndex,
+            !segment.isVisible
+        );
+    
+        // Trigger viewport re-rendering
+        viewport?.render();
+        return {
+            ...state,
+            segmentations: state.segmentations.map((seg) =>
+                seg.id === action.payload.segmentationId
+                    ? {
+                          ...seg,
+                          segments: seg.segments.map((s) =>
+                              s.segmentIndex === action.payload.segmentIndex
+                                  ? { ...s, isVisible: !segment.isVisible }
+                                  : s
+                          )
+                      }
+                    : seg
+            )
         };
     },
 

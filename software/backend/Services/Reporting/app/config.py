@@ -17,6 +17,6 @@ POSTGRES_REPORT_PORT = os.getenv('POSTGRES_REPORT_PORT')
 # Construct the database URL
 DATABASE_URL = f'postgresql://{POSTGRES_REPORT_USER}:{POSTGRES_REPORT_PASSWORD}@{POSTGRES_REPORT_HOST}:{POSTGRES_REPORT_PORT}/{POSTGRES_REPORT_DB}'
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

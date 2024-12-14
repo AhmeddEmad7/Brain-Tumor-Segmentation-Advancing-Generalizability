@@ -36,7 +36,7 @@ const AppRouter = createBrowserRouter([
         ]
     },
     {
-        path: '/login',
+        path: '/login', 
         element: <LoginLayout />,
         children: [
             {

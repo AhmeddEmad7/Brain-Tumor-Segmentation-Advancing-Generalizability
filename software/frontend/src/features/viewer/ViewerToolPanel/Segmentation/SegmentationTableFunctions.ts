@@ -8,22 +8,15 @@ import { removeSegmentationAndUpdateActiveSegmentation } from '@features/viewer/
 const handleSegmentationVisibilityToggle = (segmentationId: string) => {
     store.dispatch(viewerSliceActions.handleSegmentationVisibility({ segmentationId }));
 };
-
-const handleSegmentVisibilityToggle = (segmentationId: string, segmentIndex: number) => {
-    const currentToolGroupId = store.getState().viewer.currentToolGroupId;
-
-    const currentVisibility = cornerstoneTools.segmentation.config.visibility.getSegmentVisibility(
-        currentToolGroupId,
-        segmentationId,
-        segmentIndex
+const handleSegmentVisibilityToggle = (segmentationId: string, segmentIndex: number)=>{
+    store.dispatch(
+        viewerSliceActions.handleSegmentVisibilityToggle({
+            segmentationId,
+            segmentIndex
+        })
     );
+    console.log('Segment toggle', segmentationId, segmentIndex);
 
-    cornerstoneTools.segmentation.config.visibility.setSegmentVisibility(
-        currentToolGroupId,
-        segmentationId,
-        segmentIndex,
-        !currentVisibility
-    );
 };
 
 const handleSegmentLockToggle = (segmentationId: string, segmentIndex: number) => {
@@ -58,9 +51,13 @@ const handleSegmentationDelete = (segmentationId: string) => {
     }
 };
 
+const handleSegmentDelete = (segmentationId: string , segmentIndex:number) => {
+    store.dispatch(viewerSliceActions.removeSegment({segmentationId, segmentIndex}));
+    console.log('Segment Deleted', segmentationId, segmentIndex);
+};
 const handleSegmentClick = (segmentationId: string, segmentIndex: number) => {
     store.dispatch(viewerSliceActions.handleSegmentClick({ segmentationId, segmentIndex }));
-    console.log('Segment Clicked', segmentationId, segmentIndex);
+    // console.log('Segment Clicked', segmentationId, segmentIndex);
 };
 
 const onSegmentationClick = (segmentationId: string) => {
@@ -73,5 +70,6 @@ export {
     handleSegmentLockToggle,
     handleSegmentationDelete,
     handleSegmentClick,
+    handleSegmentDelete,
     onSegmentationClick
 };

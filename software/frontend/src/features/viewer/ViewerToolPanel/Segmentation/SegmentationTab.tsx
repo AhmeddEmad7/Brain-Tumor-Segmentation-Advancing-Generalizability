@@ -6,6 +6,7 @@ import {
     handleSegmentClick,
     handleSegmentLockToggle,
     handleSegmentVisibilityToggle,
+    handleSegmentDelete,
     onSegmentationClick
 } from './SegmentationTableFunctions.ts';
 import AISegmentation from './AISegmentation.tsx';
@@ -24,6 +25,7 @@ const SegmentationTab = () => {
             <SegmentationGroupTable
                 segmentations={segmentations}
                 showAddSegmentation={true}
+                showDeleteSegment={true} 
                 showAddSegment={true}
                 segmentationConfig={{
                     fillAlpha: 0.5,
@@ -48,7 +50,7 @@ const SegmentationTab = () => {
                     CornerstoneToolManager.downloadSegmentation();
                 }}
                 onSegmentationEdit={() => {}}
-                onSegmentDelete={() => {}}
+                onSegmentDelete={handleSegmentDelete}
                 onSegmentEdit={() => {}}
                 onToggleSegmentationVisibility={handleSegmentationVisibilityToggle}
                 onSegmentColorClick={() => {}}

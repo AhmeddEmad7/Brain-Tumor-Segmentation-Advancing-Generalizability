@@ -43,6 +43,9 @@ const handleSegModeChange = (mode: string) => {
 };
 
 const handleEraserModeChange = (mode: string) => {
+    // cornerstoneTools.segmentation.config.setGlobalConfig({
+    //     eraseActiveOnly: false // Do not erase inactive segments
+    // });
     switch (mode) {
         case 'Circle':
             CornerstoneToolManager.setToolActive('CircularEraser', 1);

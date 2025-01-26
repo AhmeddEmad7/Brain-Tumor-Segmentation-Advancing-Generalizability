@@ -34,7 +34,8 @@ import LayoutSelector from '@features/viewer/components/LayoutSelector.tsx';
 import {
     handleToolClick,
     toggleFullScreen,
-    toggleViewportOverlayShown
+    toggleViewportOverlayShown,
+    toggleVolumeRendering
 } from '@features/viewer/ViewerTopBar/viewer-top-bar-actions.ts';
 import NotificationsMenu from '@features/notifications/NotificationsMenu.tsx';
 import ViewerButtonMenu from '@features/viewer/components/ViewerButtonMenu.tsx';
@@ -124,7 +125,8 @@ const VIEWER_TOOLS_BUTTONS = [
     },
     {
         icon: <ThreeDIcon />,
-        title: '3D'
+        title: '3D',
+        onClick: toggleVolumeRendering
     },
     {
         icon: <ResetIcon />,

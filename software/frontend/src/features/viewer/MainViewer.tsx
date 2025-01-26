@@ -1,6 +1,7 @@
 import { initCornerstone } from '@utilities/helpers/index';
 import { useEffect } from 'react';
 import * as cornerstone from '@cornerstonejs/core';
+import { Enums } from '@cornerstonejs/core'; // New edits
 import { useSelector } from 'react-redux';
 import ViewportsManager from '@features/viewer/Viewport/ViewportsManager.tsx';
 import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/CornerstoneToolManager';
@@ -31,7 +32,8 @@ const MainViewer = () => {
             CornerstoneToolManager.initCornerstoneSegmentationTool();
 
             // Set the current tool group id and viewport type
-            new CornerstoneToolManager('CornerstoneTools', cornerstone.Enums.ViewportType.ORTHOGRAPHIC);
+            new CornerstoneToolManager('CornerstoneTools', Enums.ViewportType.VOLUME_3D); // New edits
+            new CornerstoneToolManager('CornerstoneTools2D', Enums.ViewportType.ORTHOGRAPHIC); // New edits
             CornerstoneToolManager.setCurrentToolGroupId('CornerstoneTools');
         };
         setupImageIdsAndVolumes();

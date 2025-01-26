@@ -18,6 +18,8 @@ class CornerstoneToolManager {
     toolGroup: cornerstoneTools.Types.IToolGroup | undefined;
     viewportsType?: any;
 
+    static initializedTools: Set<string> = new Set();
+
     // Constructor for the CornerstoneToolManager class that initializes the tool group
     // and adds all the annotation and segmentation tools to it based on the provided tool group ID
     constructor(toolGroupId: string, viewportsType?: string) {
@@ -107,17 +109,27 @@ class CornerstoneToolManager {
         }
     }
 
+    static isToolInitialized(toolName: string): boolean {
+        return this.initializedTools.has(toolName);
+    }
+
     // Initialize the cornerstone annotation tools
     static initCornerstoneAnnotationTool() {
         Object.values(ANNOTATION_TOOLS).forEach((tool) => {
-            cornerstoneTools.addTool(tool);
+            if (!this.isToolInitialized(tool.name)) {
+                cornerstoneTools.addTool(tool);
+                this.initializedTools.add(tool.name);
+            }
         });
     }
 
     // Initialize the cornerstone segmentation tools
     static initCornerstoneSegmentationTool() {
         Object.values(SEGMENTATION_TOOLS).forEach((tool) => {
-            cornerstoneTools.addTool(tool);
+            if (!this.isToolInitialized(tool.name)) {
+                cornerstoneTools.addTool(tool);
+                this.initializedTools.add(tool.name);
+            }
         });
     }
 

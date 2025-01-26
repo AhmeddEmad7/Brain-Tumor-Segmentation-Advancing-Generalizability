@@ -8,6 +8,7 @@ import viewerSegmentationReducer from './viewer-segmentation-reducers';
 const initialState: IStoreViewerSlice = {
     // ui
     isFullScreen: false,
+    isMPRActive: false, // Default state for MPR
     layout: {
         numRows: 1,
         numCols: 1

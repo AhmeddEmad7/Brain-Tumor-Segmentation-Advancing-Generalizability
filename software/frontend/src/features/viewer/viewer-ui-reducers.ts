@@ -1,5 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { IStoreViewerSlice, ILayout } from '@/models';
+import { OrientationAxis } from '@cornerstonejs/core/src/enums';
 
 const viewerUiReducer = {
     changeViewerLayout: (state: IStoreViewerSlice, action: PayloadAction<ILayout>) => {
@@ -16,6 +17,19 @@ const viewerUiReducer = {
     },
     toggleInfoOnViewports: (state: IStoreViewerSlice) => {
         state.isInfoOnViewportsShown = !state.isInfoOnViewportsShown;
+    },
+    setMPRActive: (state: IStoreViewerSlice, action: PayloadAction<boolean>) => {
+        state.isMPRActive = action.payload;
+    },
+    toggleMPRLayout: (
+        state: IStoreViewerSlice,
+        action: PayloadAction<{ orientations: OrientationAxis[] }>
+    ) => {
+        state.layout = {
+            numRows: 1,
+            numCols: 3
+        };
+
     }
 };
 

@@ -8,7 +8,8 @@ import {
     addSegmentToSegmentation,
     addSegmentation,
     downloadSegmentation,
-    uploadSegmentation
+    uploadSegmentation,
+    saveSegmentation
 } from './segmentationMethods';
 import { setToolActive, setCurrentToolGroupId } from './toolsMethods';
 
@@ -139,6 +140,9 @@ class CornerstoneToolManager {
 
     // Load annotations from a JSON file and add them to the rendering engine
     static loadAnnotations = loadAnnotations;
+
+    // Save the current segmentation mask as a dcm file
+    static saveSegmentation = saveSegmentation;
 
     // Download the current segmentation mask as a dcm file
     static downloadSegmentation = downloadSegmentation;

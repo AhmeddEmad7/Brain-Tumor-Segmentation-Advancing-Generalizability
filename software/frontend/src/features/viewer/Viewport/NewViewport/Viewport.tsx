@@ -12,6 +12,7 @@ import { detectCineHeight } from '@features/viewer/Viewport/CinePlayer/detectCin
 import { createImageIdsAndCacheMetaData } from '@utilities/helpers/index';
 import { readSegmentation } from '../../CornerstoneToolManager/segmentationMethods';
 import { getSeriesModality } from '@features/viewer/viewer-viewport-reducers';
+import { toggleMPRMode } from '@features/viewer/ViewerTopBar/viewer-top-bar-actions'; // Import your toggleMPRMode function
 
 const wadoRsRoot = import.meta.env.VITE_ORTRHANC_PROXY_URL;
 
@@ -37,7 +38,8 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         selectedViewportId,
         renderingEngineId,
         viewportsWithCinePlayer,
-        currentStudyInstanceUid
+        currentStudyInstanceUid,
+        isMPRActive 
     } = useSelector((store: IStore) => store.viewer);
 
     const dispatch = useDispatch();
@@ -49,6 +51,16 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
             onClick(id);
         }
     };
+    useEffect(() => {
+        // if (isMPRActive) {
+        //     console.log("MPR mode is already active. Skipping activation.");
+        //     return;
+        // }
+        if (selectedSeriesInstanceUid&&isMPRActive) {
+            // Trigger MPR mode whenever the series changes
+            toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
+        }
+    }, [selectedSeriesInstanceUid, renderingEngineId, currentStudyInstanceUid]);
 
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
@@ -69,7 +81,7 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     }
 
                     const volumeId = `cornerstoneStreamingImageVolume:${selectedSeriesInstanceUid}`;
-
+                    console.log('volumeId inside update', volumeId);
                     const imageIds = await createImageIdsAndCacheMetaData({
                         StudyInstanceUID: currentStudyInstanceUid,
                         SeriesInstanceUID: selectedSeriesInstanceUid,
@@ -97,7 +109,8 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     // Set the current viewport and imageIds
                     setThisViewport(viewport);
                     setThisViewportImageIds(viewport.getImageIds());
-                    dispatch(viewerSliceActions.removeClickedSeries());
+                    // dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
+                    // dispatch(viewerSliceActions.removeClickedSeries());
                 }
             } catch (error) {
                 console.error('Error setting viewport', error);

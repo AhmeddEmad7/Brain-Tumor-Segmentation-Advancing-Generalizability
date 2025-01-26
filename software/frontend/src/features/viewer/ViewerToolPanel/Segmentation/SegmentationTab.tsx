@@ -49,6 +49,7 @@ const SegmentationTab = () => {
                 onSegmentationDownload={() => {
                     CornerstoneToolManager.downloadSegmentation();
                 }}
+                onSegmentationSave={() => { CornerstoneToolManager.saveSegmentation(); }}
                 onSegmentationEdit={() => {}}
                 onSegmentDelete={handleSegmentDelete}
                 onSegmentEdit={() => {}}

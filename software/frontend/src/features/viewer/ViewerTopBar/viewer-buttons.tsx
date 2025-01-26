@@ -34,7 +34,8 @@ import LayoutSelector from '@features/viewer/components/LayoutSelector.tsx';
 import {
     handleToolClick,
     toggleFullScreen,
-    toggleViewportOverlayShown
+    toggleViewportOverlayShown,
+    toggleMPRMode
 } from '@features/viewer/ViewerTopBar/viewer-top-bar-actions.ts';
 import NotificationsMenu from '@features/notifications/NotificationsMenu.tsx';
 import ViewerButtonMenu from '@features/viewer/components/ViewerButtonMenu.tsx';
@@ -47,6 +48,7 @@ import {
     WindowButtonItems
 } from '@features/viewer/ViewerTopBar/options-menu-items';
 import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/CornerstoneToolManager';
+import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
 
 export const VIEWER_SETTINGS_MENU_ITEMS = ['About', 'License Agreement', 'Help', 'Shortcuts'];
 
@@ -120,7 +122,19 @@ const VIEWER_TOOLS_BUTTONS = [
     },
     {
         title: 'MPR',
-        icon: <LuAxis3D />
+        // menuComponent: MenuComponent,
+        onClick: () => {
+            const state = store.getState(); // Access Redux state
+            const renderingEngineId = state.viewer.renderingEngineId; // Get renderingEngineId
+            const currentStudyInstanceUid = state.viewer.currentStudyInstanceUid; // Get currentStudyInstanceUid
+            const selectedSeriesInstanceUid = state.viewer.selectedSeriesInstanceUid; // Get selectedSeriesInstanceUid
+            store.dispatch(viewerSliceActions.setMPRActive(true)); // Set MPR mode to true
+            // Call toggleMPRMode with required parameters
+            console.log("on button",selectedSeriesInstanceUid)
+            console.log("on button2",currentStudyInstanceUid)
+            toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
+        },     
+         icon: <LuAxis3D />
     },
     {
         icon: <ThreeDIcon />,

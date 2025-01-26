@@ -32,6 +32,7 @@ type TSegmentationDropDownRow = {
     onToggleSegmentationVisibility?: (segmentationId: string) => void;
     onSegmentationEdit?: (state: any) => void;
     onSegmentationDownload?: (state: any) => void;
+    onsegmentationSave?: (state: any) => void;
     onSegmentationDownloadRTSS?: (state: any) => void;
     storeSegmentation?: (state: any) => void;
     onSegmentationDelete?: (state: any) => void;
@@ -47,7 +48,8 @@ function SegmentationDropDownRow({
     onSegmentationEdit,
     onSegmentationDownload,
     onSegmentationDelete,
-    onSegmentationAdd
+    onSegmentationAdd,
+    onsegmentationSave
 }: TSegmentationDropDownRow) {
     const handleChange = (option: any) => {
         onActiveSegmentationChange(option.value); // Notify the parent
@@ -95,9 +97,16 @@ function SegmentationDropDownRow({
                                           if (activeSegmentation && onSegmentationEdit)
                                               onSegmentationEdit(activeSegmentation.id);
                                       }
-                                  }
+                                  },
+                                    {
+                                        title: 'Save to database',
+                                        onClick: () => {
+                                            if (onsegmentationSave) onsegmentationSave(activeSegmentation.id);
+                                        }
+                                    }
                               ]
                             : []),
+
                         {
                             title: 'Delete',
                             onClick: () => {

@@ -29,6 +29,8 @@ function LayoutSelector({ columns = 4, rows = 4 }: LayoutSelectorProps) {
             numRows,
             numCols
         };
+        dispatch(viewerSliceActions.removeClickedSeries());
+        dispatch(viewerSliceActions.setMPRActive(false));
         dispatch(viewerSliceActions.changeViewerLayout(layout));
     };
 

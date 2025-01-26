@@ -93,11 +93,11 @@ class DicomUtil {
         if (max_dot === dot_axial) {
             return Enums.OrientationAxis.AXIAL;
         } else if (max_dot === dot_sagittal) {
-            return Enums.OrientationAxis.SAGITTAL;
-        } else if (max_dot === dot_coronal) {
             return Enums.OrientationAxis.CORONAL;
-        } else {
+        } else if (max_dot === dot_coronal) {
             return Enums.OrientationAxis.ACQUISITION;
+        } else {
+            return Enums.OrientationAxis.SAGITTAL;
         }
     }
 

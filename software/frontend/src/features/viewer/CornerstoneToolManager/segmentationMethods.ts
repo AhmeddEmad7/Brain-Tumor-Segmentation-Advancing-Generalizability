@@ -5,8 +5,10 @@ import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
 import { adaptersSEG, helpers } from '@cornerstonejs/adapters';
 import * as cornerstoneDicomImageLoader from '@cornerstonejs/dicom-image-loader';
 import dcmjs from 'dcmjs';
+import axios from 'axios';
 import { api } from 'dicomweb-client';
 import { getAndSetSeriesInstances } from '../viewer-viewport-reducers';
+import { Direction } from 'react-toastify/dist/utils';
 
 const { wadouri } = cornerstoneDicomImageLoader;
 
@@ -88,6 +90,127 @@ export const addSegmentation = async () => {
  *
  * @returns {Promise<void>} A promise that resolves when the segmentation mask has been downloaded.
  */
+
+export const saveSegmentation = async () => {
+    const state = store.getState();
+    const { selectedViewportId } = state.viewer;
+
+    // Retrieve the rendering engine and viewport using the selected viewport ID.
+    const { viewport, currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
+
+    // Get the volume ID from the viewport.
+    const viewportVolumeId = viewport.getActorUIDs()[0];
+
+    // Retrieve the cached volume data.
+    const cacheVolume = cornerstone.cache.getVolume(viewportVolumeId);
+    const csImages = cacheVolume.getCornerstoneImages();
+
+    // Get the active segmentation representation for the current tool group.
+    const activeSegmentationRepresentation =
+        cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
+            currentToolGroupId
+        );
+
+    // Retrieve the cached segmentation volume data.
+    const cacheSegmentationVolume = cornerstone.cache.getVolume(
+        activeSegmentationRepresentation.segmentationId
+    );
+    const segmentation3D = {
+        data : Array.from(new Uint8Array(cacheSegmentationVolume.scalarData)),
+        dimension : cacheSegmentationVolume.dimension,
+        spacing : cacheSegmentationVolume.spacing,
+        origin : cacheSegmentationVolume.origin,
+        Direction : cacheSegmentationVolume.direction
+    }
+    // const segmentationData = Array.from(new Uint8Array(cacheSegmentationVolume.scalarData));
+    console.log('segmentationData', segmentation3D);
+    // Generate 2D label maps from the 3D segmentation volume.
+    const labelmapData = Cornerstone3D.Segmentation.generateLabelMaps2DFrom3D(cacheSegmentationVolume);
+
+    // Initialize metadata array for segments.
+    labelmapData.metadata = [];
+
+    // Generate metadata for each segment in the label map.
+    labelmapData.segmentsOnLabelmap.forEach((segmentIndex) => {
+        const color = cornerstoneTools.segmentation.config.color.getColorForSegmentIndex(
+            currentToolGroupId,
+            activeSegmentationRepresentation.segmentationRepresentationUID,
+            segmentIndex
+        );
+        const segmentMetadata = generateMockMetadata(segmentIndex, color);
+        labelmapData.metadata[segmentIndex] = segmentMetadata;
+    });
+
+    // Generate the segmentation dataset for DICOM export.
+    const generatedSegmentation = Cornerstone3D.Segmentation.generateSegmentation(
+        csImages,
+        labelmapData,
+        cornerstone.metaData
+    );
+
+
+    const relevantMetadata = {
+        // Required DICOM Metadata
+        SOPClassUID: generatedSegmentation.dataset.SOPClassUID,
+        SOPInstanceUID: generatedSegmentation.dataset.SOPInstanceUID,
+        Modality: generatedSegmentation.dataset.Modality,
+        SeriesInstanceUID: generatedSegmentation.dataset.SeriesInstanceUID,
+        StudyInstanceUID: generatedSegmentation.dataset.StudyInstanceUID,
+        FrameOfReferenceUID: generatedSegmentation.dataset.FrameOfReferenceUID,
+
+        ContentLabel: generatedSegmentation.dataset.ContentLabel,
+        ContentDescription: generatedSegmentation.dataset.ContentDescription,
+        SeriesDescription: generatedSegmentation.dataset.SeriesDescription,
+
+        // Patient Info (if applicable)
+        PatientName: generatedSegmentation.dataset.PatientName || 'Anonymous',
+        PatientID: generatedSegmentation.dataset.PatientID || '0000',
+        PatientBirthDate: generatedSegmentation.dataset.PatientBirthDate || '',
+        PatientSex: generatedSegmentation.dataset.PatientSex || 'O',
+
+        // Study Info
+        StudyDate: generatedSegmentation.dataset.StudyDate || '20241217',
+        StudyTime: generatedSegmentation.dataset.StudyTime || '000000',
+        StudyID: generatedSegmentation.dataset.StudyID || '123456',
+        AccessionNumber: generatedSegmentation.dataset.AccessionNumber || '1234',
+
+        // Segment and Pixel Data
+        SegmentSequence: generatedSegmentation.dataset.SegmentSequence,
+        PerFrameFunctionalGroupsSequence: generatedSegmentation.dataset.PerFrameFunctionalGroupsSequence,
+        Rows: generatedSegmentation.dataset.Rows,
+        Columns: generatedSegmentation.dataset.Columns,
+        NumberOfFrames: generatedSegmentation.dataset.NumberOfFrames,
+        PixelData: Array.from(new Uint8Array(generatedSegmentation.dataset.PixelData)),
+
+        // Image Metadata
+        SamplesPerPixel: generatedSegmentation.dataset.SamplesPerPixel || '1',
+        BitsAllocated: generatedSegmentation.dataset.BitsAllocated || '8',
+        BitsStored: generatedSegmentation.dataset.BitsStored || '8',
+        HighBit: generatedSegmentation.dataset.HighBit || '7',
+        PixelRepresentation: generatedSegmentation.dataset.PixelRepresentation || '0',
+        PhotometricInterpretation: generatedSegmentation.dataset.PhotometricInterpretation || 'MONOCHROME2'
+    };
+    console.log('generatedSegmentation', generatedSegmentation.dataset);
+
+
+    try {
+        const response = await axios.post('http://localhost:8000/inference/segmentation/uploadorthanc', {
+            dataset: relevantMetadata,
+            segmentationData: segmentation3D // Add Segmentation Mask Data
+        });
+
+        if (response.status === 200) {
+            console.log('Segmentation uploaded successfully:', response.data.message);
+            alert('Segmentation uploaded successfully!');
+        } else {
+            console.error('Error uploading segmentation:', response.data.message);
+            alert('Failed to upload segmentation!');
+        }
+    } catch (error) {
+        alert('An error occurred while uploading segmentation.');
+    }
+};
+
 export const downloadSegmentation = async () => {
     // Get the current application state and selected viewport ID.
     const state = store.getState();
@@ -114,6 +237,8 @@ export const downloadSegmentation = async () => {
         activeSegmentationRepresentation.segmentationId
     );
 
+    const segmentationData = Array.from(new Uint8Array(cacheSegmentationVolume.scalarData));
+    console.log('segmentationData', segmentationData);
     // Generate 2D label maps from the 3D segmentation volume.
     const labelmapData = Cornerstone3D.Segmentation.generateLabelMaps2DFrom3D(cacheSegmentationVolume);
 
@@ -137,9 +262,12 @@ export const downloadSegmentation = async () => {
         labelmapData,
         cornerstone.metaData
     );
+    console.log('generatedSegmentation', generatedSegmentation.dataset);
+
+    const fileName = `${viewportVolumeId}_SEG.dcm`;
 
     // Download the generated segmentation dataset as a DICOM file.
-    downloadDICOMData(generatedSegmentation.dataset, `${viewportVolumeId} SEG.dcm`);
+    downloadDICOMData(generatedSegmentation.dataset, fileName);
 };
 
 /**

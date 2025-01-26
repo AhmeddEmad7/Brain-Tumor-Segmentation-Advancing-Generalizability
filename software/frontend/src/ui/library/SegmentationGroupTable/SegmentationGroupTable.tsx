@@ -37,6 +37,7 @@ type SegmentationGroupTableProps = {
     onSegmentationClick: (segmentationId: string) => void;
     onSegmentationDelete: (segmentationId: string) => void;
     onSegmentationDownload: () => void;
+    onSegmentationSave: () => void;
     onSegmentClick: (segmentationId: string, segmentIndex: number) => void;
     onSegmentAdd: (segmentId: string) => void;
     onSegmentDelete: (segmentationId:string,segmentIndex:number) => void;
@@ -69,7 +70,7 @@ const SegmentationGroupTable = ({
     onSegmentationClick,
     onSegmentationDelete,
     onSegmentationDownload,
-
+    onSegmentationSave,
     // segment handlers
     onSegmentClick,
     onSegmentAdd,
@@ -163,6 +164,7 @@ const SegmentationGroupTable = ({
                                 onSegmentationEdit={onSegmentationEdit}
                                 onSegmentationDownload={onSegmentationDownload}
                                 onSegmentationAdd={onSegmentationAdd}
+                                onsegmentationSave={onSegmentationSave}
                                 onToggleSegmentationVisibility={onToggleSegmentationVisibility}
                             />
                             {!disableEditing && showAddSegment && (

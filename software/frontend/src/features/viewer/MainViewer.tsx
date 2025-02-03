@@ -31,8 +31,9 @@ const MainViewer = () => {
             CornerstoneToolManager.initCornerstoneSegmentationTool();
 
             // Set the current tool group id and viewport type
-            new CornerstoneToolManager('CornerstoneTools', cornerstone.Enums.ViewportType.ORTHOGRAPHIC);
-            CornerstoneToolManager.setCurrentToolGroupId('CornerstoneTools');
+            new CornerstoneToolManager('CornerstoneTools2D', cornerstone.Enums.ViewportType.ORTHOGRAPHIC);
+            new CornerstoneToolManager('CornerstoneTools3D', cornerstone.Enums.ViewportType.VOLUME_3D);      
+            CornerstoneToolManager.setCurrentToolGroupId('CornerstoneTools2D');
         };
         setupImageIdsAndVolumes();
     }, [currentStudyData]);

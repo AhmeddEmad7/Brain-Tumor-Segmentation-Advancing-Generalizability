@@ -7,6 +7,8 @@ import {
 } from '@features/viewer/ViewerTopBar/viewer-buttons.tsx';
 import ViewerToolButton from '@features/viewer/ViewerTopBar/ViewerToolButton.tsx';
 import CustomButton from '@features/top-bars/components/CustomButton.tsx';
+import { Tooltip } from '@mui/material';
+
 const ViewerTopBar = () => {
     const theme = useTheme();
 
@@ -19,28 +21,33 @@ const ViewerTopBar = () => {
             }}
             onContextMenu={(e) => e.preventDefault()}
         >
-            <Box className={'ml-9 flex'}>
+            <Box className={'ml-3 flex'}>
                 <Box className={'w-44 bg-transparent p-2'}>
                     <Link to={'/'}>
                         <Logo />
                     </Link>
                 </Box>
 
-                <Box className={'ml-6 flex'}>
+                <Box className={'ml-2 flex'} sx={{ gap: 0.1 }}>
                     {VIEWER_TOOLS_BUTTONS.map((button, index) => (
-                        <ViewerToolButton
-                            key={index}
-                            title={button.title}
-                            onClick={button.onClick}
-                            icon={button.icon}
-                            menuComponent={button.menuComponent}
-                        />
+                        <Tooltip key={index} title={button.title} arrow>
+                            <div>
+                                <ViewerToolButton
+                                    onClick={button.onClick}
+                                    icon={button.icon}
+                                    menuComponent={button.menuComponent}
+                                    title={button.title }
+                                    disabled={button.disabled}
+                                    sx={{ width: '60px ', minWidth: 'auto' ,cursor: button.disabled ? 'not-allowed' : 'pointer' }}
+                                />
+                            </div>
+                        </Tooltip>
                     ))}
                 </Box>
             </Box>
 
-            <Box className={'flex items-center mr-4'}>
-                <Box className={'space-x-2'}>
+            <Box className={'flex items-center mr-1'}>
+                <Box className={'space-x-1'}>
                     {VIEWER_OPTION_BUTTONS.map((button, index) => (
                         <CustomButton
                             key={index}

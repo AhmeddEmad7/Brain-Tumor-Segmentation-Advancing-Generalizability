@@ -12,9 +12,11 @@ interface ICustomButtonProps {
     menuComponent?: ReactNode;
     icon: ReactNode;
     sx?: any;
+    disabled?: boolean;
 }
 
-const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx }: ICustomButtonProps) => {
+const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx ,disabled}: ICustomButtonProps) => {
+    console.log('disabled',disabled);
     const [anchorElement, setAnchorElement] = useState<HTMLButtonElement | null>(null);
     const theme = useTheme();
 
@@ -27,7 +29,7 @@ const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx }: ICustomBu
     };
 
     const handleClick = (e: any) => {
-        if (onClick) {
+        if (onClick&&!disabled) {
             onClick(title, e);
         }
     };

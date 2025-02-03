@@ -81,14 +81,20 @@ class CornerstoneToolManager {
                     cornerstoneTools.Enums.MouseBindings.Secondary,
                     this.toolGroupId
                 );
+                CornerstoneToolManager.setToolActive(
+                    cornerstoneTools.TrackballRotateTool.toolName,
+                    cornerstoneTools.Enums.MouseBindings.Primary, // Use cornerstoneTools.Enums
+                    this.toolGroupId
+                  );
 
                 break;
             case Enums.ViewportType.VOLUME_3D:
+                console.log('🟢 Applying 3D tool group... inside CornerstoneToolManager');
                 CornerstoneToolManager.setToolActive(
                     cornerstoneTools.TrackballRotateTool.toolName,
-                    cornerstoneTools.Enums.MouseBindings.Primary,
+                    cornerstoneTools.Enums.MouseBindings.Primary, // Use cornerstoneTools.Enums
                     this.toolGroupId
-                );
+                  );
 
                 CornerstoneToolManager.setToolActive(
                     cornerstoneTools.PanTool.toolName,
@@ -101,13 +107,11 @@ class CornerstoneToolManager {
                     cornerstoneTools.Enums.MouseBindings.Secondary,
                     this.toolGroupId
                 );
-
                 break;
             default:
                 throw new Error(`Unsupported viewports type: ${viewportsType}`);
         }
     }
-
     // Initialize the cornerstone annotation tools
     static initCornerstoneAnnotationTool() {
         Object.values(ANNOTATION_TOOLS).forEach((tool) => {

@@ -19,7 +19,7 @@ const ANNOTATION_TOOLS = {
     'Rectangle ROI': cornerstoneTools.RectangleROITool,
     'Stack Scroll': cornerstoneTools.StackScrollMouseWheelTool,
     'Spline ROI Tool': cornerstoneTools.SplineROITool,
-    'Trackball Rotate': cornerstoneTools.TrackballRotateTool,
+    TrackballRotate: cornerstoneTools.TrackballRotateTool,
     Window: cornerstoneTools.WindowLevelTool,
     Zoom: cornerstoneTools.ZoomTool
 };

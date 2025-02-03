@@ -1,8 +1,10 @@
 
 # IDEs
 .idea/
-
+.venv/
 venv/
+**/.venv/
+**/.idea/
 # Dependences
 **/node_modules/
 

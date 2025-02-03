@@ -21,6 +21,9 @@ const viewerUiReducer = {
     setMPRActive: (state: IStoreViewerSlice, action: PayloadAction<boolean>) => {
         state.isMPRActive = action.payload;
     },
+    set3DActive: (state: IStoreViewerSlice, action: PayloadAction<boolean>) => {
+        state.is3DActive = action.payload;
+    },
     toggleMPRLayout: (
         state: IStoreViewerSlice,
         action: PayloadAction<{ orientations: OrientationAxis[] }>

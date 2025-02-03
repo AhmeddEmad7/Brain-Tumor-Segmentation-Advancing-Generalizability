@@ -7,11 +7,10 @@ import {
 } from '@/features/viewer/CornerstoneToolManager/';
 import { OrientationAxis } from '@cornerstonejs/core/src/enums';
 import { Types } from '@cornerstonejs/core';
-import { useSelector, useDispatch } from 'react-redux';
 import { IStore } from '@/models';
+import { getRenderingEngine, Enums, setVolumesForViewports, CONSTANTS } from '@cornerstonejs/core';
 import * as cornerstone from '@cornerstonejs/core';
 import { createImageIdsAndCacheMetaData } from '@utilities/helpers/index';
-
 
 export const toggleFullScreen = () => {
     const state = store.getState();
@@ -31,6 +30,168 @@ export const toggleFullScreen = () => {
         });
     }
 };
+
+export const toggleVolumeRendering = async (forceTo2D = false) => {
+    const state = store.getState();
+    const { selectedViewportId, renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid } =
+        state.viewer;
+    const renderingEngine = getRenderingEngine(renderingEngineId);
+
+    if (!renderingEngine) {
+        console.error('❌ Rendering engine not found.');
+        return;
+    }
+
+    // **Step 1: Get Current Viewport**
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    let viewport = renderingEngine.getViewport(selectedViewportId) as
+        | Types.IVolumeViewport
+        | Types.IStackViewport;
+
+    if (!viewport) {
+        console.error(`❌ Viewport ${selectedViewportId} not found.`);
+        return;
+    }
+
+    // **Step 2: Check If Already in 3D Mode**
+    const isCurrently3D = viewport.type === Enums.ViewportType.VOLUME_3D;
+
+    // ✅ **Force to 2D if `forceTo2D` is true (when changing series)**
+    const newViewportType = forceTo2D || isCurrently3D ? Enums.ViewportType.ORTHOGRAPHIC : Enums.ViewportType.VOLUME_3D;
+    console.log(`🔄 Switching to: ${newViewportType === Enums.ViewportType.VOLUME_3D ? '3D Volume' : '2D Stack'}`);
+
+    // **Step 3: Retrieve Image IDs**
+    const imageIds = await createImageIdsAndCacheMetaData({
+        StudyInstanceUID: currentStudyInstanceUid,
+        SeriesInstanceUID: selectedSeriesInstanceUid,
+        wadoRsRoot: import.meta.env.VITE_ORTRHANC_PROXY_URL
+    });
+
+    if (!imageIds || imageIds.length === 0) {
+        console.error('❌ No image IDs found for the given series.');
+        return;
+    }
+
+    // **Step 4: Configure and Enable New Viewport**
+    const viewportInputArray = [
+        {
+            viewportId: selectedViewportId,
+            type: newViewportType,
+            element: viewport.element as HTMLDivElement,
+            defaultOptions: {
+                orientation: Enums.OrientationAxis.AXIAL, // Reset to default AXIAL for 2D
+                background: CONSTANTS.BACKGROUND_COLORS.slicer3D as [number, number, number]
+            }
+        }
+    ];
+    renderingEngine.setViewports(viewportInputArray);
+    renderingEngine.enableElement({
+        viewportId: selectedViewportId,
+        type: newViewportType,
+        element: viewport.element as HTMLDivElement
+    });
+
+    // **Step 5: Retrieve Updated Viewport**
+    viewport = renderingEngine.getViewport(selectedViewportId) as
+        | Types.IVolumeViewport
+        | Types.IStackViewport;
+
+    try {
+        console.log('🔍 Loading Volume or Stack...');
+
+        const volumeId = `cornerstoneStreamingImageVolume:${selectedSeriesInstanceUid}`;
+
+        if (newViewportType === Enums.ViewportType.ORTHOGRAPHIC) {
+            // ✅ **Load 2D Stack**
+            await setVolumesForViewports(renderingEngine, [{ volumeId }], [selectedViewportId]);
+            CornerstoneToolManager.setCurrentToolGroupId('CornerstoneTools2D');
+            console.log('✅ Switched to 2D Stack Mode');
+        } else {
+            // ✅ **Load 3D Volume**
+            const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageIds });
+            await volume.load();
+            await setVolumesForViewports(renderingEngine, [{ volumeId }], [selectedViewportId]);
+            viewport.setProperties({
+                preset: 'MR-Default',
+                background: CONSTANTS.BACKGROUND_COLORS.slicer3D as [number, number, number]
+            });
+            CornerstoneToolManager.setCurrentToolGroupId('CornerstoneTools3D');
+            console.log('🎉 3D Volume Rendering Activated');
+        }
+
+        viewport.render();
+    } catch (error) {
+        console.error('❌ Error loading volume/stack:', error);
+    }
+
+    // **Step 6: Update Redux State**
+    store.dispatch(viewerSliceActions.set3DActive(newViewportType === Enums.ViewportType.VOLUME_3D));
+};
+
+// export const toggleVolumeRendering = async () => {
+//     const state = store.getState();
+//     const { selectedViewportId, renderingEngineId } = state.viewer;
+//     const renderingEngine = getRenderingEngine(renderingEngineId);
+
+//     if (!renderingEngine) {
+//         console.error('Rendering engine not found');
+//         return;
+//     }
+
+//     const viewport = renderingEngine.getViewport(selectedViewportId);
+
+//     console.log('Current viewport properties:', viewport.getProperties());
+
+//     if (viewport.type === Enums.ViewportType.VOLUME_3D) {
+//         viewport.setProperties({ type: Enums.ViewportType.ORTHOGRAPHIC });
+//         console.log('Switching to 2D');
+//     } else {
+//         viewport.setProperties({ type: Enums.ViewportType.VOLUME_3D });
+//         console.log('Switching to 3D');
+//     }
+
+//     viewport.render();
+//     console.log('Updated viewport properties:', viewport.getProperties());
+//     console.log('Viewport rendered');
+
+//     // Re-initialize the viewport to ensure the changes take effect
+//     renderingEngine.disableElement(selectedViewportId);
+//     renderingEngine.enableElement({
+//         viewportId: selectedViewportId,
+//         type: viewport.type,
+//         element: viewport.element
+//     });
+
+//     // Reload the image or volume
+//     const imageIds = viewport.getImageIds(); // Ensure this method retrieves image IDs correctly
+//     if (viewport.type === Enums.ViewportType.ORTHOGRAPHIC) {
+//         if (viewport.setImageIds) {
+//             // Use setImageIds for 2D viewports
+//             await viewport.setImageIds(imageIds);
+//         } else {
+//             console.error('setImageIds method is not available on the viewport object.');
+//         }
+//     } else if (viewport.type === Enums.ViewportType.VOLUME_3D) {
+//         if (viewport.setVolumes) {
+//             // Use setVolumes for 3D volumes
+//             await viewport.setVolumes([{ volumeId: imageIds[0] }]);
+//         } else {
+//             console.error('setVolumes method is not available on the viewport object.');
+//         }
+//     }
+
+//     // Avoid re-initializing tools that have already been added
+//     // if (!CornerstoneToolManager.isToolInitialized('Angle')) {
+//     //     CornerstoneToolManager.initCornerstoneAnnotationTool();
+//     // }
+//     // if (!CornerstoneToolManager.isToolInitialized('Brush')) {
+//     //     CornerstoneToolManager.initCornerstoneSegmentationTool();
+//     // }
+
+//     viewport.render();
+//     console.log('Viewport re-initialized, image reloaded, and tools re-initialized');
+// };
+
 export const toggleMPRMode = async (
     renderingEngineId: string,
     selectedSeriesInstanceUid: string,
@@ -80,8 +241,8 @@ export const toggleMPRMode = async (
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Get all viewports
-    const viewports = [0, 1, 2].map((index) =>
-        renderingEngine.getViewport(`viewport-${index}`) as Types.IVolumeViewport | undefined
+    const viewports = [0, 1, 2].map(
+        (index) => renderingEngine.getViewport(`viewport-${index}`) as Types.IVolumeViewport | undefined
     );
 
     if (viewports.some((viewport) => !viewport)) {
@@ -104,9 +265,7 @@ export const toggleMPRMode = async (
         }
     });
     store.dispatch(viewerSliceActions.removeClickedSeries());
-
 };
-
 
 export const toggleViewportOverlayShown = () => {
     store.dispatch(viewerSliceActions.toggleInfoOnViewports());
@@ -157,6 +316,9 @@ export const handleToolClick = (toolName: string, mouseEvent: any) => {
                 ANNOTATION_TOOLS['Stack Scroll'].toolName,
                 clickedMouseButton
             );
+            break;
+        case 'Render' :
+            CornerstoneToolManager.setToolActive(ANNOTATION_TOOLS['TrackballRotate'].toolName, clickedMouseButton);  
             break;
         case 'Cine':
             store.dispatch(viewerSliceActions.toggleCine());

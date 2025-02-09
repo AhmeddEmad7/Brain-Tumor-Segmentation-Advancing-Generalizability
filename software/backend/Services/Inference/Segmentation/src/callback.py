@@ -18,10 +18,13 @@ if not os.path.exists(studies_dir):
         print(f"Creating directory {studies_dir}")
         os.makedirs(studies_dir)
         
-# client = dicomweb_client.api.DICOMwebClient(f"{os.getenv('ORTHANC_URL')}/dicom-web")
-client = dicomweb_client.api.DICOMwebClient(f"http://localhost:8042/dicom-web")
+client = dicomweb_client.api.DICOMwebClient(f"{os.getenv('ORTHANC_URL')}/dicom-web")
 
-client_redis = redis.Redis(host="localhost", port=6379, db=0)
+redis_host = os.getenv('REDIS_HOST', 'localhost')
+redis_port = int(os.getenv('REDIS_PORT', 6379))
+redis_db = int(os.getenv('REDIS_DB', 0))
+
+client_redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
 
 def segmentation_callback(ch, method, properties, body):
     print(f" [Segmentation] Received {body.decode()}, starting processing...")
@@ -101,15 +104,3 @@ label_info = [
     {"name": "Label2", "description": "Edema region", "color": (0, 255, 0), "model_name": "AIModel_v1.0"},
     {"name": "Label3", "description": "Enhancing Tumor", "color": (0, 0, 255), "model_name": "AIModel_v1.0"},
 ]
-def upload_dicom_series_orthanc(dicom_dir):
-    dicom_files = [os.path.join(dicom_dir, f) for f in os.listdir(dicom_dir) if os.path.isfile(os.path.join(dicom_dir, f))]
-    for dicom_file in dicom_files:
-        try:
-            with open(dicom_file, 'rb') as f:
-                files = {'file': (os.path.basename(dicom_file), f, 'application/dicom')}
-                response = requests.post("http://localhost:8042/instances", files=files)
-                response.raise_for_status()  # raises exception for HTTP errors
-            print(f"Uploaded DICOM file: {dicom_file}")
-        except Exception as e:
-            print(f"Failed to upload {dicom_file} due to {e}")
-    print(f"All DICOM files from {dicom_dir} uploaded to Orthanc.")   

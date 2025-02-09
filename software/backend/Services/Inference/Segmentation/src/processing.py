@@ -26,7 +26,12 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 studies_dir = os.path.join(os.path.dirname(current_dir), 'studies')
 
 client = dicomweb_client.api.DICOMwebClient(f"{os.getenv('ORTHANC_URL')}/dicom-web")
-client_redis = redis.Redis(host="localhost", port=6379, db=0)
+
+redis_host = os.getenv('REDIS_HOST', 'localhost')
+redis_port = int(os.getenv('REDIS_PORT', 6379))
+redis_db = int(os.getenv('REDIS_DB', 0))
+
+client_redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
 
 if not os.path.exists(studies_dir):
     print(f"Creating directory {studies_dir}")
@@ -128,6 +133,7 @@ def get_dicom_series(study_uid, series_uid, tag):
                 # Assuming the metadata is returned as a list and the first item contains the desired data
                 # global_metadata = instance_metadata
                 client_redis.set(f"metadata/{series_uid}", json.dumps(instance_metadata),ex=1800) #30 min
+                # client_redis.set(f"instance/{study_uid}",instances,ex=1800) #30 min
                 # print("on redis successfully", instance_metadata)
         # print("Metadata updated in global variable:", instance_metadata)
     
@@ -154,7 +160,7 @@ def get_dicom_series(study_uid, series_uid, tag):
     dicom_to_nifti(current_study_path, current_study_path, tag)
 
     print(f"Series {series_uid} from study {study_uid} retrieved and converted to NIfTI")
-
+    
     return os.path.join(current_study_path, f"{tag}.nii.gz")
 
 
@@ -283,8 +289,8 @@ def itk_image_to_dicom_seg(label, series_dir, template, output_file) -> str:
     print("meta_data", meta_data)
     print("output_file", output_file)
 
-    # command = "itkimage2segimage" 
-    command = r"C:\Users\hazem\dcmqi\build\dcmqi-build\bin\Release\itkimage2segimage"
+    command = "itkimage2segimage" 
+    # command = r"D:\dcmqi\build\dcmqi-build\bin\Release\itkimage2segimage"
     args = [
         "--inputImageList",
         label,

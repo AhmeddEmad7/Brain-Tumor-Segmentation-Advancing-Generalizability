@@ -5,13 +5,19 @@ import pika
 import json
 import environ
 import redis
+import os
+
 env = environ.Env()
-client_redis = redis.Redis(host="localhost", port=6379, db=0)
+redis_host = os.getenv('REDIS_HOST', 'localhost')
+redis_port = int(os.getenv('REDIS_PORT', 6379))
+redis_db = int(os.getenv('REDIS_DB', 0))
+
+client_redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
 
 def start_connection():
     # establish connection with rabbitmq server
     connection = pika.BlockingConnection(pika.ConnectionParameters(
-        # host=env('RABBITMQ_HOST'),
+        host=env('RABBITMQ_HOST'),
         port=env('RABBITMQ_PORT'),
         credentials=pika.PlainCredentials(
             env('RABBITMQ_USERNAME'),

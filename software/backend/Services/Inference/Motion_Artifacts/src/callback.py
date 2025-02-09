@@ -11,10 +11,15 @@ model = load_model()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 studies_dir = os.path.join(current_dir, '..', 'studies')
 
-client_redis = redis.Redis(host="localhost", port=6379, db=0)
+redis_host = os.getenv('REDIS_HOST', 'localhost')
+redis_port = int(os.getenv('REDIS_PORT', 6379))
+redis_db = int(os.getenv('REDIS_DB', 0))
+
+client_redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
 
 
 def motion_correction_callback(ch, method, properties, body):
+
         print(f" [Motion Artifacts] Received {body.decode()}, starting processing...")
         body = json.loads(body.decode())
         study_uid = body['studyInstanceUid']
@@ -69,9 +74,10 @@ def upload_dicom_series_orthanc(dicom_dir):
         try:
             with open(dicom_file, 'rb') as f:
                 files = {'file': (os.path.basename(dicom_file), f, 'application/dicom')}
-                response = requests.post("http://localhost:8042/instances", files=files)
+                response = requests.post(os.getenv('ORTHANC_URL') + "/instances", files=files)
                 response.raise_for_status()  # raises exception for HTTP errors
             print(f"Uploaded DICOM file: {dicom_file}")
         except Exception as e:
+
             print(f"Failed to upload {dicom_file} due to {e}")
     print(f"All DICOM files from {dicom_dir} uploaded to Orthanc.")   

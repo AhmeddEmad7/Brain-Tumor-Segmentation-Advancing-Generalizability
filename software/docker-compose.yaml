@@ -5,12 +5,11 @@ volumes:
   api_gateway_db_data:
 
 services:
-
   frontend:
     build: ./frontend
     container_name: gp_frontend
     ports:
-       - "5000:5000"
+      - "5000:5000"
     depends_on:
       - api_gateway
 
@@ -60,7 +59,6 @@ services:
       - ./backend/Services/Redis:/data
     restart: always
 
-  
   rabbitmq:
     image: rabbitmq:3-management
     container_name: gp_rabbitmq
@@ -118,4 +116,3 @@ services:
   #     - ./backend/Services/Reporting:/usr/src/app:ro
   #   depends_on:
   #     - reporting_db
-

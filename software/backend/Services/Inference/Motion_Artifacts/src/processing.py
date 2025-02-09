@@ -18,14 +18,18 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 studies_dir = os.path.join(current_dir, '..', 'studies')
 model_path = os.path.join(current_dir, '..', 'models', 'stacked_model.h5')
 
-os.environ['ORTHANC_URL'] = 'http://localhost:8042/'
+client = dicomweb_client.api.DICOMwebClient(f"{os.getenv('ORTHANC_URL')}/dicom-web")
 
-client = dicomweb_client.api.DICOMwebClient(f"http://localhost:8042/dicom-web")
 
-client_redis = redis.Redis(host="localhost", port=6379, db=0)
+redis_host = os.getenv('REDIS_HOST', 'localhost')
+redis_port = int(os.getenv('REDIS_PORT', 6379))
+redis_db = int(os.getenv('REDIS_DB', 0))
+
+client_redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
 
 # global_metadata = None 
 def load_model():
+
     global model_path
 
     print('loading the model')

@@ -1,7 +1,9 @@
 from revproxy.views import ProxyView
+import os
+orthanc_url = os.environ.get('ORTHANC_URL')
 
 
 class OrthancProxyView(ProxyView):
-    upstream = 'http://orthanc:8042'
+    upstream = orthanc_url
 
 

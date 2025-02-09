@@ -46,12 +46,6 @@ def convert_nifti_to_dicom(nifti_file, output_folder, metadata=None):
     ds.SeriesInstanceUID = generate_uid()
     ds.Modality = get_dicom_tag_value(metadata, '00080060') or 'MR'
     ds.Manufacturer = get_dicom_tag_value(metadata, '00080070') or 'Unknown manufacturer'
-    # ds.ImagePositionPatient = get_dicom_tag_value(metadata, '00200032', [0.0, 0.0, 0.0])
-    # print("ds.ImagePositionPatient",ds.ImagePositionPatient)
-    
-    # # ds.ImageOrientationPatient = get_dicom_tag_value(metadata, '00200037', [1.0, 0.0, 0.0, 0.0, 1.0, 0.0])
-    # ds.SliceLocation = get_dicom_tag_value(metadata, '00201040', "0")
-    # print("ds.SliceLocation",ds.SliceLocation)
 
     ds.SliceThickness = "1"
     ds.PatientPosition = get_dicom_tag_value(metadata, '00185100') or 'HFS'
@@ -91,9 +85,9 @@ def convert_nifti_to_dicom(nifti_file, output_folder, metadata=None):
         print(f"Saved {filename}")
         
 
-nifti_file = r"C:\Users\hazem\Downloads\test2\project\segmentation\sequences\BraTS-GLI-00182-000-t1c.nii"
-output_folder = r"C:\Users\hazem\Downloads\hz11"
-convert_nifti_to_dicom(nifti_file,output_folder)
+# nifti_file = r"C:\Users\hazem\Downloads\test2\project\segmentation\sequences\BraTS-GLI-00182-000-t1c.nii"
+# output_folder = r"C:\Users\hazem\Downloads\hz11"
+# convert_nifti_to_dicom(nifti_file,output_folder)
 # Example usage
 # json_metadata_file = "C:\\Users\\Mina A Tayeh\\Desktop\\Dicom-nifti conv\\BraTS2021_00000_flair.nii\\mina.json"
 # os.makedirs(output_folder, exist_ok=True)

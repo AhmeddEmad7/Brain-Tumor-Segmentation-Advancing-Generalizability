@@ -53,11 +53,17 @@ def load_model(model_path):
     return model
 
 def generate_prediction_mask(pred):
-    pred_probs = F.softmax(pred, dim=1)
-    pred_discrete = AsDiscrete(argmax=True, dim=1)(pred_probs)
-    new_volume = pred_discrete.squeeze(0).squeeze(0)
+    output_probs = (torch.sigmoid(pred) > 0.5)
+    _, _, H, W, D = output_probs.shape
 
-    return new_volume.float()
+    output = output_probs[0] # Get the only element in the batch (first one)
+    seg_mask = torch.zeros((H, W, D))
+
+    seg_mask[torch.where(output[1, ...] == 1)] = 2  # WT --> ED
+    seg_mask[torch.where(output[2, ...] == 1)] = 1  # TC --> NCR
+    seg_mask[torch.where(output[3, ...] == 1)] = 3  # ET --> ET
+
+    return seg_mask.float()
     
 def save_nifti_volumes(int_volumes, metadata, output_dir):
     os.makedirs(output_dir, exist_ok=True)
@@ -71,36 +77,42 @@ def save_nifti_volumes(int_volumes, metadata, output_dir):
         print(f"Saved: {file_path}")
 
 def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir):
-    input, int_volumes, metadata = load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path)
+    input_data, int_volumes, metadata = load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path)
     save_nifti_volumes(int_volumes, metadata, output_dir)
     
-    input['imgs'] = input['imgs'].unsqueeze(0).to('cuda')
-    print("Input to model shape:", input['imgs'].shape)
-    
-    model = load_model('/kaggle/input/gliomateacheroldlabelsbgincluded/Teacher_model_after_epoch_100_trainLoss_0.2821_valLoss_0.1429.pth')
+    input_data['imgs'] = input_data['imgs'].unsqueeze(0).to('cuda')
+    print("Input to model shape:", input_data['imgs'].shape)
+
+    model_path = '/kaggle/input/gliomateachernewlabels/Teacher_model_after_epoch_100_trainLoss_0.5972_valLoss_0.3019.pth'
+    model = load_model(model_path)
     model = model.to('cuda')
     model.eval()
 
     with torch.no_grad():
         output = sliding_window_inference(
-            inputs=input['imgs'],
+            inputs=input_data['imgs'],
             roi_size=(128, 128, 128),
             sw_batch_size=4,
             predictor=model,
             overlap=0.25,
-            # mode='gaussian'
+            mode='gaussian'
         )
     
     # output = model(input['imgs'])
     prediction = generate_prediction_mask(output['pred'])
     print("Prediction shape:", prediction.shape)
 
+    ## For cropping before SW inference ##
+    # prediction = generate_prediction_mask(output['pred'])
+    # prediction = SpatialPad(spatial_size=(240, 240, 155), mode='constant')(prediction.unsqueeze(0)).squeeze(0)
+    # print("Prediction shape:", prediction.shape)
+
     # Saving prediction
     nifti_pred = nib.Nifti1Image(prediction.cpu().numpy(), affine=metadata[0]['affine'])
     nifti_pred.header.set_intent('label', name='Label Map')
     
     # Save the NIfTI file and _label left as it is
-    nib.save(nifti_pred, os.path.join(output_dir, f"prediction_label.nii.gz")) # Do not change the name
+    nib.save(nifti_pred, os.path.join(output_dir, f"prediction_label.nii.gz"))
 
     return np.array(prediction.cpu())
 

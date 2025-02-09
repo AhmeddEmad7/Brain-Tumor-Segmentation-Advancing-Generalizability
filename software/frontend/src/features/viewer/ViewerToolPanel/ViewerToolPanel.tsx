@@ -1,83 +1,79 @@
 import { useState } from 'react';
-import { ButtonGroup, SidePanel } from '@ui/library';
+import { SidePanel } from '@ui/library';
 import SegmentationTab from './Segmentation/SegmentationTab.tsx';
 import MeasurementsTab from '@features/viewer/ViewerToolPanel/MeasurementsTab.tsx';
 import SequenceSynthesisTab from './Synthesis/SequenceSynthesisTab.tsx';
 import MotionArtifactsCorrectionTab from './MotionArtifactsCorrection/MotionArtifactsCorrectionTab.tsx';
 import ReportingTab from './Reporting/ReportingTab.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRuler, faBrush, faBriefcaseMedical, faPlus, faFile } from '@fortawesome/free-solid-svg-icons';
+import { faRuler, faBrush, faBriefcaseMedical, faPlus, faFile, faBars } from '@fortawesome/free-solid-svg-icons';
+import { Box, Menu, MenuItem, IconButton, Typography } from '@mui/material';
 
 const ViewerToolPanel = () => {
     const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
+    const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+    const open = Boolean(menuAnchor);
 
-    const onActiveIndexChange = (index: number) => {
+    const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setMenuAnchor(event.currentTarget);
+    };
+
+    const handleMenuClose = (index: number) => {
         setActiveTabIndex(index);
+        setMenuAnchor(null);
     };
 
     return (
-        <div>
-            <SidePanel
-                title={'Tools'}
-                headerComponent={
-                    <ButtonGroup
-                        buttons={[
-                            {
-                                children: <FontAwesomeIcon icon={faRuler} />,
-                                onClick: () => console.log('Measurement'),
-                                key: `button-Measurement`,
-                                title: 'Measurement'
-                            },
-                            {
-                                children: <FontAwesomeIcon icon={faBrush} />,
-                                onClick: () => console.log('Segmentation'),
-                                key: `button-Segmentation`,
-                                title: 'Segmentation'
-                            },
-                            {
-                                children: <FontAwesomeIcon icon={faBriefcaseMedical} />,
-                                onClick: () => console.log('Motion Artifacts Correction'),
-                                key: `button-AI-Features`,
-                                title: 'Motion Artifacts Correction'
-                            },
-                            {
-                                children: <FontAwesomeIcon icon={faPlus} />,
-                                onClick: () => console.log('Sequence Synthesis'),
-                                key: `button-AI-Features`,
-                                title: 'Sequence Synthesis'
-                            },
-                            {
-                                children: <FontAwesomeIcon icon={faFile} />,
-                                onClick: () => console.log('Report'),
-                                key: `button-Report`,
-                                title: 'Reporting'
-                            }
-                        ]}
-                        onActiveIndexChange={onActiveIndexChange}
-                        defaultActiveIndex={activeTabIndex}
-                        activeTabColor={'bg-sky-800'}
-                    />
-                }
-            >
-                <div className="overflow-y-scroll min-h-[85vh] max-h-[88vh]">
-                    <div className={`${activeTabIndex !== 0 ? 'hidden' : ''}`}>
-                        <SegmentationTab />
-                    </div>
-                    <div className={`${activeTabIndex !== 1 ? 'hidden' : ''}`}>
-                        <MeasurementsTab />
-                    </div>
-                    <div className={`${activeTabIndex !== 2 ? 'hidden' : ''}`}>
-                        <MotionArtifactsCorrectionTab />
-                    </div>
-                    <div className={`${activeTabIndex !== 3 ? 'hidden' : ''}`}>
-                        <SequenceSynthesisTab />
-                    </div>
-                    <div className={`${activeTabIndex !== 4 ? 'hidden' : ''}`}>
-                        <ReportingTab />
-                    </div>
-                </div>
+        <Box>
+            <SidePanel title={'Tools'}>
+                <Box className="flex justify-between items-center p-2">
+                    <Box className="flex gap-4">
+                        <Box className="flex flex-col items-center">
+                            <IconButton onClick={() => setActiveTabIndex(0)}>
+                                <FontAwesomeIcon icon={faBrush} />
+                            </IconButton>
+                            <Typography variant="caption">Segmentation</Typography>
+                        </Box>
+                        <Box className="flex flex-col items-center">
+                            <IconButton onClick={() => setActiveTabIndex(1)}>
+                                <FontAwesomeIcon icon={faRuler} />
+                            </IconButton>
+                            <Typography variant="caption">Measurements</Typography>
+                        </Box>
+                        <Box className="flex flex-col items-center">
+                            <IconButton onClick={() => setActiveTabIndex(2)}>
+                                <FontAwesomeIcon icon={faBriefcaseMedical} />
+                            </IconButton>
+                            <Typography variant="caption">Motion Correction</Typography>
+                        </Box>
+                    </Box>
+                    <IconButton onClick={handleMenuClick}>
+                        <FontAwesomeIcon icon={faBars} />
+                    </IconButton>
+                    <Menu
+                        anchorEl={menuAnchor}
+                        open={open}
+                        onClose={() => setMenuAnchor(null)}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    >
+                        <MenuItem onClick={() => handleMenuClose(3)}>
+                            <FontAwesomeIcon icon={faPlus} className="mr-2" /> Sequence Synthesis
+                        </MenuItem>
+                        <MenuItem onClick={() => handleMenuClose(4)}>
+                            <FontAwesomeIcon icon={faFile} className="mr-2" /> Reporting
+                        </MenuItem>
+                    </Menu>
+                </Box>
+                <Box className="p-4 overflow-y-auto" sx={{ maxHeight: '80vh' }}>
+                    {activeTabIndex === 0 && <SegmentationTab />}
+                    {activeTabIndex === 1 && <MeasurementsTab />}
+                    {activeTabIndex === 2 && <MotionArtifactsCorrectionTab />}
+                    {activeTabIndex === 3 && <SequenceSynthesisTab />}
+                    {activeTabIndex === 4 && <ReportingTab />}
+                </Box>
             </SidePanel>
-        </div>
+        </Box>
     );
 };
 

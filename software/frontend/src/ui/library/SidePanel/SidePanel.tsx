@@ -2,42 +2,40 @@ import { ReactElement, ReactNode, useState } from 'react';
 import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-type TSidePanelProps = {
+interface TSidePanelProps {
     children: ReactNode;
     title: string;
     side?: 'left' | 'right';
     tabs?: any[];
     headerComponent?: ReactElement;
-};
+}
 
 const SidePanel = ({ children, title, headerComponent }: TSidePanelProps) => {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     const togglePanel = () => {
         setIsOpen(!isOpen);
     };
 
     return (
-        <div className={`h-full bg-AAFirstShade transition-all duration-300  ${isOpen ? 'w-72' : 'w-8'}`}>
-            <div className={'bg-AAPrimary flex text-center justify-between'}>
-                <div>
-                    {/*Open & Close Button*/}
-                    <button className="px-2 py-1 text-white" onClick={togglePanel}>
-                        <FontAwesomeIcon
-                            icon={faArrowRightFromBracket}
-                            className={`${isOpen ? '' : 'rotate-180'}`}
-                        />
-                    </button>
-                </div>
-                {/* Conditional Rendering: if the header is text or component*/}
+        <div
+            className={`h-full transition-all duration-300 shadow-lg ${isOpen ? 'w-80' : 'w-10'} rounded-lg bg-gradient-to-r from-gray-900 to-gray-700 text-white`}
+        >
+            <div className="bg-gray-800 flex items-center justify-between p-3 rounded-t-lg">
+                <button className="p-2 text-white hover:bg-gray-700 rounded-md" onClick={togglePanel}>
+                    <FontAwesomeIcon
+                        icon={faArrowRightFromBracket}
+                        className={`transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`}
+                    />
+                </button>
                 {headerComponent ? (
-                    <div className={'p-2'}>{headerComponent}</div>
+                    <div className="text-lg font-semibold">{headerComponent}</div>
                 ) : (
-                    <div className={'text-base'}>{title}</div>
+                    <div className="text-lg font-semibold">{title}</div>
                 )}
-                <div className={'opacity-0'}>hidd</div>
+                <div className="opacity-0">hidd</div>
             </div>
-            <div>{isOpen && children}</div>
+            <div className="p-4">{isOpen && children}</div>
         </div>
     );
 };

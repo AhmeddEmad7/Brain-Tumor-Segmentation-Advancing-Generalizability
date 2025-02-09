@@ -5,13 +5,7 @@ import ViewerSidebar from '@features/viewer/StudySidebar/ViewerSidebar.tsx';
 import ViewerToolPanel from '@features/viewer/ViewerToolPanel/ViewerToolPanel.tsx';
 
 const ViewerLayout = () => {
-    // window.addEventListener(
-    //     'contextmenu',
-    //     function (event) {
-    //         event.preventDefault(); // Prevent the default context menu from appearing
-    //     },
-    //     false
-    // );
+
 
     return (
         <div className={'w-full'}>
@@ -32,7 +26,7 @@ const ViewerLayout = () => {
                     <Outlet />
                 </div>
                 <div onContextMenu={(e) => e.preventDefault()}>
-                    <ViewerToolPanel />
+                    <ViewerToolPanel  />
                 </div>
             </div>
         </div>

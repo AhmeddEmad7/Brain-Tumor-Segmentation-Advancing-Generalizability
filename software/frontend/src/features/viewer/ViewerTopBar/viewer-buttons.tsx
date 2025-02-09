@@ -56,27 +56,27 @@ export const VIEWER_SETTINGS_MENU_ITEMS = ['About', 'License Agreement', 'Help',
 
 const is3DActive = store.getState().viewer.is3DActive;
 console.log('is3DActive',is3DActive);
-const VIEWER_TOOLS_BUTTONS = [
+const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
     {
         title: ANNOTATION_TOOLS['Window'].toolName,
         onClick: handleToolClick,
         icon: <ContrastIcon />,
         menuComponent: <ViewerButtonMenu items={WindowButtonItems} />,
-        disabled: is3DActive // ✅ Disable if 3D is active
+        disabled: false
     },
     {
         title: ANNOTATION_TOOLS['Pan'].toolName,
         onClick: handleToolClick,
         icon: <FontAwesomeIcon icon={faUpDownLeftRight} />,
         menuComponent: <ViewerButtonMenu items={PanButtonItems} />,
-        disabled: is3DActive // ✅ Disable if 3D is active
+        disabled: false
     },
     {
         title: ANNOTATION_TOOLS['Zoom'].toolName,
         onClick: handleToolClick,
         icon: <ZoomToolIcon />,
         menuComponent: <ViewerButtonMenu items={ZoomButtonItems} />,
-        disabled: is3DActive
+        disabled: false 
     },
     {
         title: 'Measurements',
@@ -90,7 +90,13 @@ const VIEWER_TOOLS_BUTTONS = [
         onClick: handleToolClick,
         icon: <RotationToolIcon />,
         menuComponent: <ViewerButtonMenu items={RotateButtonItems} />,
-        disabled: is3DActive
+        disabled: false
+    },
+    {
+        title: 'Layout',
+        icon: <LayoutIcon />,
+        menuComponent: <LayoutSelector rows={4} columns={4} />,
+        disabled: false
     },
     {
         title: 'Magnify',
@@ -102,12 +108,6 @@ const VIEWER_TOOLS_BUTTONS = [
         title: 'Scroll',
         icon: <FontAwesomeIcon icon={faLayerGroup} />,
         onClick: handleToolClick,
-        disabled: is3DActive
-    },
-    {
-        title: 'Layout',
-        icon: <LayoutIcon />,
-        menuComponent: <LayoutSelector rows={4} columns={4} />,
         disabled: is3DActive
     },
     {
@@ -147,7 +147,7 @@ const VIEWER_TOOLS_BUTTONS = [
             toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
         },
         icon: <LuAxis3D />,
-        disabled: is3DActive
+        disabled: false
     },
     {
         icon: <ThreeDIcon />,
@@ -155,22 +155,20 @@ const VIEWER_TOOLS_BUTTONS = [
         onClick: async () => {
             await toggleVolumeRendering();
         },
-        
-        disabled: is3DActive // Disable the 3D button itself when already in 3D mode
+        disabled: false // Disable the 3D button itself when already in 3D mode
     },
     {
         icon: <ThreeDRotationIcon />,
         title: 'Render',
         onClick: handleToolClick,
-        disabled: false // ✅ Render tool is always active
+        disabled: !is3DActive 
     },
     {
         icon: <ResetIcon />,
         title: 'Reset',
-        disabled: is3DActive
+        disabled: false
     }
 ];
-
 const VIEWER_OPTION_BUTTONS = [
     {
         onClick: () => {},

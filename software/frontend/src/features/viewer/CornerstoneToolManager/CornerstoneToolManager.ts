@@ -35,7 +35,11 @@ class CornerstoneToolManager {
                 annotationToolGroupId: this.toolGroupId
             })
         );
-
+        CornerstoneToolManager.setToolActive(
+            cornerstoneTools.WindowLevelTool.toolName,
+            cornerstoneTools.Enums.MouseBindings.Primary,
+            this.toolGroupId
+        );
         // Add all the annotation and segmentation tools to the tool group
         Object.values(ANNOTATION_TOOLS).forEach((tool) => {
             this.toolGroup?.addTool(tool.toolName);
@@ -81,12 +85,6 @@ class CornerstoneToolManager {
                     cornerstoneTools.Enums.MouseBindings.Secondary,
                     this.toolGroupId
                 );
-                CornerstoneToolManager.setToolActive(
-                    cornerstoneTools.TrackballRotateTool.toolName,
-                    cornerstoneTools.Enums.MouseBindings.Primary, // Use cornerstoneTools.Enums
-                    this.toolGroupId
-                  );
-
                 break;
             case Enums.ViewportType.VOLUME_3D:
                 console.log('🟢 Applying 3D tool group... inside CornerstoneToolManager');

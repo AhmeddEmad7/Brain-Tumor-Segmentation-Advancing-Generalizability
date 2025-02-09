@@ -40,13 +40,21 @@ const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx ,disabled}: 
 
     return (
         <>
-            <StyledDiv aria-haspopup="true" className={'flex items-center justify-center p-1'} sx={sx}>
+            <StyledDiv aria-haspopup="true" 
+            className={'flex items-center justify-center p-1'} 
+            sx={{
+                ...sx,
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: disabled ? 0.4 : 1 // Greyed out when disabled
+            }}
+            >
                 <div
                     className={
                         'flex flex-col items-center justify-center cursor-pointer w-4/5 overflow-hidden'
                     }
                     onMouseUp={handleClick}
                     title={title}
+                    aria-disabled={disabled}
                 >
                     <div className={'text-2xl'}>
                         <SvgIcon fontSize={'inherit'}>{icon}</SvgIcon>

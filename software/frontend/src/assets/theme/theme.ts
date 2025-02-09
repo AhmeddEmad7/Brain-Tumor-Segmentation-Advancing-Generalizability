@@ -7,56 +7,56 @@ export const tokens = (mode: TModeType) => ({
     ...(mode === 'dark'
         ? {
               grey: {
-                  100: '#e0e0e0',
-                  200: '#c2c2c2',
-                  300: '#a3a3a3',
-                  400: '#858585',
-                  500: '#666666',
-                  600: '#525252',
-                  700: '#3d3d3d',
-                  800: '#292929',
-                  900: '#141414'
+                  100: '#B0B8C0',
+                  200: '#9098A1',
+                  300: '#707880',
+                  400: '#505860',
+                  500: '#303840',
+                  600: '#202830',
+                  700: '#101820',
+                  800: '#0A1015',
+                  900: '#05080A'
               },
               primary: {
-                  100: '#383842',
-                  200: '#323237',
-                  300: '#2f2f33',
-                  400: '#27272b'
+                  100: '#0A1320',
+                  200: '#08101C',
+                  300: '#060C18',
+                  400: '#040A15'
               },
               blue: {
-                  100: '#9fddf3',
-                  200: '#10a9e2',
-                  300: '#076c93'
+                  100: '#6A7B8C',
+                  200: '#3A4A5C',
+                  300: '#1A2A3C'
               },
               text: {
-                  primary: '#ffffff'
+                  primary: '#DDE1E6'
               }
           }
         : {
               grey: {
-                  100: '#141414',
-                  200: '#292929',
-                  300: '#3d3d3d',
-                  400: '#525252',
-                  500: '#666666',
-                  600: '#858585',
-                  700: '#a3a3a3',
-                  800: '#c2c2c2',
-                  900: '#e0e0e0'
+                  100: '#F0F4F8',
+                  200: '#D8DFE5',
+                  300: '#C0C9D0',
+                  400: '#A8B1BB',
+                  500: '#9099A6',
+                  600: '#707880',
+                  700: '#505860',
+                  800: '#303840',
+                  900: '#101820'
               },
               primary: {
-                  100: '#c7c7bd',
-                  200: '#cdcdc8',
-                  300: '#d0d0cc',
-                  400: '#d8d8d4'
+                  100: '#B8C0C8',
+                  200: '#90A0B0',
+                  300: '#607080',
+                  400: '#405060'
               },
               blue: {
-                  100: '#9fddf3',
-                  200: '#10a9e2',
-                  300: '#076c93'
+                  100: '#6A7B8C',
+                  200: '#3A4A5C',
+                  300: '#1A2A3C'
               },
               text: {
-                  primary: '#4f4f4f'
+                  primary: '#1A1F26'
               }
           })
 });
@@ -107,36 +107,46 @@ export const themeSettings = (mode: TModeType) => {
                           light: colors.grey[100]
                       },
                       background: {
-                          default: colors.primary[200]
+                          default: colors.primary[100]
                       }
                   })
         },
         typography: {
-            fontFamily: ['Source Sans Pro', 'sans-serif'].join(','),
+            fontFamily: ['Inter', 'sans-serif'].join(','),
             fontSize: 12,
             h1: {
-                fontFamily: ['Source Sans Pro', 'sans-serif'].join(','),
-                fontSize: 40
+                fontFamily: ['Inter', 'sans-serif'].join(','),
+                fontSize: 36
             },
             h2: {
-                fontFamily: ['Source Sans Pro', 'sans-serif'].join(','),
-                fontSize: 32
+                fontFamily: ['Inter', 'sans-serif'].join(','),
+                fontSize: 28
             },
             h3: {
-                fontFamily: ['Source Sans Pro', 'sans-serif'].join(','),
-                fontSize: 24
+                fontFamily: ['Inter', 'sans-serif'].join(','),
+                fontSize: 22
             },
             h4: {
-                fontFamily: ['Source Sans Pro', 'sans-serif'].join(','),
-                fontSize: 20
+                fontFamily: ['Inter', 'sans-serif'].join(','),
+                fontSize: 18
             },
             h5: {
-                fontFamily: ['Source Sans Pro', 'sans-serif'].join(','),
-                fontSize: 16
+                fontFamily: ['Inter', 'sans-serif'].join(','),
+                fontSize: 14
             },
             h6: {
-                fontFamily: ['Source Sans Pro', 'sans-serif'].join(','),
-                fontSize: 14
+                fontFamily: ['Inter', 'sans-serif'].join(','),
+                fontSize: 12
+            }
+        },
+        components: {
+            MuiButton: {
+                styleOverrides: {
+                    root: {
+                        fontSize: '12px',
+                        padding: '4px 8px'
+                    }
+                }
             }
         }
     };

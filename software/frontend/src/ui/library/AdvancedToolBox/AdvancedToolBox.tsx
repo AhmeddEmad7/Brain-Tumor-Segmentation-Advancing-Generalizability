@@ -46,8 +46,8 @@ const AdvancedToolbox = ({ title, items }: TAdvancedToolboxProps) => {
 
     return (
         <PanelSection title={title}>
-            <div className="flex flex-col bg-black">
-                <div className="bg-AASecondShade flex flex-wrap py-2">
+            <div className="flex flex-col rounded-lg p-3 transition-all duration-300 shadow-md" >
+                <div className="flex flex-wrap py-2">
                     {items?.map((item) => {
                         return (
                             <Tooltip
@@ -67,11 +67,10 @@ const AdvancedToolbox = ({ title, items }: TAdvancedToolboxProps) => {
                                 >
                                     <div
                                         className={classnames(
-                                            'text-white mt-2 grid h-10 w-10 place-items-center rounded-md bg-AAFirstShade  ',
-                                            activeItemName === item.name && 'bg-AAPrimary text-black',
+                                            'text-white mt-2 grid h-10 w-10 place-items-center rounded-md',
+                                            activeItemName === item.name ? 'bg-[#00A8E8] text-black' : 'bg-[#112D4E]',
                                             item.disabled && 'opacity-50',
-                                            !item.disabled &&
-                                                'hover:bg-AAPrimaryDark cursor-pointer hover:cursor-pointer hover:text-white'
+                                            !item.disabled && 'hover:bg-[#007BB5] cursor-pointer hover:text-white'
                                         )}
                                     >
                                         <FontAwesomeIcon icon={item.icon} />
@@ -81,7 +80,7 @@ const AdvancedToolbox = ({ title, items }: TAdvancedToolboxProps) => {
                         );
                     })}
                 </div>
-                <div className="bg-AASecondShade h-auto px-2">
+                <div className="h-auto px-2">
                     {activeItemOptions && <ToolSettings options={activeItemOptions} />}
                 </div>
             </div>

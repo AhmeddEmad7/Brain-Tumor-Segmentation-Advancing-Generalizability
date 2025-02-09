@@ -9,6 +9,7 @@ const initialState: IStoreViewerSlice = {
     // ui
     isFullScreen: false,
     isMPRActive: false, // Default state for MPR
+    is3DActive: false, // Default state for 3D
     layout: {
         numRows: 1,
         numCols: 1

@@ -21,15 +21,15 @@ export default {
         },
         extend: {
             colors: {
-                AAPrimaryLight: '#58c3eb',
-                AAPrimary: '#10a9e2',
-                AAPrimaryDark: '#0b769e',
+                AAPrimaryLight: '#66C3FF',
+                AAPrimary: '#009DFF',
+                AAPrimaryDark: '#007ACC',
 
-                AASecondary: '#fff',
-                AAError: '#ff6489',
-                AASuccess: '#00c853',
-                AAFirstShade: '#2f2f33',
-                AASecondShade: '#383842',
+                AASecondary: '#E3F2FD',
+                AAError: '#FF4F5E',
+                AASuccess: '#00C896',
+                AAFirstShade: '#1E293B',
+                AASecondShade: '#263750',
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',
                 ring: 'hsl(var(--ring))',

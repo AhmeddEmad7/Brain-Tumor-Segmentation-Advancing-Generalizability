@@ -149,8 +149,8 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     // Set the current viewport and imageIds
                     setThisViewport(viewport);
                     setThisViewportImageIds(viewport.getImageIds());
-                    // dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
-                    // dispatch(viewerSliceActions.removeClickedSeries());
+                    dispatch(viewerSliceActions.removeClickedSeries());
+                    dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
                 }
             } catch (error) {
                 console.error('Error setting viewport', error);

@@ -123,74 +123,13 @@ export const toggleVolumeRendering = async (forceTo2D = false) => {
     } catch (error) {
         console.error('❌ Error loading volume/stack:', error);
     }
-
+    console.log('newViewportType',newViewportType);
+    console.log('Enums.ViewportType.VOLUME_3D',Enums.ViewportType.VOLUME_3D);
+    console.log('Enums.ViewportType.ORTHOGRAPHIC',Enums.ViewportType.VOLUME_3D === newViewportType);
     // **Step 6: Update Redux State**
     store.dispatch(viewerSliceActions.set3DActive(newViewportType === Enums.ViewportType.VOLUME_3D));
 };
 
-// export const toggleVolumeRendering = async () => {
-//     const state = store.getState();
-//     const { selectedViewportId, renderingEngineId } = state.viewer;
-//     const renderingEngine = getRenderingEngine(renderingEngineId);
-
-//     if (!renderingEngine) {
-//         console.error('Rendering engine not found');
-//         return;
-//     }
-
-//     const viewport = renderingEngine.getViewport(selectedViewportId);
-
-//     console.log('Current viewport properties:', viewport.getProperties());
-
-//     if (viewport.type === Enums.ViewportType.VOLUME_3D) {
-//         viewport.setProperties({ type: Enums.ViewportType.ORTHOGRAPHIC });
-//         console.log('Switching to 2D');
-//     } else {
-//         viewport.setProperties({ type: Enums.ViewportType.VOLUME_3D });
-//         console.log('Switching to 3D');
-//     }
-
-//     viewport.render();
-//     console.log('Updated viewport properties:', viewport.getProperties());
-//     console.log('Viewport rendered');
-
-//     // Re-initialize the viewport to ensure the changes take effect
-//     renderingEngine.disableElement(selectedViewportId);
-//     renderingEngine.enableElement({
-//         viewportId: selectedViewportId,
-//         type: viewport.type,
-//         element: viewport.element
-//     });
-
-//     // Reload the image or volume
-//     const imageIds = viewport.getImageIds(); // Ensure this method retrieves image IDs correctly
-//     if (viewport.type === Enums.ViewportType.ORTHOGRAPHIC) {
-//         if (viewport.setImageIds) {
-//             // Use setImageIds for 2D viewports
-//             await viewport.setImageIds(imageIds);
-//         } else {
-//             console.error('setImageIds method is not available on the viewport object.');
-//         }
-//     } else if (viewport.type === Enums.ViewportType.VOLUME_3D) {
-//         if (viewport.setVolumes) {
-//             // Use setVolumes for 3D volumes
-//             await viewport.setVolumes([{ volumeId: imageIds[0] }]);
-//         } else {
-//             console.error('setVolumes method is not available on the viewport object.');
-//         }
-//     }
-
-//     // Avoid re-initializing tools that have already been added
-//     // if (!CornerstoneToolManager.isToolInitialized('Angle')) {
-//     //     CornerstoneToolManager.initCornerstoneAnnotationTool();
-//     // }
-//     // if (!CornerstoneToolManager.isToolInitialized('Brush')) {
-//     //     CornerstoneToolManager.initCornerstoneSegmentationTool();
-//     // }
-
-//     viewport.render();
-//     console.log('Viewport re-initialized, image reloaded, and tools re-initialized');
-// };
 
 export const toggleMPRMode = async (
     renderingEngineId: string,

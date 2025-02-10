@@ -4,12 +4,12 @@
         min-height: 28px;
 
         &:hover {
-            @apply ring-1 ring-AAPrimaryDark;
+            @apply ring-1 ring-[#0A192F]; /* Dark blue */
         }
 
         &:focus,
         &--menu-is-open {
-            @apply ring-2 ring-AAPrimaryLight ring-opacity-50 outline-none;
+            @apply ring-2 ring-[#112D4E] ring-opacity-50 outline-none; /* Darker blue */
         }
     }
 
@@ -75,7 +75,7 @@
             }
 
             &::-webkit-scrollbar-thumb {
-                @apply bg-AAPrimaryLight;
+                @apply bg-[#0A192F]; /* Dark blue scrollbar */
                 border-radius: 10px;
             }
 
@@ -89,16 +89,16 @@
         }
 
         .customSelect__option--is-focused {
-            @apply bg-AAPrimaryDark;
+            @apply bg-[#112D4E]; /* Deep dark blue */
         }
 
         .customSelect__option:hover {
-            @apply bg-AAPrimaryLight bg-opacity-50;
+            @apply bg-[#0A192F] bg-opacity-50; /* Slightly lighter dark blue */
         }
 
         .customSelect__menu {
-            @apply ring-2 ring-AAPrimaryLight ring-opacity-50 rounded-sm;
-            background-color: #383842 !important;
+            @apply ring-2 ring-[#112D4E] ring-opacity-50 rounded-sm;
+            background-color: #1B2A41 !important; /* Dark navy blue */
         }
     }
 }

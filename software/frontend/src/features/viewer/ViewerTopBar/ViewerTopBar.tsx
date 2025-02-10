@@ -1,4 +1,3 @@
-/* Edited ViewerTopBar.tsx */
 import { useTheme, Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { Logo } from '@ui/library';
 import { Link } from 'react-router-dom';
@@ -19,10 +18,12 @@ import { ExpandCircleDown as ExpandCircleDownIcon } from '@mui/icons-material';
 const ViewerTopBar = () => {
     const theme = useTheme();
     const is3DActive = useSelector((state: IStore) => state.viewer.is3DActive);
+    const isMPRActive = useSelector((state: IStore) => state.viewer.isMPRActive);
     const isDarkMode = theme.palette.mode === 'dark';
     const tools = VIEWER_TOOLS_BUTTONS(is3DActive);
     const primaryTools = tools.slice(0, 6);
     const otherTools = tools.slice(6);
+
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedTool, setSelectedTool] = useState<ViewerButtonType | null>(null);
@@ -86,14 +87,12 @@ const ViewerTopBar = () => {
                         </div>
                     </Tooltip>
                 ))}
-                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} >
                     {otherTools.map((tool, index) => (
-                        <MenuItem key={index} onClick={() => handleToolSelect(tool)}>
-                            <Box component="span" sx={{ marginRight: 1 }}>
-                                {tool.icon}
-                            </Box>
-                            {tool.title}
-                        </MenuItem>
+                        <MenuItem key={index} onClick={() => handleToolSelect(tool)} sx={{ color: '#00A8E8'  }}>
+                        <Box component="span" sx={{  marginRight: 1 ,}}>{tool.icon}</Box> 
+                        {tool.title}
+                    </MenuItem>
                     ))}
                 </Menu>
                 {/* New Dynamic Button */}

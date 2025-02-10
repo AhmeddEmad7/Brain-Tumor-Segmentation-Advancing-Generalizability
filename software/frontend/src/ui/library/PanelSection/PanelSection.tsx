@@ -23,7 +23,7 @@ const PanelSection = ({ title, children, actionIcons }: TPanelSectionProps) => {
     return (
         <>
             <div
-                className="bg-AAPrimaryLight flex h-7 cursor-pointer select-none items-center justify-between rounded-sm pl-2.5 text-md"
+                className="bg-gray-500 flex h-7 cursor-pointer select-none items-center justify-between rounded-sm pl-2.5 text-md"
                 onClick={handleHeaderClick}
             >
                 <div className="text-base font-bold text-white">{title}</div>

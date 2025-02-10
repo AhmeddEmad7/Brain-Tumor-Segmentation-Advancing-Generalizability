@@ -68,9 +68,9 @@ const AdvancedToolbox = ({ title, items }: TAdvancedToolboxProps) => {
                                     <div
                                         className={classnames(
                                             'text-white mt-2 grid h-10 w-10 place-items-center rounded-md',
-                                            activeItemName === item.name ? 'bg-[#00A8E8] text-black' : 'bg-[#112D4E]',
+                                            activeItemName === item.name ? 'bg-[#1E88E5] text-white' : 'bg-[#1B4965]', // Lighter dark blue for active
                                             item.disabled && 'opacity-50',
-                                            !item.disabled && 'hover:bg-[#007BB5] cursor-pointer hover:text-white'
+                                            !item.disabled && 'hover:bg-[#2086C0] cursor-pointer hover:text-white' // Even lighter on hover
                                         )}
                                     >
                                         <FontAwesomeIcon icon={item.icon} />

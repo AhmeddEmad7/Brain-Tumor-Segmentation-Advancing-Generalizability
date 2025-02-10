@@ -116,12 +116,12 @@ export const saveSegmentation = async () => {
         activeSegmentationRepresentation.segmentationId
     );
     const segmentation3D = {
-        data : Array.from(new Uint8Array(cacheSegmentationVolume.scalarData)),
-        dimension : cacheSegmentationVolume.dimension,
-        spacing : cacheSegmentationVolume.spacing,
-        origin : cacheSegmentationVolume.origin,
-        Direction : cacheSegmentationVolume.direction
-    }
+        data: Array.from(new Uint8Array(cacheSegmentationVolume.scalarData)),
+        dimension: cacheSegmentationVolume.dimension,
+        spacing: cacheSegmentationVolume.spacing,
+        origin: cacheSegmentationVolume.origin,
+        Direction: cacheSegmentationVolume.direction
+    };
     // const segmentationData = Array.from(new Uint8Array(cacheSegmentationVolume.scalarData));
     console.log('segmentationData', segmentation3D);
     // Generate 2D label maps from the 3D segmentation volume.
@@ -147,7 +147,6 @@ export const saveSegmentation = async () => {
         labelmapData,
         cornerstone.metaData
     );
-
 
     const relevantMetadata = {
         // Required DICOM Metadata
@@ -191,7 +190,6 @@ export const saveSegmentation = async () => {
         PhotometricInterpretation: generatedSegmentation.dataset.PhotometricInterpretation || 'MONOCHROME2'
     };
     console.log('generatedSegmentation', generatedSegmentation.dataset);
-
 
     try {
         const response = await axios.post('http://localhost:8000/inference/segmentation/uploadorthanc', {

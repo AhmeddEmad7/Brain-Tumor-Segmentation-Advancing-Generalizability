@@ -1,3 +1,4 @@
+/* Edited ViewerTopBar.tsx */
 import { useTheme, Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { Logo } from '@ui/library';
 import { Link } from 'react-router-dom';
@@ -85,12 +86,14 @@ const ViewerTopBar = () => {
                         </div>
                     </Tooltip>
                 ))}
-                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} >
+                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                     {otherTools.map((tool, index) => (
                         <MenuItem key={index} onClick={() => handleToolSelect(tool)}>
-                        <Box component="span" sx={{  marginRight: 1 ,}}>{tool.icon}</Box> 
-                        {tool.title}
-                    </MenuItem>
+                            <Box component="span" sx={{ marginRight: 1 }}>
+                                {tool.icon}
+                            </Box>
+                            {tool.title}
+                        </MenuItem>
                     ))}
                 </Menu>
                 {/* New Dynamic Button */}

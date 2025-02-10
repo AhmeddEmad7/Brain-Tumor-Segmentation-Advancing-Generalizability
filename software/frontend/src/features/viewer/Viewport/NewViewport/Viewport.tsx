@@ -12,9 +12,10 @@ import { detectCineHeight } from '@features/viewer/Viewport/CinePlayer/detectCin
 import { createImageIdsAndCacheMetaData } from '@utilities/helpers/index';
 import { readSegmentation } from '../../CornerstoneToolManager/segmentationMethods';
 import { getSeriesModality } from '@features/viewer/viewer-viewport-reducers';
-import { toggleMPRMode ,toggleVolumeRendering } from '@features/viewer/ViewerTopBar/viewer-top-bar-actions'; // Import your toggleMPRMode function
+import { toggleMPRMode, toggleVolumeRendering } from '@features/viewer/ViewerTopBar/viewer-top-bar-actions'; // Import your toggleMPRMode function
 import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/CornerstoneToolManager';
 import * as cornerstoneTools from '@cornerstonejs/tools';
+// const { isCrosshairActive } = useSelector((store: IStore) => store.viewer);
 
 const wadoRsRoot = import.meta.env.VITE_ORTRHANC_PROXY_URL;
 
@@ -42,7 +43,8 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         viewportsWithCinePlayer,
         currentStudyInstanceUid,
         isMPRActive,
-        is3DActive
+        is3DActive,
+        isCrosshairActive
     } = useSelector((store: IStore) => store.viewer);
 
     const dispatch = useDispatch();
@@ -53,50 +55,61 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         if (onClick) {
             onClick(id);
         }
-    }; 
+    };
     useEffect(() => {
-        if (selectedSeriesInstanceUid&&is3DActive) {
+        if (selectedSeriesInstanceUid && is3DActive) {
             console.log('🔄 Switching to 2D due to series change...');
             toggleVolumeRendering(true); // **Force switching to 2D**
         }
     }, [selectedSeriesInstanceUid]);
-    
-        // 🔹 Ensure correct tools are applied when mode changes
-        useEffect(() => {
-            const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-            if (!renderingEngine) return;
-    
-            const viewport = renderingEngine.getViewport(selectedViewportId);
-            if (!viewport) return;
-    
-            let toolGroupId = 'CornerstoneTools2D';
-             if (is3DActive) {
-                toolGroupId = 'CornerstoneTools3D';
-            }
-            // 🟢 **Ensure the tool group exists**
-            const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroup(toolGroupId);
-            if (!toolGroup) {
-                console.error(`❌ Tool Group ${toolGroupId} not found.`);
-                return;
-            }
-    
-            // 🟢 **Add the viewport to the correct tool group**
-            toolGroup.addViewport(selectedViewportId, renderingEngineId);
-            // 🟢 **Activate the correct tool group**
-            console.log(`✅ Applying tool group: ${toolGroupId}`);
-            CornerstoneToolManager.setCurrentToolGroupId(toolGroupId);
-    
-            // 🔄 **Ensure viewport is refreshed after tool change**
-            viewport.render();
-        }, [isMPRActive, is3DActive, selectedViewportId,selectedSeriesInstanceUid]);
-    
-    useEffect(() => {
 
-        if (selectedSeriesInstanceUid&&isMPRActive) {
+    // 🔹 Ensure correct tools are applied when mode changes
+    useEffect(() => {
+        const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+        if (!renderingEngine) return;
+
+        const viewport = renderingEngine.getViewport(selectedViewportId);
+        if (!viewport) return;
+
+        let toolGroupId = 'CornerstoneTools2D';
+        if (is3DActive) {
+            toolGroupId = 'CornerstoneTools3D';
+        }
+        // 🟢 **Ensure the tool group exists**
+        const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroup(toolGroupId);
+        if (!toolGroup) {
+            console.error(`❌ Tool Group ${toolGroupId} not found.`);
+            return;
+        }
+
+        // 🟢 **Add the viewport to the correct tool group**
+        toolGroup.addViewport(selectedViewportId, renderingEngineId);
+        // 🟢 **Activate the correct tool group**
+        console.log(`✅ Applying tool group: ${toolGroupId}`);
+        CornerstoneToolManager.setCurrentToolGroupId(toolGroupId);
+
+        // 🔄 **Ensure viewport is refreshed after tool change**
+        viewport.render();
+    }, [isMPRActive, is3DActive, selectedViewportId, selectedSeriesInstanceUid]);
+
+    useEffect(() => {
+        if (selectedSeriesInstanceUid && isMPRActive) {
             // Trigger MPR mode whenever the series changes
             toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
         }
     }, [selectedSeriesInstanceUid, renderingEngineId, currentStudyInstanceUid]);
+
+    useEffect(() => {
+        if (isMPRActive && isCrosshairActive) {
+            const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+            if (!renderingEngine) return;
+
+            const viewport = renderingEngine.getViewport(selectedViewportId);
+            if (!viewport) return;
+
+            CornerstoneToolManager.setToolActive('Crosshairs');
+        }
+    }, [isMPRActive, isCrosshairActive]);
 
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
@@ -136,15 +149,14 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     const orientation = DicomUtil.detectImageOrientation(
                         direction ? direction.slice(0, 6) : [1, 0, 0, 0, 1, 0]
                     );
-                    if (is3DActive) {   
+                    if (is3DActive) {
                         // Set the orientation of the viewport
                         // Render the viewport
                         viewport.resetCamera();
-                    }
-                    else {
+                    } else {
                         viewport.setOrientation(orientation);
                     }
-                    
+
                     viewport.render();
                     // Set the current viewport and imageIds
                     setThisViewport(viewport);

@@ -57,8 +57,11 @@ export const toggleVolumeRendering = async (forceTo2D = false) => {
     const isCurrently3D = viewport.type === Enums.ViewportType.VOLUME_3D;
 
     // ✅ **Force to 2D if `forceTo2D` is true (when changing series)**
-    const newViewportType = forceTo2D || isCurrently3D ? Enums.ViewportType.ORTHOGRAPHIC : Enums.ViewportType.VOLUME_3D;
-    console.log(`🔄 Switching to: ${newViewportType === Enums.ViewportType.VOLUME_3D ? '3D Volume' : '2D Stack'}`);
+    const newViewportType =
+        forceTo2D || isCurrently3D ? Enums.ViewportType.ORTHOGRAPHIC : Enums.ViewportType.VOLUME_3D;
+    console.log(
+        `🔄 Switching to: ${newViewportType === Enums.ViewportType.VOLUME_3D ? '3D Volume' : '2D Stack'}`
+    );
 
     // **Step 3: Retrieve Image IDs**
     const imageIds = await createImageIdsAndCacheMetaData({
@@ -123,13 +126,12 @@ export const toggleVolumeRendering = async (forceTo2D = false) => {
     } catch (error) {
         console.error('❌ Error loading volume/stack:', error);
     }
-    console.log('newViewportType',newViewportType);
-    console.log('Enums.ViewportType.VOLUME_3D',Enums.ViewportType.VOLUME_3D);
-    console.log('Enums.ViewportType.ORTHOGRAPHIC',Enums.ViewportType.VOLUME_3D === newViewportType);
+    console.log('newViewportType', newViewportType);
+    console.log('Enums.ViewportType.VOLUME_3D', Enums.ViewportType.VOLUME_3D);
+    console.log('Enums.ViewportType.ORTHOGRAPHIC', Enums.ViewportType.VOLUME_3D === newViewportType);
     // **Step 6: Update Redux State**
     store.dispatch(viewerSliceActions.set3DActive(newViewportType === Enums.ViewportType.VOLUME_3D));
 };
-
 
 export const toggleMPRMode = async (
     renderingEngineId: string,
@@ -256,8 +258,11 @@ export const handleToolClick = (toolName: string, mouseEvent: any) => {
                 clickedMouseButton
             );
             break;
-        case 'Render' :
-            CornerstoneToolManager.setToolActive(ANNOTATION_TOOLS['TrackballRotate'].toolName, clickedMouseButton);  
+        case 'Render':
+            CornerstoneToolManager.setToolActive(
+                ANNOTATION_TOOLS['TrackballRotate'].toolName,
+                clickedMouseButton
+            );
             break;
         case 'Cine':
             store.dispatch(viewerSliceActions.toggleCine());

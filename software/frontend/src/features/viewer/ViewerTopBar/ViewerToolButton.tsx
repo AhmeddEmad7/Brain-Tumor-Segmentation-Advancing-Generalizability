@@ -1,3 +1,4 @@
+/* Edited ViewerToolButton.tsx */
 import { ReactNode, useState } from 'react';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { StyledDiv } from '@features/top-bars/components/StyledDiv.tsx';
@@ -15,8 +16,8 @@ interface ICustomButtonProps {
     disabled?: boolean;
 }
 
-const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx ,disabled}: ICustomButtonProps) => {
-    console.log('disabled',disabled);
+const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx, disabled }: ICustomButtonProps) => {
+    console.log('disabled', disabled);
     const [anchorElement, setAnchorElement] = useState<HTMLButtonElement | null>(null);
     const theme = useTheme();
 
@@ -29,7 +30,7 @@ const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx ,disabled}: 
     };
 
     const handleClick = (e: any) => {
-        if (onClick&&!disabled) {
+        if (onClick && !disabled) {
             onClick(title, e);
         }
     };
@@ -40,13 +41,14 @@ const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx ,disabled}: 
 
     return (
         <>
-            <StyledDiv aria-haspopup="true" 
-            className={'flex items-center justify-center p-1'} 
-            sx={{
-                ...sx,
-                cursor: disabled ? 'not-allowed' : 'pointer',
-                opacity: disabled ? 0.4 : 1 // Greyed out when disabled
-            }}
+            <StyledDiv
+                aria-haspopup="true"
+                className={'flex items-center justify-center p-1'}
+                sx={{
+                    ...sx,
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                    opacity: disabled ? 0.4 : 1 // Greyed out when disabled
+                }}
             >
                 <div
                     className={

@@ -16,12 +16,13 @@ import {
     Translate as LanguagesIcon,
     SettingsOutlined as SettingsOutlinedIcon,
     Upload as UploadIcon,
-    ThreeDRotationSharp  as ThreeDRotationIcon 
+    ThreeDRotationSharp as ThreeDRotationIcon
 } from '@mui/icons-material';
 import { LuAxis3D } from 'react-icons/lu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLayerGroup, faUpDownLeftRight, faCirclePlay } from '@fortawesome/free-solid-svg-icons';
 import { FaPaintBrush } from 'react-icons/fa';
+import { GiCrosshair } from 'react-icons/gi'; // Import crosshair icon
 
 import store from '@/redux/store.ts';
 import {
@@ -55,7 +56,7 @@ import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
 export const VIEWER_SETTINGS_MENU_ITEMS = ['About', 'License Agreement', 'Help', 'Shortcuts'];
 
 const is3DActive = store.getState().viewer.is3DActive;
-console.log('is3DActive',is3DActive);
+console.log('is3DActive', is3DActive);
 const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
     {
         title: ANNOTATION_TOOLS['Window'].toolName,
@@ -76,7 +77,7 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         onClick: handleToolClick,
         icon: <ZoomToolIcon />,
         menuComponent: <ViewerButtonMenu items={ZoomButtonItems} />,
-        disabled: false 
+        disabled: false
     },
     {
         title: 'Measurements',
@@ -150,6 +151,23 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         disabled: false
     },
     {
+        title: 'Crosshair',
+        onClick: () => {
+            const state = store.getState();
+            const isCurrentlyActive = state.viewer.isCrosshairActive;
+
+            store.dispatch(viewerSliceActions.setCrosshairActive(!isCurrentlyActive));
+
+            if (!isCurrentlyActive) {
+                CornerstoneToolManager.setToolActive('Crosshairs');
+            } else {
+                CornerstoneToolManager.setToolDisabled('Crosshairs');
+            }
+        },
+        icon: <GiCrosshair />,
+        disabled: false
+    },
+    {
         icon: <ThreeDIcon />,
         title: '3D',
         onClick: async () => {
@@ -161,7 +179,7 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         icon: <ThreeDRotationIcon />,
         title: 'Render',
         onClick: handleToolClick,
-        disabled: !is3DActive 
+        disabled: !is3DActive
     },
     {
         icon: <ResetIcon />,

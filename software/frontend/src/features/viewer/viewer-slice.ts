@@ -9,6 +9,7 @@ const initialState: IStoreViewerSlice = {
     // ui
     isFullScreen: false,
     isMPRActive: false, // Default state for MPR
+    isCrosshairActive: false, // Default state for Crosshair
     is3DActive: false, // Default state for 3D
     layout: {
         numRows: 1,
@@ -40,7 +41,10 @@ const viewportsSlice = createSlice({
         ...viewerUiReducer,
         ...viewerViewportReducer,
         ...viewerAnnotationReducer,
-        ...viewerSegmentationReducer
+        ...viewerSegmentationReducer,
+        setCrosshairActive: (state, action) => {
+            state.isCrosshairActive = action.payload; // ✅ Define setCrosshairActive
+        }
     }
 });
 

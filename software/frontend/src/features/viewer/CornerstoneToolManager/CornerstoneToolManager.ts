@@ -152,14 +152,16 @@ class CornerstoneToolManager {
     // Upload segmentation mask from a dcm file
     static uploadSegmentation = uploadSegmentation;
 
-    // Method to disable all tools
+    // Method to disable all tools except for the scroll tool
     static disableAllTools() {
         const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroup(
             store.getState().viewer.currentToolGroupId
         );
         if (toolGroup) {
             Object.values(ANNOTATION_TOOLS).forEach((tool) => {
-                toolGroup.setToolDisabled(tool.toolName);
+                if (tool.toolName !== cornerstoneTools.StackScrollMouseWheelTool.toolName) {
+                    toolGroup.setToolDisabled(tool.toolName);
+                }
             });
             Object.values(SEGMENTATION_TOOLS).forEach((tool) => {
                 toolGroup.setToolDisabled(tool.toolName);

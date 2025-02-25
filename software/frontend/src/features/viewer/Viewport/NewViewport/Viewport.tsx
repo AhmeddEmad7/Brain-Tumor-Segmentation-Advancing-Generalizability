@@ -107,7 +107,10 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
             const viewport = renderingEngine.getViewport(selectedViewportId);
             if (!viewport) return;
 
-            CornerstoneToolManager.setToolActive('Crosshairs');
+            CornerstoneToolManager.setToolActive(
+                cornerstoneTools.CrosshairsTool.toolName,
+                cornerstoneTools.Enums.MouseBindings.Primary
+            );
         }
     }, [isMPRActive, isCrosshairActive]);
 

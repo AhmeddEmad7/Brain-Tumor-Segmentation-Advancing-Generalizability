@@ -92,7 +92,7 @@ class CornerstoneToolManager {
                     cornerstoneTools.TrackballRotateTool.toolName,
                     cornerstoneTools.Enums.MouseBindings.Primary, // Use cornerstoneTools.Enums
                     this.toolGroupId
-                  );
+                );
 
                 CornerstoneToolManager.setToolActive(
                     cornerstoneTools.PanTool.toolName,
@@ -151,6 +151,21 @@ class CornerstoneToolManager {
 
     // Upload segmentation mask from a dcm file
     static uploadSegmentation = uploadSegmentation;
+
+    // Method to disable all tools
+    static disableAllTools() {
+        const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroup(
+            store.getState().viewer.currentToolGroupId
+        );
+        if (toolGroup) {
+            Object.values(ANNOTATION_TOOLS).forEach((tool) => {
+                toolGroup.setToolDisabled(tool.toolName);
+            });
+            Object.values(SEGMENTATION_TOOLS).forEach((tool) => {
+                toolGroup.setToolDisabled(tool.toolName);
+            });
+        }
+    }
 }
 
 export default CornerstoneToolManager;

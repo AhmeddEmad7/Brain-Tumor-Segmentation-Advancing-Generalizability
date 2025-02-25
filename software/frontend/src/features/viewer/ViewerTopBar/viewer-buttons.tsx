@@ -159,9 +159,13 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
             store.dispatch(viewerSliceActions.setCrosshairActive(!isCurrentlyActive));
 
             if (!isCurrentlyActive) {
-                CornerstoneToolManager.setToolActive('Crosshairs');
+                CornerstoneToolManager.disableAllTools();
+                CornerstoneToolManager.setToolActive(
+                    cornerstoneTools.CrosshairsTool.toolName,
+                    cornerstoneTools.Enums.MouseBindings.Primary
+                );
             } else {
-                CornerstoneToolManager.setToolDisabled('Crosshairs');
+                CornerstoneToolManager.setToolDisabled(cornerstoneTools.CrosshairsTool.toolName);
             }
         },
         icon: <GiCrosshair />,

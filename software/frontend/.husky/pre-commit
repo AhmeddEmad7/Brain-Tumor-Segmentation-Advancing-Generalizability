@@ -1,3 +1,0 @@
-# Software/frontend/.husky/pre-commit
-cd Software/frontend
-npx prettier --write .

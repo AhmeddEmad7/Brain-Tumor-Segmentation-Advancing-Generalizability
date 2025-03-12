@@ -1,23 +1,68 @@
 import { Dispatch } from '@reduxjs/toolkit';
 import { AxiosUtil } from '@/utilities';
 import { studiesSliceActions } from '@features/studies-table/studies-slice.ts';
+import { IStoreStudiesSlice, INiftiTableStudy, INiftiStudyData } from '@/models';
 
 const GATEWAY_URL = import.meta.env.VITE_SERVER_URL;
 
 export const fetchNiftiStudiesThunk = () => {
-    console.log(`fetching nifti studies from ${GATEWAY_URL}/nitfti/studies`);
+    console.log(`fetching nifti studies from ${GATEWAY_URL}/nifti/query/db/files`);
 
     return async (dispatch: Dispatch) => {
-        const studies = await AxiosUtil.sendRequest({
+        const response = await AxiosUtil.sendRequest({
             method: 'GET',
-            url: `${GATEWAY_URL}/nifti/studies`
+            url: `${GATEWAY_URL}/nifti/query/db/files`
         });
 
-        if (!studies) {
+        if (!response) {
             return;
         }
 
-        dispatch(studiesSliceActions.addNiftiStudies(studies));
+        // Assuming the response has the shape { files: [ ... ] }
+        const mappedStudies: INiftiTableStudy[] = response.files.map((file: any) => ({
+            fileName: file.file_name,
+            projectSub: file.subject,
+            category: file.modality,
+            sequencey: file.session,
+            filePath: file.file_path, // save file path for later use (download/view)
+        }));
+
+        dispatch(studiesSliceActions.addNiftiStudies(mappedStudies));
+    };
+};
+
+
+export const uploadNiftiFileThunk = (payload: {
+    file: File,
+    subject_num: number,
+    session_num: number,
+    modality: string,
+    subject_age?: string,
+    subject_sex?: string,
+}) => {
+    return async (dispatch: Dispatch) => {
+        const formData = new FormData();
+        formData.append("file", payload.file);
+        formData.append("subject_num", payload.subject_num.toString());
+        formData.append("session_num", payload.session_num.toString());
+        formData.append("file_type", payload.modality);
+        if (payload.subject_age) formData.append("subject_age", payload.subject_age);
+        if (payload.subject_sex) formData.append("subject_sex", payload.subject_sex);
+
+        try {
+            const response = await AxiosUtil.sendRequest({
+                method: 'POST',
+                url: `${GATEWAY_URL}/nifti/store/`,
+                data: formData,
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            // You can dispatch success actions here if needed
+            return response;
+        } catch (error) {
+            console.error('Upload NIfTI Error:', error);
+            // Optionally dispatch error actions here
+            throw error;
+        }
     };
 };
 

@@ -2,3 +2,9 @@ fastapi==0.111.0
 pydantic==1.10.15
 python-decouple==3.8
 uvicorn==0.29.0
+sqlalchemy
+nibabel
+numpy
+dotenv
+psycopg2
+python-decouple

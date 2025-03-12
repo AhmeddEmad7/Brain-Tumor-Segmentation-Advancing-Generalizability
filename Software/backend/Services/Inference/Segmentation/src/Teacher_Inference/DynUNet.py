@@ -1,3 +1,4 @@
+
 from typing import Optional, Sequence, Tuple, Union
 import numpy as np
 import torch
@@ -70,7 +71,6 @@ class UnetBasicBlock(nn.Module):
         return out
 
 
-
 class UnetUpBlock(nn.Module):
     """
     An upsampling module that can be used for DynUNet, based on:
@@ -137,7 +137,6 @@ class UnetUpBlock(nn.Module):
         out = torch.cat((out, skip), dim=1)
         out = self.conv_block(out)
         return out
-
 
 
 class UnetOutBlock(nn.Module):

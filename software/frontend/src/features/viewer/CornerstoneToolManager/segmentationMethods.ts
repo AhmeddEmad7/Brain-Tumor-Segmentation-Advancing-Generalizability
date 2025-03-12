@@ -9,6 +9,7 @@ import axios from 'axios';
 import { api } from 'dicomweb-client';
 import { getAndSetSeriesInstances } from '../viewer-viewport-reducers';
 import { Direction } from 'react-toastify/dist/utils';
+import { renderSegmentationAsSurface } from './surface'; // ✅ Import surface rendering function
 
 const { wadouri } = cornerstoneDicomImageLoader;
 
@@ -27,7 +28,7 @@ const SINGLEPART = true;
  * @param {number} selectedViewportId - The selected viewport ID.
  * @returns {void}
  */
-const getRenderingAndViewport = (selectedViewportId: string) => {
+export const getRenderingAndViewport = (selectedViewportId: string) => {
     // Get the current application state
     const state = store.getState();
     const { segmentations, renderingEngineId, currentToolGroupId } = state.viewer;
@@ -339,147 +340,176 @@ export const uploadSegmentation = async () => {
 export const readSegmentation = async (input: File | string) => {
     let imageId, arrayBuffer;
     const state = store.getState();
-    const { currentStudyInstanceUid } = state.viewer;
+    const { currentStudyInstanceUid, is3DActive } = state.viewer; // ✅ Get 3D flag
 
     if (typeof input === 'string') {
-        // If input is a string, assume it's a Series UID
         const seriesInstanceUID = input;
+        const client = new api.DICOMwebClient({ url: DICOM_URL, singlepart: SINGLEPART });
 
-        // Construct URL to fetch DICOM image based on seriesInstanceUID
-        const client = new api.DICOMwebClient({
-            url: DICOM_URL,
-            singlepart: SINGLEPART
-        });
-
-        // Retrieve the SOP Instance UIDs for the specified series
         const SOPInstanceUIDs = await getAndSetSeriesInstances(currentStudyInstanceUid, seriesInstanceUID);
 
-        // Fetch the instance data as an array buffer
         arrayBuffer = await client.retrieveInstance({
             studyInstanceUID: currentStudyInstanceUid,
             seriesInstanceUID: seriesInstanceUID,
             sopInstanceUID: SOPInstanceUIDs[0]
         });
     } else {
-        // If input is a File object, add it to wadouri file manager
         imageId = wadouri.fileManager.add(input);
 
-        // Load and cache the image from the file
         const image = await cornerstone.imageLoader.loadAndCacheImage(imageId);
-
-        // Retrieve instance metadata to verify the modality
         const instance = cornerstone.metaData.get('instance', imageId);
+
         if (instance.Modality !== 'SEG' && instance.Modality !== 'seg') {
-            console.error('This is not segmentation');
+            console.error('This is not a segmentation file.');
             return;
         }
 
-        // Extract the array buffer from the image data
         arrayBuffer = image.data.byteArray.buffer;
     }
 
     if (!arrayBuffer) {
-        console.error('Failed to load segmentation due to missing array buffer');
+        console.error('Failed to load segmentation: No data available.');
         return;
     }
 
-    // Load the segmentation into the viewer using the array buffer
-    await loadSegmentation(arrayBuffer);
+    // ✅ Load Segmentation Based on Viewport Type (3D vs 2D)
+    await loadSegmentation(arrayBuffer, is3DActive);
 };
 
 /**
  * Loads a segmentation into the viewer.
  *
  * @param {ArrayBuffer} arrayBuffer - The array buffer containing the segmentation data.
- * @returns {Promise<void>} A promise that resolves when the segmentation has been loaded and applied.
+ * @param {boolean} is3DActive - Whether 3D segmentation should be used.
  */
-async function loadSegmentation(arrayBuffer: ArrayBuffer) {
+async function loadSegmentation(arrayBuffer: ArrayBuffer, is3DActive: boolean) {
     const state = store.getState();
     const { selectedViewportId } = state.viewer;
 
-    // Retrieve the rendering engine and viewport using the selected viewport ID.
     const { viewport, currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
 
-    // Generate a new unique segmentation ID.
+    if (!viewport) {
+        console.error('❌ Viewport not found for segmentation.');
+        return;
+    }
+
     const newSegmentationId = 'LOAD_SEGMENTATION_ID:' + cornerstone.utilities.uuidv4();
 
-    // Generate the tool state for the segmentation from the provided array buffer.
+    // ✅ Generate segmentation tool state
     const generateToolState = await Cornerstone3D.Segmentation.generateToolState(
         viewport.getImageIds(),
         arrayBuffer,
         cornerstone.metaData
     );
 
-    // Add the segmentation to the application state and associate it with the tool group.
+    console.log('🔄 Generating Segmentation Tool State:', generateToolState);
+
+    // ✅ Add segmentation state (Labelmap for 2D, Surface for 3D)
     const derivedVolume = await addSegmentationsToState(
         newSegmentationId,
         viewport,
         currentToolGroupId,
-        generateToolState.segMetadata.data.length - 1
+        generateToolState.segMetadata.data.length - 1,
+        is3DActive
     );
 
-    // Get the scalar data of the derived volume and set it with the generated labelmap buffer.
+    console.log('✅ Derived Volume Created:', derivedVolume);
+
+    // ✅ Assign segmentation data to volume
     const derivedVolumeScalarData = derivedVolume.getScalarData();
     derivedVolumeScalarData.set(new Uint8Array(generateToolState.labelmapBufferArray[0]));
+
+    if (is3DActive) {
+        console.log('🚀 Rendering 3D Segmentation Volume...');
+        await renderSegmentationAsSurface(viewport, newSegmentationId); // ✅ Convert and render Surface
+    } else {
+        console.log('🖌️ Applying 2D Labelmap Segmentation...');
+    }
+
+    viewport.render();
 }
 
 /**
  * Adds segmentations to the application state and associates them with a tool group.
  *
  * @param {string} segmentationId - The unique identifier for the segmentation.
- * @param {cornerstone.Types.IVolumeViewport} viewport - The viewport where the segmentation is to be applied.
- * @param {string} currentToolGroupId - The ID of the current tool group to associate the segmentation with.
- * @param {number} numberOfSegments - The number of segments to add to the segmentation.
+ * @param {cornerstone.Types.IVolumeViewport} viewport - The viewport where the segmentation is applied.
+ * @param {string} currentToolGroupId - The ID of the tool group managing segmentation.
+ * @param {number} numberOfSegments - The number of segments to add.
+ * @param {boolean} is3DActive - Whether segmentation should be surface-based (3D).
  * @returns {Promise<cornerstone.Volume>} A promise that resolves to the derived segmentation volume.
  */
 async function addSegmentationsToState(
     segmentationId: string,
     viewport: cornerstone.Types.IVolumeViewport,
     currentToolGroupId: string,
-    numberOfSegments: number
+    numberOfSegments: number,
+    is3DActive: boolean
 ) {
-    // Retrieve the volume ID from the viewport.
     const viewportVolumeId = viewport.getActorUIDs()[0];
 
-    // Create a derived segmentation volume with the same resolution as the source data.
-    const derivedVolume = await cornerstone.volumeLoader.createAndCacheDerivedSegmentationVolume(
-        viewportVolumeId,
-        {
-            volumeId: segmentationId
-        }
-    );
+    // ✅ Create the segmentation volume (Surface for 3D, Labelmap for 2D)
+    let derivedVolume;
+    if (is3DActive) {
+        console.log('🚀 Creating 3D Segmentation Volume...');
+        
+        derivedVolume = await cornerstone.volumeLoader.createAndCacheDerivedSegmentationVolume(
+            viewportVolumeId,
+            { volumeId: segmentationId }
+        );
+    } else {
+        console.log('🖼️ Creating 2D Labelmap Segmentation...');
+        
+        derivedVolume = await cornerstone.volumeLoader.createAndCacheDerivedSegmentationVolume(
+            viewportVolumeId,
+            { volumeId: segmentationId }
+        );
+    }
 
-    // Add the segmentations to the application state.
-    cornerstoneTools.segmentation.addSegmentations([
-        {
-            segmentationId,
-            representation: {
-                // The type of segmentation
-                type: cornerstoneTools.Enums.SegmentationRepresentations.Labelmap,
-                // The actual segmentation data, in the case of labelmap this is a
-                // reference to the source volume of the segmentation.
-                data: {
-                    volumeId: segmentationId
+    // ✅ Add segmentation representation based on viewport type
+    if (is3DActive) {
+        console.log('🔄 Adding 3D Surface Segmentation Representation...');
+
+        await cornerstoneTools.segmentation.addSegmentations([
+            {
+                segmentationId,
+                representation: {
+                    type: cornerstoneTools.Enums.SegmentationRepresentations.Surface,
+                    data: { volumeId: segmentationId }
                 }
             }
-        }
-    ]);
+        ]);
+    } else {
+        console.log('🖌️ Adding 2D Labelmap Segmentation Representation...');
+        
+        await cornerstoneTools.segmentation.addSegmentations([
+            {
+                segmentationId,
+                representation: {
+                    type: cornerstoneTools.Enums.SegmentationRepresentations.Labelmap,
+                    data: { volumeId: segmentationId }
+                }
+            }
+        ]);
+    }
 
-    // Add the segmentation representation to the specified tool group.
+    // ✅ Register segmentation with tool group
     const [uid] = await cornerstoneTools.segmentation.addSegmentationRepresentations(currentToolGroupId, [
         {
             segmentationId,
-            type: cornerstoneTools.Enums.SegmentationRepresentations.Labelmap
+            type: is3DActive 
+                ? cornerstoneTools.Enums.SegmentationRepresentations.Surface 
+                : cornerstoneTools.Enums.SegmentationRepresentations.Labelmap
         }
     ]);
 
-    // Set the active segmentation representation for the tool group.
+    // ✅ Set the active segmentation representation
     cornerstoneTools.segmentation.activeSegmentation.setActiveSegmentationRepresentation(
         currentToolGroupId,
         uid
     );
 
-    // Update the application state with the new segmentation information.
+    // ✅ Update Redux state
     store.dispatch(
         viewerSliceActions.addSegmentation({
             id: segmentationId,
@@ -488,10 +518,8 @@ async function addSegmentationsToState(
         })
     );
 
-    // Add the specified number of segments to the segmentation.
     addSegmentToSegmentation(numberOfSegments);
 
-    // Return the derived segmentation volume.
     return derivedVolume;
 }
 

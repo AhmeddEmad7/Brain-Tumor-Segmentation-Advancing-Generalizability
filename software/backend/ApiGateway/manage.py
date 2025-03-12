@@ -3,10 +3,11 @@
 import os
 import sys
 
-
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ApiGateway.settings')
+    # Fix the autoreload issue on Windows by using the absolute path of manage.py
+    sys.argv[0] = os.path.abspath(sys.argv[0])
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -16,7 +17,6 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(sys.argv)
-
 
 if __name__ == '__main__':
     main()

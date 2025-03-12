@@ -17,7 +17,8 @@ export interface INiftiTableStudy {
     fileName: string;
     category: string;
     projectSub: string;
-    sequencey: string;
+    session: string;
+    filePath?: string; // optional, for future use (like viewer/download)
 }
 
 export interface IDicomSeriesData {

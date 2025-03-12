@@ -7,11 +7,27 @@ import requests
 import environ
 from django.views.decorators.csrf import csrf_exempt
 from requests.auth import HTTPBasicAuth
+import redis 
+import time
+import os
+import json
+import base64
+
+
+redis_host = os.getenv('REDIS_HOST', 'localhost')
+redis_port = int(os.getenv('REDIS_PORT', 6379))
+redis_db = int(os.getenv('REDIS_DB', 0))
+
+# client_redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
+# Retrieve authentication credentials
+orthanc_username = os.getenv('ORTHANC_USER')
+orthanc_password = os.getenv('ORTHANC_PASSWORD')
+
+# Define auth_cred
+auth_cred = (orthanc_username, orthanc_password) if orthanc_username and orthanc_password else None
 
 env = environ.Env()
 service_url = env('ORTHANC_URL')
-auth_cred = HTTPBasicAuth(env('ORTHANC_USER'), env('ORTHANC_PASSWORD'))
-
 @api_view(['GET'])
 def orthanc_dicomweb_proxy(request, dicom_web_path):
 
@@ -38,11 +54,13 @@ def get_all_studies(request):
     try:
         studies_ids = requests.get(service_url + '/studies', auth=auth_cred)
         studies_json = studies_ids.json()
+        
 
         # get the metadata for each study
         studies_metadata_arr = []
         first_series_metadata_arr = []
         for study in studies_json:
+            
             study_metadata = requests.get(service_url + '/studies/' + study, auth=auth_cred)
             first_series = requests.get(service_url + '/series/' + study_metadata.json()['Series'][0], auth=auth_cred)
             first_series_metadata_arr.append(first_series.json())
@@ -58,7 +76,6 @@ def get_all_studies(request):
 
 @api_view(['GET'])
 def get_study(request, study_uid):
-
     # send request to orthanc server
     try:
         study = requests.get(service_url + '/dicom-web/studies/' + study_uid + '/series', auth=auth_cred)
@@ -78,11 +95,26 @@ def get_study(request, study_uid):
 
 @api_view(['GET'])
 def get_series_image(request, study_uid, series_uid):
+    cashed_key = f'study_{study_uid}_series_{series_uid}'
+    # if client_redis.get(cashed_key):
+    #     cached_json = json.loads(client_redis.get(cashed_key))
+    #     image_content = base64.b64decode(cached_json["image"])  # Convert from Base64 back to bytes
+    #     content_type = cached_json["content_type"]  # Get the content type
+    #     return HttpResponse(image_content, content_type=content_type)
+    # print(f'time: {time.time()*1000}')
+
     try:
         image = requests.get(service_url + '/dicom-web/studies/' + study_uid + '/series/' + series_uid + '/rendered', auth=auth_cred)
+        image_base64 = base64.b64encode(image.content).decode('utf-8')  # Convert bytes to string
+        cached_json = json.dumps({"image": image_base64, "content_type": image.headers['Content-Type']})
+        # Store JSON in Redis
+        # client_redis.setex(cashed_key, 3600, cached_json)  # Expires in 1 hour
+        
+        print(f'Cashed key: {cashed_key}')
+        print(f'Cashed image: {image.content}')
     except Exception as e:
         print(e)    
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return HttpResponse(image.content, content_type=image.headers['Content-Type'])
 

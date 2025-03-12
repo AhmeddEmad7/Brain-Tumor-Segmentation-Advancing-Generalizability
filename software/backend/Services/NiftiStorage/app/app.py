@@ -31,7 +31,7 @@ async def read_root():
     """
     return {
         "Welcome to": "Nifti Storage Service",
-        "Made by": "Ibrahim Mohamed",
+        "Made by": "Hazem ",
         "At": "Systems and Biomedical Engineering Department, Cairo University",
         "For": "Graduation Project Thesis",
     }

@@ -1,15 +1,65 @@
 import os
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from app.utils import query_helpers as utils
 from pathlib import Path
 from app.core.config import settings
 from app.utils import BDISModalityType
-
+from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.api.v1.nifti_crud import get_all_nifti_files
+from app.models.nifti_model import NiftiModel
 # User Route Entry Point
 query_router = APIRouter()
 UPLOAD_DIR = Path(settings.UPLOADS_DIR)
 
-
+@query_router.get("/db/files")
+async def get_all_files(db: Session = Depends(get_db)):
+    """
+    Return all file records with subject, session, modality, file name, and file path.
+    """
+    nifti_files = get_all_nifti_files(db)
+    if not nifti_files:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No files found in the database")
+    
+    files_data = [
+        {
+            "subject": file.subject,
+            "session": file.session,
+            "modality": file.modality,
+            "file_name": file.file_name,
+            "file_path": file.file_path
+        }
+        for file in nifti_files
+    ]
+    return {"files": files_data}
+@query_router.get("/db/subject/{subject_id}/session/{session_id}/modality/{modality_type}")
+async def get_specific_file_paths(
+    subject_id: str, 
+    session_id: str, 
+    modality_type: BDISModalityType, 
+    db: Session = Depends(get_db)
+):
+    """
+    Return all file paths for a specific subject, session, and modality.
+    """
+    files = db.query(NiftiModel).filter(
+        NiftiModel.subject == subject_id,
+        NiftiModel.session == session_id,
+        NiftiModel.modality == modality_type
+    ).all()
+    if not files:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No files found for the given subject, session, and modality")
+    files_data = [
+        {
+            "file_name": file.file_name,
+            "file_path": file.file_path,
+            "subject" : file.subject,
+            "session" : file.session,
+            "modality" : file.modality
+        }
+        for file in files
+    ]
+    return {"files": files_data}
 @query_router.get("/")
 async def get_all_files():
     # Get all the files in the upload directory

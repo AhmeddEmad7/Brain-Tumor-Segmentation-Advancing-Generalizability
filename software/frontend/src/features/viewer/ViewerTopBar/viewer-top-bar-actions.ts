@@ -5,7 +5,7 @@ import {
     ANNOTATION_TOOLS,
     SEGMENTATION_TOOLS
 } from '@/features/viewer/CornerstoneToolManager/';
-import { OrientationAxis } from '@cornerstonejs/core/src/enums';
+// import { OrientationAxis } from '@cornerstonejs/core/src/enums';
 import { Types } from '@cornerstonejs/core';
 import { IStore } from '@/models';
 import { getRenderingEngine, Enums, setVolumesForViewports, CONSTANTS } from '@cornerstonejs/core';
@@ -82,7 +82,7 @@ export const toggleVolumeRendering = async (forceTo2D = false) => {
             type: newViewportType,
             element: viewport.element as HTMLDivElement,
             defaultOptions: {
-                orientation: Enums.OrientationAxis.AXIAL, // Reset to default AXIAL for 2D
+                orientation: "axial", // Reset to default AXIAL for 2D
                 background: CONSTANTS.BACKGROUND_COLORS.slicer3D as [number, number, number]
             }
         }
@@ -152,9 +152,9 @@ export const toggleMPRMode = async (
     }
 
     const orientations: OrientationAxis[] = [
-        OrientationAxis.AXIAL,
-        OrientationAxis.SAGITTAL,
-        OrientationAxis.CORONAL
+        "axial",
+        "coronal",
+        "sagittal"
     ];
 
     const volumeId = `cornerstoneStreamingImageVolume:${selectedSeriesInstanceUid}`;

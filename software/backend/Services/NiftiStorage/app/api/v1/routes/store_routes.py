@@ -1,66 +1,153 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, HTTPException, status, Depends, Form
 from app.utils import BDISModalityType
 from app.core.config import settings
 from pathlib import Path
 from app.utils import store_helpers as utils
+from app.core.database import get_db
+from app.schemas.nifti_schema import NiftiFileCreate
+from app.api.v1.nifti_crud import create_nifti_file
+from decouple import config
+
+from sqlalchemy.orm import Session
+
+import csv 
+import json 
 import os
 
 store_router = APIRouter()
+PROJECT_DIR = Path(__file__).resolve().parent
 
-UPLOAD_DIR = Path(settings.UPLOADS_DIR)
+# Get the folder name from the environment variable
+uploads_folder_name = config('UPLOADS_FOLDER')  # e.g., "storage"
 
+# Build the full uploads directory path
+UPLOAD_DIR = PROJECT_DIR / uploads_folder_name
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+# Define the participants.tsv file (for subject-level metadata)
+PARTICIPANTS_TSV = UPLOAD_DIR / "participants.tsv"
+
+def update_participants_tsv(subject: str, age: str = None, sex: str = None):
+    """
+    Update or create a participants.tsv file.
+    If the subject is new, add a row with the subject ID and provided metadata.
+    """
+    headers = ["participant_id", "age", "sex"]
+    file_exists = PARTICIPANTS_TSV.exists()
+    rows = []
+    if file_exists:
+        with open(PARTICIPANTS_TSV, "r", newline="") as f:
+            reader = csv.DictReader(f, delimiter="\t")
+            for row in reader:
+                rows.append(row)
+    # Check if the subject is already present
+    if not any(row["participant_id"] == subject for row in rows):
+        new_row = {"participant_id": subject, "age": age if age else "", "sex": sex if sex else ""}
+        with open(PARTICIPANTS_TSV, "a", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=headers, delimiter="\t")
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(new_row)
+
+def decode_bytes(obj):
+    """
+    Recursively decode bytes objects in a dict or list to UTF-8 strings.
+    """
+    if isinstance(obj, dict):
+        return {k: decode_bytes(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [decode_bytes(item) for item in obj]
+    elif isinstance(obj, bytes):
+        return obj.decode('utf-8')
+    else:
+        return obj
 
 @store_router.post("/")
-async def upload_nifti_file(file: UploadFile = File(...), file_type: BDISModalityType = 'anat'):
-    # Check if the file is empty
+async def upload_nifti_file(
+    file: UploadFile = File(...),
+    file_type: BDISModalityType = 'anat',
+    # Numeric values for subject and session from the frontend
+    subject_num: int = Form(...),
+    session_num: int = Form(...),
+    # Optional subject-level metadata fields
+    subject_age: str = Form(None),
+    subject_sex: str = Form(None),
+    db: Session = Depends(get_db)
+):
+    # Validate the file
     if not file.filename:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No file was uploaded")
-
-    # Get the file name from the upload
-    file_name = UPLOAD_DIR / file.filename
-
-    if file_name == '':
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No file selected")
-
-    # Check if the file is a NIfTI file
     if not utils.check_is_nifti(file):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Invalid file type, we only accept NIfTI files")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file type, we only accept NIfTI files"
+        )
 
-    # Remove the NIfTI file extension & prepare the file
-    file_id = utils.remove_nifti_file_extension(file.filename)
-    chunks = file_id.split('_')
+    # Convert numeric inputs to BIDS format, e.g., 1 -> "sub-01" and 1 -> "ses-01"
+    subject = f"sub-{subject_num:02d}"
+    session = f"ses-{session_num:02d}"
 
-    # Get the path of the case folder
-    if file_type not in BDISModalityType:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid modality type")
+    # Update the participants.tsv file if this subject is new
+    update_participants_tsv(subject, subject_age, subject_sex)
 
-    case_path = utils.get_path(chunks[0], chunks[1], file_type)
+    # Validate modality
+    if file_type not in [member.value for member in BDISModalityType]:
+        raise ValueError("Invalid modality type")
 
-    # Create parent directory if it doesn't exist
+    # Determine the scan label based on modality; for example, "anat" can default to "T1w"
+    scan_label = "T1w" if file_type == "anat" else file_type
+
+    # Determine the new file extension
+    if file.filename.endswith('.nii.gz'):
+        ext = '.nii.gz'
+    elif file.filename.endswith('.nii'):
+        ext = '.nii.gz'
+    else:
+        ext = '.nii.gz'  # default extension if not provided
+
+    # Construct the new file name in BIDS format
+    new_file_name = f"{subject}_{session}_{scan_label}{ext}"
+    
+    # Determine the storage path based on subject, session, and modality
+    # Expected folder structure: UPLOAD_DIR/sub-XX/ses-XX/<modality>
+    case_path = utils.get_path(subject, session, file_type)
     if not os.path.exists(case_path):
         os.makedirs(case_path)
 
-    # Edit the file name
-    ready_file_name = utils.edit_file_name(file.filename, chunks[1])
-    file_path = os.path.join(case_path, ready_file_name)
-
-    # Check if file already exists
+    # Build the full file path using the new file name
+    file_path = os.path.join(case_path, new_file_name)
     if os.path.exists(file_path):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File already exists")
 
-        # if the file is .nii compress it to .nii.gz
-    if file.filename.endswith('.nii'):
-        file_path = file_path + '.gz'
-
-    # Save the file to the case folder
+    # Save the NIfTI file to disk
     with open(file_path, "wb") as buffer:
         buffer.write(file.file.read())
+    file_size = os.path.getsize(file_path)
+    
+    # Extract scan-specific metadata from the saved NIfTI file
+    scan_metadata = utils.extract_nifti_metadata(file_path)
 
+    # Save the extracted metadata as a sidecar JSON file, decoding bytes as needed
+    sidecar_path = os.path.splitext(file_path)[0] + ".json"
+    decoded_metadata = decode_bytes(scan_metadata)
+    with open(sidecar_path, "w") as f:
+        json.dump(decoded_metadata, f, indent=4)
+    
+    # Build the database record including the scan metadata and a reference to the sidecar file
+    nifti_data = NiftiFileCreate(
+        file_name=new_file_name,
+        file_path=file_path,
+        file_size=file_size,
+        modality=file_type,
+        subject=subject,
+        session=session,
+    )
+    record = create_nifti_file(db=db, nifti=nifti_data)
+    
     return {
         "status": "success",
         "message": "File uploaded successfully",
-        "parent_id": chunks[0],
-        "sub_id": chunks[1],
-        "sequence_id": chunks[2],
+        "subject": subject,
+        "session": session,
+        "record_id": record.id,
     }

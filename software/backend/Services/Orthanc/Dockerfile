@@ -21,6 +21,8 @@ RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-webv
 RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-postgresql/5.1/libOrthancPostgreSQLIndex.so --output-document /usr/share/orthanc/plugins/libOrthancPostgreSQLIndex.so
 RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-postgresql/5.1/libOrthancPostgreSQLStorage.so --output-document /usr/share/orthanc/plugins/libOrthancPostgreSQLStorage.so
 
+# Copy your Orthanc configuration file into the container
+COPY ./config/orthanc.json /etc/orthanc/orthanc.json
 
 # Expose the default Orthanc port (4242) if needed
 EXPOSE 4242

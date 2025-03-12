@@ -17,7 +17,7 @@ import pydicom
 from pydicom.dataset import Dataset, FileMetaDataset
 from pydicom.uid import ExplicitVRLittleEndian, generate_uid, SegmentationStorage
 from src.colors import GENERIC_ANATOMY_COLORS
-from .Teacher_Inference.Inference import inference
+from Teacher_Inference.Inference import inference
 from src.colored_dicom import convert_array_to_dicom_seg
 import redis
 

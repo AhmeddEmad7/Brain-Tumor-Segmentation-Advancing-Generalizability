@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'revproxy',
 ]
+REVPROXY_UPSTREAM = env('Nifi_URL', default='http://127.0.0.1:7070')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

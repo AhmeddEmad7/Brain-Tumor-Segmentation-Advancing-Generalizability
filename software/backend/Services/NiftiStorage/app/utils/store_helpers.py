@@ -1,6 +1,6 @@
 import os
-
-
+import nibabel as nib
+import numpy as np
 def check_is_nifti(file):
     """
     Check if the uploaded file is a NIfTI file
@@ -53,3 +53,22 @@ def edit_file_name(file_name, sub):
     return f'sub-{new_file_name}'
 
 
+def extract_nifti_metadata(file_path:str)-> dict:   
+    """
+    Loads a NIfTI file and extracts header metadata.
+    Converts numpy arrays to lists so that all values are JSON serializable.
+    """
+    try:
+        nifti = nib.load(file_path)
+        header = nifti.header
+        metadata = {}
+        for key in header :
+            value = header[key]
+            if isinstance(value, np.ndarray):
+              value = value.tolist()
+            elif hasattr(value,'item'):
+                value = value.item()
+            metadata[key]= value
+        return metadata
+    except Exception as e:
+        return {"error": str(e)}

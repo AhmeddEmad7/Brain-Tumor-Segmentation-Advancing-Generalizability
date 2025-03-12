@@ -3,7 +3,6 @@ from pydantic import BaseModel, Field
 
 T = TypeVar("T")
 
-
 class ReportSchema(BaseModel):
     studyId: str
     content: str

@@ -7,13 +7,13 @@ const tableColumnHeadings: INiftiTableColumnHead[] = [
         searchable: false
     },
     {
-        displayName: 'File Name',
-        key: 'fileName',
-        searchable: true
+        displayName: 'View',
+        key: 'viewer',
+        searchable: false
     },
     {
-        displayName: 'Category',
-        key: 'category',
+        displayName: 'File Name',
+        key: 'fileName',
         searchable: true
     },
     {
@@ -22,7 +22,12 @@ const tableColumnHeadings: INiftiTableColumnHead[] = [
         searchable: true
     },
     {
-        displayName: 'Sequence',
+        displayName: 'Category',
+        key: 'category',
+        searchable: true
+    },
+    {
+        displayName: 'Session',
         key: 'sequence',
         searchable: true
     }

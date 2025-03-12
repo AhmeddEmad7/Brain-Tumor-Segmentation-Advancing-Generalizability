@@ -82,6 +82,8 @@ def segmentation_callback(ch, method, properties, body):
     print("Loaded Metadata:", metadata)
     metadata = json.loads(metadata)
     print("Start making the dicom seg")
+    
+    
     output_file_segmentation = nifti_to_dicom_seg(
         os.path.join(studies_dir, study_uid, 't1'),
         segmentation_mask_nifti_path,

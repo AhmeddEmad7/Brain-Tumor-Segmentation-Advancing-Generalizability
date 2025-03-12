@@ -100,12 +100,12 @@ const StudiesDataTable = ({ data }: { data: INiftiTableStudy[] }) => {
                                         {row.fileName}
                                     </StyledTableCell>
 
-                                    <StyledTableCell component="th" scope="row" sx={{ width: '10%' }}>
-                                        {row.category}
-                                    </StyledTableCell>
 
                                     <StyledTableCell component="th" align="left" sx={{ width: '20%' }}>
                                         {row.projectSub}
+                                    </StyledTableCell>
+                                    <StyledTableCell component="th" scope="row" sx={{ width: '10%' }}>
+                                        {row.category}
                                     </StyledTableCell>
 
                                     <StyledTableCell component="th" align="left" sx={{ width: '10%' }}>

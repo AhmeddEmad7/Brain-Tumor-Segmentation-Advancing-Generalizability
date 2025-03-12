@@ -1,4 +1,5 @@
 import * as cornerstone from '@cornerstonejs/core';
+import makeVolumeMetada from '@cornerstonejs/core/dist/esm/utilities/makeVolumeMetadata';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
@@ -58,11 +59,16 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
     };
     useEffect(() => {
         if (selectedSeriesInstanceUid && is3DActive) {
-            console.log('🔄 Switching to 2D due to series change...');
-            toggleVolumeRendering(true); // **Force switching to 2D**
+            getSeriesModality(currentStudyInstanceUid, selectedSeriesInstanceUid).then((modality) => {
+                if (modality !== 'SEG') {
+                    console.log('🔄 Switching to 2D due to series change...');
+                    toggleVolumeRendering(true); // **Force switching to 2D**
+                } else {
+                    console.log('📦 Keeping 3D Mode for Segmentation');
+                }
+            });
         }
     }, [selectedSeriesInstanceUid]);
-
     // 🔹 Ensure correct tools are applied when mode changes
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
@@ -116,65 +122,120 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
 
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-
+    
         const updateViewport = async () => {
             try {
-                if (selectedViewportId === id && selectedSeriesInstanceUid && renderingEngine) {
-                    const viewport: Types.IVolumeViewport = renderingEngine!.getViewport(
-                        selectedViewportId
-                    ) as Types.IVolumeViewport;
-
-                    if (
-                        (await getSeriesModality(currentStudyInstanceUid, selectedSeriesInstanceUid)) ===
-                        'SEG'
-                    ) {
-                        readSegmentation(selectedSeriesInstanceUid);
-                        return;
-                    }
-
-                    const volumeId = `cornerstoneStreamingImageVolume:${selectedSeriesInstanceUid}`;
-                    console.log('volumeId inside update', volumeId);
-                    const imageIds = await createImageIdsAndCacheMetaData({
-                        StudyInstanceUID: currentStudyInstanceUid,
-                        SeriesInstanceUID: selectedSeriesInstanceUid,
-                        wadoRsRoot: wadoRsRoot
-                    });
-
-                    const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, {
-                        imageIds
-                    });
-
-                    await volume.load();
-
-                    await viewport.setVolumes([{ volumeId }], true);
-
-                    const direction = viewport.getImageData()?.imageData.getDirection() as number[];
-                    const orientation = DicomUtil.detectImageOrientation(
-                        direction ? direction.slice(0, 6) : [1, 0, 0, 0, 1, 0]
-                    );
-                    if (is3DActive) {
-                        // Set the orientation of the viewport
-                        // Render the viewport
-                        viewport.resetCamera();
-                    } else {
-                        viewport.setOrientation(orientation);
-                    }
-
-                    viewport.render();
-                    // Set the current viewport and imageIds
-                    setThisViewport(viewport);
-                    setThisViewportImageIds(viewport.getImageIds());
-                    dispatch(viewerSliceActions.removeClickedSeries());
-                    dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
+                if (!selectedSeriesInstanceUid || !selectedViewportId || !renderingEngine) {
+                    console.warn('⚠️ Missing required values to update viewport.');
+                    return;
                 }
+    
+                const viewport = renderingEngine.getViewport(selectedViewportId) as Types.IVolumeViewport;
+    
+                if (!viewport) {
+                    console.error(`❌ Viewport ${selectedViewportId} not found.`);
+                    return;
+                }
+    
+                console.log('🔄 Updating viewport for series:', selectedSeriesInstanceUid);
+    
+                // ✅ **Check if the series is a segmentation (`SEG`)**
+                const modality = await getSeriesModality(currentStudyInstanceUid, selectedSeriesInstanceUid);
+                if (modality === 'SEG') {
+                    console.log('🧩 Detected segmentation series, reading segmentation...');
+                    await readSegmentation(selectedSeriesInstanceUid);
+                    return;
+                }
+    
+                // ✅ **Generate Volume ID**
+                const volumeId = `cornerstoneStreamingImageVolume:${selectedSeriesInstanceUid}`;
+                console.log('🆔 Volume ID:', volumeId);
+    
+                // ✅ **Retrieve Image IDs**
+                const imageIds = await createImageIdsAndCacheMetaData({
+                    StudyInstanceUID: currentStudyInstanceUid,
+                    SeriesInstanceUID: selectedSeriesInstanceUid,
+                    wadoRsRoot: wadoRsRoot
+                });
+    
+                if (!imageIds || imageIds.length === 0) {
+                    console.error('❌ No image IDs found for this series.');
+                    return;
+                }
+    
+                console.log(`📸 Found ${imageIds.length} image IDs.`);
+    
+                // ✅ **Ensure metadata exists before proceeding**
+                const volumeMetada = cornerstone.utilities.makeVolumeMetadata(imageIds);
+                console.log('📦 Volume metadata:', volumeMetada.PixelRepresentation);
+                for (const imageId of imageIds) {
+                    // Try to get the metadata; if it doesn't exist, create a default object.
+                    let metadata = cornerstone.metaData.get('imagePixelModule', imageId);
+                    console.log('📦 Metadata pixel:', metadata.pixelRepresentation);
+                    if (!metadata) {
+                      console.warn(`Metadata missing for imageId ${imageId}. Using default metadata.`);
+                      metadata = {
+                        pixelRepresentation: 1, // default value
+                        BitsAllocated: 16,        // provide a fallback or an appropriate value
+                        BitsStored: 16,
+                        HighBit: 15,
+                        PhotometricInterpretation: 'MONOCHROME2',
+                        SamplesPerPixel: 1,
+                      };
+                    } else {
+                      // Map the PascalCase keys to the lowercase keys expected by the volume loader
+                      // Here, you can override pixelRepresentation if needed.
+                      metadata.pixelRepresentation = 1; // or any value you choose
+                      metadata.bitsAllocated = metadata.BitsAllocated;
+                      metadata.bitsStored = metadata.BitsStored;
+                      metadata.highBit = metadata.HighBit;
+                      metadata.photometricInterpretation = metadata.PhotometricInterpretation;
+                      metadata.samplesPerPixel = metadata.SamplesPerPixel;
+                    }
+                  }
+                  
+                // ✅ **Create & Load Volume**
+                console.log('🔄 Creating & caching volume...');
+                const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageIds });
+                await volume.load();
+    
+                // ✅ **Set Volume in Viewport**
+                console.log('📡 Setting volume in viewport...');
+                await viewport.setVolumes([{ volumeId }], true);
+            
+                // ✅ **Set Orientation**
+                const direction = viewport.getImageData()?.imageData.getDirection() as number[];
+                const orientation = DicomUtil.detectImageOrientation(
+                    direction ? direction.slice(0, 6) : [1, 0, 0, 0, 1, 0]
+                );
+    
+                if (is3DActive) {
+                    console.log('🖥️ Setting 3D mode...');
+                    viewport.resetCamera();
+                } else {
+                    console.log('🖼️ Setting 2D orientation:', orientation);
+                    viewport.setOrientation(orientation);
+                }
+    
+                // ✅ **Render Viewport**
+                viewport.render();
+    
+                // ✅ **Update State**
+                setThisViewport(viewport);
+                setThisViewportImageIds(viewport.getImageIds());
+    
+                dispatch(viewerSliceActions.removeClickedSeries());
+                dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
+    
+                console.log('✅ Viewport updated successfully!');
             } catch (error) {
-                console.error('Error setting viewport', error);
+                console.error('❌ Error setting viewport:', error);
             }
         };
-
+    
         updateViewport();
     }, [selectedSeriesInstanceUid, selectedViewportId]);
-
+    
     useEffect(() => {
         if (thisViewport) {
             setCurrentImageId(thisViewportImageIds[thisViewport.getCurrentImageIdIndex()]);

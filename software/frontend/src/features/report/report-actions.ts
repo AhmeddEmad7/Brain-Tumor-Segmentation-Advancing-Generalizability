@@ -8,7 +8,9 @@ import { useNavigate } from 'react-router-dom';
 /**
  * The URL for the reporting API.
  */
-const REPORTING_API_URL = import.meta.env.VITE_REPORTING_API_URL;
+// const REPORTING_API_URL = import.meta.env.VITE_REPORTING_API_URL;
+ const REPORTING_API_URL = "http://localhost:9000";
+
 const templateReportContent = `[
     {"id":"1","children":[{"text":"{Doctor's info}\\n"}],"type":"p"},
     {"children":[{"children":[{"children":[{"children":[{"text":"Patient's name: {patientName}"}],"type":"p","id":"6tjqr"}],"type":"td","id":"4nkmv"},
@@ -24,17 +26,27 @@ const templateReportContent = `[
  * @param {string} studyInstanceUid - The study instance UID.
  * @param {string} reportContent - The report content.
  */
-export const createReportThunk = (studyInstanceUid: string, navigate: any) => {
+export const createReportThunk = (studyInstanceUid: string, navigate: any,snapshots:any) => {
     return async (dispatch: Dispatch) => {
+        const templateContent  = JSON.parse(templateReportContent)
+
+        const snapshotsElements ={
+            id: "snapshots",       // unique key or id
+            type: "images",        // custom type to signal image content
+            images: snapshots.map((s:any) => s.image)
+        }
+        const finalContent = [snapshotsElements,...templateContent]
+        const finalContentString = JSON.stringify(finalContent);
+
         const res = await AxiosUtil.sendRequest({
             method: 'POST',
-            url: `${REPORTING_API_URL}/report`,
+            url: `${REPORTING_API_URL}/report/`,
             data: {
                 studyId: studyInstanceUid,
-                content: templateReportContent
+                content: finalContentString
             }
         });
-
+            console.log("res report created", res);
         if (!res) {
             return;
         }
@@ -46,8 +58,8 @@ export const createReportThunk = (studyInstanceUid: string, navigate: any) => {
                 content: 'Report has been created successfully!'
             })
         );
-
-        navigate(`/report/${res.result.id}/study/${studyInstanceUid}`);
+        console.log(`/report/${res.result.id}/study/${studyInstanceUid}`)
+        navigate(`/report/${res.data.result.id}/study/${studyInstanceUid}`);
     };
 };
 

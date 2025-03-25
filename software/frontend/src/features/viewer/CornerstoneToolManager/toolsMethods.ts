@@ -9,7 +9,6 @@ export const setToolActive = (toolName: string, mouseButton: number, toolGroupId
     const currentToolGroupId = toolGroupId || currentAnnotationToolGroupId;
     const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroup(currentToolGroupId);
     const { selectedCornerstoneTools } = state.viewer;
-
     try {
         if (!toolGroup) {
             console.error('tool group is not initialized');
@@ -18,7 +17,6 @@ export const setToolActive = (toolName: string, mouseButton: number, toolGroupId
 
         // Set the tool as passive if it is already active
         toolGroup.setToolPassive(toolName, { removeAllBindings: true });
-
         // get the index of the existing tool with the same mouse binding and set the tool indexed to it as passive
         const existingToolIndex = selectedCornerstoneTools.findIndex(
             (tool) => tool.mouseBinding === mouseButton

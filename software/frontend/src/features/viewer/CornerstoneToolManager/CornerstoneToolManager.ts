@@ -18,7 +18,7 @@ class CornerstoneToolManager {
     toolGroupId: string;
     toolGroup: cornerstoneTools.Types.IToolGroup | undefined;
     viewportsType?: any;
-
+    
     // Constructor for the CornerstoneToolManager class that initializes the tool group
     // and adds all the annotation and segmentation tools to it based on the provided tool group ID
     constructor(toolGroupId: string, viewportsType?: string) {
@@ -58,7 +58,30 @@ class CornerstoneToolManager {
                 }
             );
         });
-
+        const defaultToolStyles: any = {
+            global: {
+                color: 'rgb(255, 255, 0)',
+                colorHighlighted: 'rgb(0, 255, 0)',
+                colorSelected: 'rgb(0, 220, 0)',
+                colorLocked: 'rgb(255, 255, 0)',
+                lineWidth: '1',
+                lineDash: '',
+                shadow: true,
+                textBoxVisibility: true,
+                textBoxFontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif',
+                textBoxFontSize: '20px',
+                textBoxColor: 'rgb(255, 255, 0)',
+                textBoxColorHighlighted: 'rgb(0, 255, 0)',
+                textBoxColorSelected: 'rgb(0, 255, 0)',
+                textBoxColorLocked: 'rgb(255, 255, 0)',
+                textBoxBackground: '',
+                textBoxLinkLineWidth: '1',
+                textBoxLinkLineDash: '2,3',
+                textBoxShadow: true,
+              },
+            };
+            
+        cornerstoneTools.annotation.config.style.setDefaultToolStyles(defaultToolStyles);
         this.toolGroup.setToolEnabled(cornerstoneTools.SegmentationDisplayTool.toolName);
 
         switch (this.viewportsType) {

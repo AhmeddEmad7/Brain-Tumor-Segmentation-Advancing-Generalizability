@@ -43,7 +43,7 @@ const viewportsSlice = createSlice({
         ...viewerAnnotationReducer,
         ...viewerSegmentationReducer,
         setCrosshairActive: (state, action) => {
-            state.isCrosshairActive = action.payload; // ✅ Define setCrosshairActive
+            state.isCrosshairActive = action.payload; //  Define setCrosshairActive
         }
     }
 });

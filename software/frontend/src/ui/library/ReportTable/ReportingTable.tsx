@@ -31,7 +31,7 @@ const ReportingTable = ({
             <div className="p-2">
                 <List
                     dataSource={data}
-                    renderItem={(item) => (
+                    renderItem={(item,index) => (
                         <List.Item>
                             <List.Item.Meta
                                 title={
@@ -39,7 +39,7 @@ const ReportingTable = ({
                                         className="text-AAPrimary font-bold hover:text-gray-200 hover:cursor-pointer"
                                         onClick={() => navigate(`/report/${item.id}/study/${item.studyId}`)}
                                     >
-                                        Report {item.id}
+                                        Report {index + 1}
                                     </p>
                                 }
                                 description={

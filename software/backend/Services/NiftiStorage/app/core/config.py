@@ -1,4 +1,6 @@
-from pydantic import BaseSettings, AnyHttpUrl
+from pydantic_settings import BaseSettings
+from pydantic import AnyHttpUrl
+
 from decouple import config
 import os 
 from dotenv import load_dotenv
@@ -9,7 +11,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     UPLOADS_DIR: str = config('UPLOADS_FOLDER')
     PROJECT_NAME: str = 'Nifti Storage Service'
-    BACKEND_CORS_ORIGINS: str = '*'
+    # BACKEND_CORS_ORIGINS: str = '*'
     Database_URls: str = DATABASE_URL
     
 

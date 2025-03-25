@@ -14,6 +14,7 @@ export interface IDicomTableStudy {
 }
 
 export interface INiftiTableStudy {
+    id: string; 
     fileName: string;
     category: string;
     projectSub: string;

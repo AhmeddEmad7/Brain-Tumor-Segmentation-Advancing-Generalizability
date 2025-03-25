@@ -60,6 +60,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB in bytes
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB in bytes
 
 ROOT_URLCONF = 'ApiGateway.urls'
 
@@ -137,5 +139,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = ["*"]
+CORS_ALLOW_HEADERS = ["*"]

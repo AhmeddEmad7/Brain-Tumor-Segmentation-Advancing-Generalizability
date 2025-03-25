@@ -1,6 +1,8 @@
 from django.http import HttpResponse
-from rest_framework.response import Response
+from rest_framework.response import Response 
 from rest_framework import status
+from rest_framework.exceptions import APIException
+
 from rest_framework.decorators import api_view
 from .processing import extract_studies_metadata, extract_study_metadata, check_is_dicom
 import requests
@@ -28,6 +30,22 @@ auth_cred = (orthanc_username, orthanc_password) if orthanc_username and orthanc
 
 env = environ.Env()
 service_url = env('ORTHANC_URL')
+
+
+@api_view(['GET'])
+async def get_test_file():
+    # Hard-coded file path for testing; adjust this path as needed.
+    file_path = "/path/to/your/testfile.nii"
+    
+    try:
+        with open(file_path, "rb") as file:
+            file_content = file.read()
+    except Exception as e:
+        raise APIException(detail=f"Error reading file: {e}")
+
+    encoded_data = base64.b64encode(file_content).decode("utf-8")
+    return Response(content=encoded_data, media_type="application/octet-stream")
+
 @api_view(['GET'])
 def orthanc_dicomweb_proxy(request, dicom_web_path):
 
@@ -110,8 +128,8 @@ def get_series_image(request, study_uid, series_uid):
         # Store JSON in Redis
         # client_redis.setex(cashed_key, 3600, cached_json)  # Expires in 1 hour
         
-        print(f'Cashed key: {cashed_key}')
-        print(f'Cashed image: {image.content}')
+        # print(f'Cashed key: {cashed_key}')
+        # print(f'Cashed image: {image.content}')
     except Exception as e:
         print(e)    
         return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

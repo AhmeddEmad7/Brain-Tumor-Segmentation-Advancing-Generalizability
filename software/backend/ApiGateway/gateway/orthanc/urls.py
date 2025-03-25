@@ -9,4 +9,5 @@ urlpatterns = [
     path('upload', views.upload_instances, name='upload_instances'),
     path('delete/studies/<str:study_orthanc_id>', views.delete_study, name='delete_study'),
     path('delete/series/<str:series_uid>', views.delete_series, name='delete_series'),
+    # path('test/nifti',views.get_test_file)
 ]

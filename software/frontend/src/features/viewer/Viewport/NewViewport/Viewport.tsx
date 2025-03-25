@@ -1,5 +1,5 @@
 import * as cornerstone from '@cornerstonejs/core';
-import makeVolumeMetada from '@cornerstonejs/core/dist/esm/utilities/makeVolumeMetadata';
+// import hazem from '@cornerstonejs/nifti-volume-loader';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
@@ -15,11 +15,19 @@ import { readSegmentation } from '../../CornerstoneToolManager/segmentationMetho
 import { getSeriesModality } from '@features/viewer/viewer-viewport-reducers';
 import { toggleMPRMode, toggleVolumeRendering } from '@features/viewer/ViewerTopBar/viewer-top-bar-actions'; // Import your toggleMPRMode function
 import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/CornerstoneToolManager';
-import * as cornerstoneTools from '@cornerstonejs/tools';
+// import * as cornerstoneTools from '@cornerstonejs/tools/dist/types/';
+// import {
+//     cornerstoneNiftiImageLoader,
+//     createNiftiImageIdsAndCacheMetadata,
+//   } from '@cornerstonejs/nifti-volume-loader';
+import { cornerstoneNiftiImageVolumeLoader } from '@cornerstonejs/nifti-volume-loader';
+
+import { Volume } from 'lucide-react';
+import * as cornerstone3 from '@cornerstonejs/core/dist/'
 // const { isCrosshairActive } = useSelector((store: IStore) => store.viewer);
 
 const wadoRsRoot = import.meta.env.VITE_ORTRHANC_PROXY_URL;
-
+const NIFTI_DOMAIN = import.meta.env.VITE_NIFTI_DOMAIN
 type TViewportProps = {
     onClick?: (idx: string) => void;
     selectedViewportId?: number | string | null;
@@ -34,7 +42,7 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
     const [thisViewport, setThisViewport] = useState<Types.IVolumeViewport | null>(null);
     const [thisViewportImageIds, setThisViewportImageIds] = useState<string[]>([]);
     const [hasCinePlayer, setHasCinePlayer] = useState<boolean>(false);
-
+    // const mina = hazem.cornerstoneNiftiImageVolumeLoader
     const viewportRef = useRef<HTMLDivElement>(null);
     const cineRef = useRef<HTMLDivElement>(null);
     const {
@@ -120,6 +128,66 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         }
     }, [isMPRActive, isCrosshairActive]);
 
+
+    useEffect(() => {
+        const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+
+        const updateViewportNifti = async () => {
+            try {
+                if (!selectedViewportId || !renderingEngine) {
+                    console.warn('⚠ Missing required values to update viewport.');
+                    return;
+                }
+
+                const viewport = renderingEngine.getViewport(selectedViewportId) as Types.IVolumeViewport;
+                
+                console.log('currentStudyInstanceUid',currentStudyInstanceUid)
+                
+                if (!viewport) {
+                    console.error(`❌ Viewport ${selectedViewportId} not found.`);
+                    return;
+                }
+                if(currentStudyInstanceUid.endsWith(".nii")||currentStudyInstanceUid.endsWith(".gz")){
+                    console.log("File name ends with .nii or .gz");
+                }
+                else{
+                    console.log("File NOt name ends with .nii or .gz");
+                    return;
+                }
+                
+                
+                const niftiURL = `${NIFTI_DOMAIN}/${currentStudyInstanceUid}`;
+                // const niftiURL = 'nifti/00000057_brain_flair.nii';
+                console.log('niftiURL',niftiURL)
+                const volumeId = 'nifti:' + niftiURL;
+                console.log('🆔 Volume ID:', volumeId);
+
+                cornerstone.volumeLoader.registerVolumeLoader('nifti', cornerstoneNiftiImageVolumeLoader);
+
+                const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId);
+
+                cornerstone.setVolumesForViewports(renderingEngine, [{ volumeId }], [selectedViewportId]);
+
+                console.log('📡 Setting volume in viewport...');
+                await viewport.setVolumes([{ volumeId }], true);
+                viewport.resetCamera();
+                viewport.render();
+
+                viewport.render();
+
+                setThisViewport(viewport);
+                setThisViewportImageIds(viewport.getImageIds());
+                dispatch(viewerSliceActions.removeClickedSeries());
+
+                console.log('✅ Viewport updated successfully!');
+            } catch (error) {
+                console.error('❌ Error setting viewport:', error);
+            }
+        };
+        // add if Nifti here
+        updateViewportNifti();
+    }, [selectedViewportId]);
+
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
     
@@ -129,7 +197,7 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     console.warn('⚠️ Missing required values to update viewport.');
                     return;
                 }
-    
+                
                 const viewport = renderingEngine.getViewport(selectedViewportId) as Types.IVolumeViewport;
     
                 if (!viewport) {
@@ -138,13 +206,20 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                 }
     
                 console.log('🔄 Updating viewport for series:', selectedSeriesInstanceUid);
-    
+                
                 // ✅ **Check if the series is a segmentation (`SEG`)**
                 const modality = await getSeriesModality(currentStudyInstanceUid, selectedSeriesInstanceUid);
                 if (modality === 'SEG') {
                     console.log('🧩 Detected segmentation series, reading segmentation...');
                     await readSegmentation(selectedSeriesInstanceUid);
                     return;
+                }
+
+                if(currentStudyInstanceUid.endsWith(".nii")||currentStudyInstanceUid.endsWith(".gz")){
+                    console.log("File name ends with .nii or .gz");
+                }
+                else{
+                    console.log("File NOt name ends with .nii or .gz");
                 }
     
                 // ✅ **Generate Volume ID**
@@ -157,45 +232,43 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     SeriesInstanceUID: selectedSeriesInstanceUid,
                     wadoRsRoot: wadoRsRoot
                 });
+                
     
-                if (!imageIds || imageIds.length === 0) {
-                    console.error('❌ No image IDs found for this series.');
-                    return;
-                }
+                // if (!imageIds || imageIds.length === 0) {
+                //     console.error('❌ No image IDs found for this series.');
+                //     return;
+                // }
     
-                console.log(`📸 Found ${imageIds.length} image IDs.`);
+                // console.log(`📸 Found ${imageIds.length} image IDs.`);
     
-                // ✅ **Ensure metadata exists before proceeding**
-                const volumeMetada = cornerstone.utilities.makeVolumeMetadata(imageIds);
-                console.log('📦 Volume metadata:', volumeMetada.PixelRepresentation);
-                for (const imageId of imageIds) {
-                    // Try to get the metadata; if it doesn't exist, create a default object.
-                    let metadata = cornerstone.metaData.get('imagePixelModule', imageId);
-                    console.log('📦 Metadata pixel:', metadata.pixelRepresentation);
-                    if (!metadata) {
-                      console.warn(`Metadata missing for imageId ${imageId}. Using default metadata.`);
-                      metadata = {
-                        pixelRepresentation: 1, // default value
-                        BitsAllocated: 16,        // provide a fallback or an appropriate value
-                        BitsStored: 16,
-                        HighBit: 15,
-                        PhotometricInterpretation: 'MONOCHROME2',
-                        SamplesPerPixel: 1,
-                      };
-                    } else {
-                      // Map the PascalCase keys to the lowercase keys expected by the volume loader
-                      // Here, you can override pixelRepresentation if needed.
-                      metadata.pixelRepresentation = 1; // or any value you choose
-                      metadata.bitsAllocated = metadata.BitsAllocated;
-                      metadata.bitsStored = metadata.BitsStored;
-                      metadata.highBit = metadata.HighBit;
-                      metadata.photometricInterpretation = metadata.PhotometricInterpretation;
-                      metadata.samplesPerPixel = metadata.SamplesPerPixel;
-                    }
-                  }
                   
                 // ✅ **Create & Load Volume**
                 console.log('🔄 Creating & caching volume...');
+                // const niftiURL =
+                // 'https://ohif-assets.s3.us-east-2.amazonaws.com/nifti/CTACardio.nii.gz';
+                // const volumeId = 'nifti:' + niftiURL;
+                // console.log('🆔 Volume ID:', volumeId);
+                // cornerstone.imageLoader.registerImageLoader('nifti', cornerstoneNiftiImageLoader)
+                // const imageIds = await createNiftiImageIdsAndCacheMetadata({ url: niftiURL });
+                // console.log('Image IDs:', imageIds);
+
+                // const viewportInputArray:any = [
+                //     {
+                //       viewportId: selectedViewportId,
+                //       type: cornerstone.Enums.ViewportType.STACK,
+                //       element: viewport.element
+                //     },
+                //   ];
+                //   renderingEngine.setViewports(viewportInputArray);
+                //   const vps = renderingEngine.getStackViewports();
+                //   const viewport2 = vps[0];
+
+                //   viewport2.setStack(imageIds);
+                //   viewport2.resetCamera();
+                //   renderingEngine.render();
+                //   viewport2.render();
+
+                //   const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId);
                 const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageIds });
                 await volume.load();
     
@@ -226,7 +299,7 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
     
                 dispatch(viewerSliceActions.removeClickedSeries());
                 dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
-    
+                
                 console.log('✅ Viewport updated successfully!');
             } catch (error) {
                 console.error('❌ Error setting viewport:', error);

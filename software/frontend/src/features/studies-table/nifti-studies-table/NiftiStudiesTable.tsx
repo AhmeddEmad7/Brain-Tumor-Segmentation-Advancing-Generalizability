@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { INiftiTableStudy } from '@/models';
+import { MdDeleteForever } from 'react-icons/md';
+import { deleteNiftiThunk } from '@features/studies-table/nifti-studies-table/nifti-studies-actions';
 import {
     StyledTableCell,
     StyledTableRow
@@ -15,15 +17,21 @@ import {
     TableRow,
     Box,
     useTheme,
-    Checkbox
+    Checkbox,
+    IconButton
 } from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
-
 const StudiesDataTable = ({ data }: { data: INiftiTableStudy[] }) => {
     const theme = useTheme();
     const [searchValues, setSearchValues] = useState(Array(tableColumnHeadings.length).fill(''));
 
+    const dispatch = useDispatch<TAppDispatch>();
+
+    const handleDelete = (fileID: string) => {
+        dispatch(deleteNiftiThunk(fileID));
+    };
     const handleSearchChange = (index: number, value: string) => {
         const newSearchValues = [...searchValues];
         newSearchValues[index] = value;
@@ -84,7 +92,7 @@ const StudiesDataTable = ({ data }: { data: INiftiTableStudy[] }) => {
                                     <StyledTableCell component="th" scope="row" sx={{ width: '5%' }}>
                                         <Link
                                             target={'_blank'}
-                                            to={`/viewer?StudyInstanceUID=${row.fileName}`}
+                                            to={`/viewer?StudyInstanceUID=${row.filePath}`}
                                         >
                                             <VisibilityIcon
                                                 sx={{
@@ -100,7 +108,6 @@ const StudiesDataTable = ({ data }: { data: INiftiTableStudy[] }) => {
                                         {row.fileName}
                                     </StyledTableCell>
 
-
                                     <StyledTableCell component="th" align="left" sx={{ width: '20%' }}>
                                         {row.projectSub}
                                     </StyledTableCell>
@@ -110,6 +117,20 @@ const StudiesDataTable = ({ data }: { data: INiftiTableStudy[] }) => {
 
                                     <StyledTableCell component="th" align="left" sx={{ width: '10%' }}>
                                         {row.sequencey}
+                                    </StyledTableCell>
+                                    <StyledTableCell component="th" align="left" sx={{ width: '5%' }}>
+                                        <IconButton
+                                            aria-label="delete"
+                                            onClick={() => handleDelete(row.id)}
+                                            sx={{
+                                                color: theme.palette.error.main,
+                                                '&:hover': {
+                                                    color: theme.palette.error.dark
+                                                }
+                                            }}
+                                        >
+                                            <MdDeleteForever />
+                                        </IconButton>
                                     </StyledTableCell>
                                 </StyledTableRow>
                             );

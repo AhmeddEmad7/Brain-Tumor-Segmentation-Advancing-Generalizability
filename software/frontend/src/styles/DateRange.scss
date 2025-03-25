@@ -12,6 +12,13 @@ $text-color-light: #333333;
 /*
 THE INPUT FIELD
 */
+.custom-image-node {
+    display: inline-block !important;
+    width: 300px; /* fixed width */
+    margin-right: 16px; /* adjust gap between images */
+    vertical-align: top;
+  }
+  
 .createDateRangePicker {
     /* Background Color of Input filed  */
     background-color: $body-background-dark;

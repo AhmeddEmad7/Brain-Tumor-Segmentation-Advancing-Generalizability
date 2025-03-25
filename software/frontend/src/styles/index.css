@@ -17,7 +17,13 @@ body,
     background: linear-gradient(to right, #0E1B2C, #162A40);
     color: #A9D6E5;
 }
-
+.custom-image-node {
+    display: inline-block !important;
+    width: 300px; /* fixed width */
+    margin-right: 16px; /* adjust gap between images */
+    vertical-align: top;
+  }
+  
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 0.5rem;

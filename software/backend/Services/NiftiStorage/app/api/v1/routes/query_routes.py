@@ -1,16 +1,37 @@
 import os
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends , Response
 from app.utils import query_helpers as utils
 from pathlib import Path
 from app.core.config import settings
 from app.utils import BDISModalityType
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.api.v1.nifti_crud import get_all_nifti_files
+from app.api.v1.nifti_crud import get_all_nifti_files ,get_nifti_file_by_id
 from app.models.nifti_model import NiftiModel
+import base64
+
 # User Route Entry Point
 query_router = APIRouter()
 UPLOAD_DIR = Path(settings.UPLOADS_DIR)
+
+@query_router.get("/db/files/{file_id}")
+async def get_file_url(  file_id: int ,db: Session = Depends(get_db)):
+    nifti_file = get_nifti_file_by_id(db, file_id)
+    print("enter as start ")
+    if not nifti_file:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"File with id {file_id} not found in the database"
+        )
+    
+    file_path = nifti_file.file_path
+    if not file_path.startswith("/"):
+        file_path = "/" + file_path
+
+    BASE_DOMAIN  = os.getenv("BASE_DOMAIN", "https://yourdomain.com")
+    file_url = f"{BASE_DOMAIN}{file_path}"
+    return {"fileUrl": file_url}
+
 
 @query_router.get("/db/files")
 async def get_all_files(db: Session = Depends(get_db)):
@@ -23,6 +44,7 @@ async def get_all_files(db: Session = Depends(get_db)):
     
     files_data = [
         {
+            "id" : file.id,
             "subject": file.subject,
             "session": file.session,
             "modality": file.modality,
@@ -32,6 +54,8 @@ async def get_all_files(db: Session = Depends(get_db)):
         for file in nifti_files
     ]
     return {"files": files_data}
+
+
 @query_router.get("/db/subject/{subject_id}/session/{session_id}/modality/{modality_type}")
 async def get_specific_file_paths(
     subject_id: str, 

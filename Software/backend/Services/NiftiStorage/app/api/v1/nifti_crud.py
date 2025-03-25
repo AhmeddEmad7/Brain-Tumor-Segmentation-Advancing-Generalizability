@@ -11,3 +11,7 @@ def create_nifti_file(db: Session, nifti: NiftiFileCreate):
 
 def get_all_nifti_files(db: Session, skip: int = 0, limit: int = 100):
     return db.query(NiftiModel).offset(skip).limit(limit).all()
+
+def get_nifti_file_by_id(db: Session, file_id: int):
+    # Assuming you have a model called NiftiFile and you are using SQLAlchemy
+    return db.query(NiftiModel).filter(NiftiModel.id == file_id).first()

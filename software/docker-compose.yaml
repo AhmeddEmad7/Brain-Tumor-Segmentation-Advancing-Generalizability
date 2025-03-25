@@ -1,8 +1,8 @@
 version: "3.8"
 
 volumes:
-  reporting_db_data:
   api_gateway_db_data:
+  reporting_db_data:
   nifti_db_data:
 
 services:
@@ -24,7 +24,19 @@ services:
     depends_on:
       - api_gateway_db
       - orthanc
-
+  reporting_db:
+    image: postgres:latest
+    container_name: gp_reporting_db
+    volumes:
+      - reporting_db_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=gp_reporting
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    restart: always
+    
   api_gateway_db:
     image: postgres:latest
     container_name: gp_gatway_db
@@ -37,6 +49,7 @@ services:
     volumes:
       - api_gateway_db_data:/var/lib/postgresql/data
     restart: always
+
 
   orthanc:
     build: ./backend/Services/Orthanc
@@ -80,7 +93,7 @@ services:
     volumes:
       - ./backend/Services/Reporting:/usr/src/app:ro
     depends_on:
-      - api_gateway_db
+      - reporting_db
 
 
   nifti_storage:
@@ -122,15 +135,5 @@ services:
   #   depends_on:
   #     - rabbitmq
 
-  # reporting_db:
-  #   image: postgres:latest
-  #   container_name: gp_reporting_db
-  #   volumes:
-  #     - reporting_db_data:/var/lib/postgresql/data/
-  #   ports:
-  #     - "5433:5432"
-  #   environment:
-  #     - POSTGRES_DB=GP
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=123456
+
 

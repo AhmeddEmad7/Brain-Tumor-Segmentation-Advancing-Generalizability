@@ -23,6 +23,7 @@ const ViewerTopBar = () => {
     const tools = VIEWER_TOOLS_BUTTONS(is3DActive);
     const primaryTools = tools.slice(0, 6);
     const otherTools = tools.slice(6);
+    
 
 
     const [anchorEl, setAnchorEl] = useState(null);

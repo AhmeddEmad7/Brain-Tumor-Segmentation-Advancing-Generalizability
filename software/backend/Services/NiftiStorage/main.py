@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.api.v1.router import api_v1_router
 from app.core.config import settings
 from pathlib import Path
@@ -19,11 +20,18 @@ print("Tables created successfully!")
 # ✅ Add the CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+## to return nifti file 
+BASE_DIR = Path(__file__).resolve().parent
+STORAGE_DIR = BASE_DIR / "storage"
+print("Storage directory:", STORAGE_DIR)
+app.mount("/storage", StaticFiles(directory="storage"), name="storage")
 
 # ✅ Define the directory where uploaded files will be saved
 UPLOAD_DIR = Path(settings.UPLOADS_DIR)
@@ -47,7 +55,7 @@ app.include_router(api_v1_router)
 # ✅ Run the app (only if script is run directly)
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",  # ✅ Change to "main:app"
+        "main:app",  
         host="0.0.0.0",
         port=7070,
         reload=True

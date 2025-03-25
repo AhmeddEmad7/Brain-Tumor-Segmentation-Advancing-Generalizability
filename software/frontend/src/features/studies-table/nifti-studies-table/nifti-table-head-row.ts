@@ -30,6 +30,11 @@ const tableColumnHeadings: INiftiTableColumnHead[] = [
         displayName: 'Session',
         key: 'sequence',
         searchable: true
+    },
+    {
+        displayName: '',
+        key: 'delete',
+        searchable: false
     }
 ];
 

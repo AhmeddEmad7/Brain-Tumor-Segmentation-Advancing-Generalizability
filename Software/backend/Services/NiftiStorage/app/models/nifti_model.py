@@ -7,7 +7,7 @@ class NiftiModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     file_name = Column(String, index=True)
     file_path = Column(String, index=True)
-    file_size = Column(String, index=True)
+    file_size = Column(Integer, index=True)  
     subject = Column(String, index=True)    # New column for subject
     session = Column(String, index=True)    # New column for session
     modality = Column(String, index=True)

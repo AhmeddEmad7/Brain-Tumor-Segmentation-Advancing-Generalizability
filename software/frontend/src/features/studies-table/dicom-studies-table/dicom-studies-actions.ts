@@ -23,6 +23,9 @@ export const fetchDicomStudiesThunk = () => {
 
 export const fetchDicomStudyByIdThunk = (studyInstanceUID: string) => {
     return async (dispatch: Dispatch) => {
+        if(studyInstanceUID.endsWith(".nii")||studyInstanceUID.endsWith(".gz")){
+            return ; 
+        }
         const study = await AxiosUtil.sendRequest({
             method: 'GET',
             url: `${GATEWAY_URL}/dicom/studies/${studyInstanceUID}`
@@ -31,7 +34,6 @@ export const fetchDicomStudyByIdThunk = (studyInstanceUID: string) => {
         if (!study) {
             return;
         }
-
         dispatch(studiesSliceActions.setSelectedDicomStudy(study));
     };
 };

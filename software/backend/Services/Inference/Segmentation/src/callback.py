@@ -62,7 +62,7 @@ def segmentation_callback(ch, method, properties, body):
 
     ###### INSERT THE MODEL FUNCTION HERE ######
     output_dir = os.path.join(studies_dir, study_uid)
-    segmentation_mask_nifti_path = segmentation(t1, t2, flair, t1ce,output_dir)
+    segmentation_mask_nifti_path = segmentation(t1ce, t1, flair, t2, output_dir)
     # segmentation_mask = np.flip(segmentation_mask, axis=1)
     # End the timer
     end_time = time.time()

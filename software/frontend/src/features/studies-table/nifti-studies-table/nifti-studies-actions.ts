@@ -24,7 +24,7 @@ export const fetchNiftiStudiesThunk = () => {
             fileName: file.file_name,
             projectSub: file.subject,
             category: file.modality,
-            sequencey: file.session,
+            session: file.session,
             filePath: file.file_path // save file path for later use (download/view)
         }));
 

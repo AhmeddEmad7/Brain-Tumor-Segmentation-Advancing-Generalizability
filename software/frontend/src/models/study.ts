@@ -21,7 +21,26 @@ export interface INiftiTableStudy {
     session: string;
     filePath?: string; // optional, for future use (like viewer/download)
 }
+export interface INiftiFile {
+    id: string;
+    fileName: string;
+    filePath: string;
+  }
+  
+export interface ICategory {
+    categoryName : string;
+    files : INiftiFile[];
+}
 
+export interface ISession {
+    sessionName : string;
+    categories : ICategory[];
+}
+export interface ISubject {
+    subjectName: string; // e.g. "sub-01"
+    sessions: ISession[];
+  }
+  
 export interface IDicomSeriesData {
     studyInstanceUid: string;
     studyOrthancId: string;

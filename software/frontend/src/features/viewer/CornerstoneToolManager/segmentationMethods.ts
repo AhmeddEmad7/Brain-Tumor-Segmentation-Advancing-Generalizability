@@ -9,7 +9,7 @@ import axios from 'axios';
 import { api } from 'dicomweb-client';
 import { getAndSetSeriesInstances } from '../viewer-viewport-reducers';
 import { Direction } from 'react-toastify/dist/utils';
-import { renderSegmentationAsSurface } from './surface'; // ✅ Import surface rendering function
+// import { renderSegmentationAsSurface } from './surface'; // ✅ Import surface rendering function
 
 const { wadouri } = cornerstoneDicomImageLoader;
 

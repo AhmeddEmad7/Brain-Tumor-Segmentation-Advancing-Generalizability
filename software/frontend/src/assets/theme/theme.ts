@@ -71,9 +71,9 @@ export const themeSettings = (mode: TModeType) => {
                 ? {
                       primary: {
                           lighter: colors.primary[100],
-                          light: colors.primary[200],
+                          light: colors.primary[300],
                           main: colors.primary[300],
-                          dark: colors.primary[400]
+                          dark: colors.primary[500],
                       },
                       secondary: {
                           light: colors.blue[100],
@@ -86,7 +86,8 @@ export const themeSettings = (mode: TModeType) => {
                           light: colors.grey[100]
                       },
                       background: {
-                          default: colors.primary[300]
+                          default:
+                              'linear-gradient(0deg, rgb(50, 80, 120) 10%, rgb(100, 120, 160) 100%)'
                       }
                   }
                 : {

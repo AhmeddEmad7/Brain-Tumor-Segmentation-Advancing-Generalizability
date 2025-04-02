@@ -43,7 +43,7 @@ def save_nifti_volumes(int_volumes, metadata, output_dir):
         print(f"Saved: {file_path}")
 
 def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
-    input_data, int_volumes, metadata = load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path)
+    input_data, int_volumes, metadata, brain_volume = load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path)
     save_nifti_volumes(int_volumes, metadata, output_dir)
     
     input_data['imgs'] = input_data['imgs'].unsqueeze(0).to('cuda')
@@ -64,14 +64,15 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
         )
 
     prediction, mask_channels = generate_prediction_mask(output['pred'])
+    prediction, mask_channels, brain_volume = prediction.cpu().numpy(), mask_channels.cpu().numpy(), brain_volume[0].cpu().numpy()
     print("Prediction shape:", prediction.shape)
 
     # Saving prediction
-    nifti_pred = nib.Nifti1Image(prediction.cpu().numpy(), affine=metadata[0]['affine'])
+    nifti_pred = nib.Nifti1Image(prediction, affine=metadata[0]['affine'])
     nifti_pred.header.set_intent('label', name='Label Map')
     nib.save(nifti_pred, os.path.join(output_dir, f"prediction_label.nii.gz"))
 
-    tumor_features = extract_tumor_features(prediction, mask_channels)
+    tumor_features = extract_tumor_features(brain_volume, prediction, mask_channels)
     findings = generate_report(tumor_features)
 
     # Generating a PDF IF NEEDED #
@@ -80,7 +81,7 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
     # generate_pdf(findings, patient)
     # print("\n==== Generated Report as PDF file ====\n")
 
-    return prediction.cpu().numpy(), findings
+    return prediction, findings
 
 
 # # Doing inference here

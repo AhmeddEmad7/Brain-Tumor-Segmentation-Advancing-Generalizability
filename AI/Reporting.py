@@ -56,9 +56,12 @@ def interpret_anatomical_location(centroid):
     
     return description, hemisphere, lobe
 
-def extract_tumor_features(segmentation_mask, mask_channels, voxel_size=(1,1,1)):
+def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, voxel_size=(1,1,1)):
     voxel_volume = np.prod(voxel_size)
-    total_voxels = segmentation_mask.size
+
+    # Mask out background (only consider voxels within brain region)
+    brain_mask = brain_vol > 0
+    total_voxels = np.sum(brain_mask)
     
     whole_tumor_vol = np.sum(mask_channels[1]) * voxel_volume / 1000  # Convert to cc
     tumor_core_vol = np.sum(mask_channels[2]) * voxel_volume / 1000

@@ -27,7 +27,7 @@ def load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path):   # lazem
     norm_imgs  = np.array(processed_data['imgs'])
     float_volumes = {'imgs' : torch.from_numpy(norm_imgs).type(torch.FloatTensor)}
     
-    return float_volumes, int_volumes, metadata
+    return float_volumes, int_volumes, metadata, t1c_tensor
 
 def preprocess_data(data):
     transform = Compose([

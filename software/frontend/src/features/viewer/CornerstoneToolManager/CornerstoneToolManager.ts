@@ -18,7 +18,7 @@ class CornerstoneToolManager {
     toolGroupId: string;
     toolGroup: cornerstoneTools.Types.IToolGroup | undefined;
     viewportsType?: any;
-    
+
     // Constructor for the CornerstoneToolManager class that initializes the tool group
     // and adds all the annotation and segmentation tools to it based on the provided tool group ID
     constructor(toolGroupId: string, viewportsType?: string) {
@@ -77,10 +77,10 @@ class CornerstoneToolManager {
                 textBoxBackground: '',
                 textBoxLinkLineWidth: '1',
                 textBoxLinkLineDash: '2,3',
-                textBoxShadow: true,
-              },
-            };
-            
+                textBoxShadow: true
+            }
+        };
+
         cornerstoneTools.annotation.config.style.setDefaultToolStyles(defaultToolStyles);
         this.toolGroup.setToolEnabled(cornerstoneTools.SegmentationDisplayTool.toolName);
 
@@ -133,6 +133,7 @@ class CornerstoneToolManager {
                 throw new Error(`Unsupported viewports type: ${viewportsType}`);
         }
     }
+
     // Initialize the cornerstone annotation tools
     static initCornerstoneAnnotationTool() {
         Object.values(ANNOTATION_TOOLS).forEach((tool) => {

@@ -21,13 +21,15 @@ import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/Cor
 //     createNiftiImageIdsAndCacheMetadata,
 //   } from '@cornerstonejs/nifti-volume-loader';
 import { cornerstoneNiftiImageVolumeLoader } from '@cornerstonejs/nifti-volume-loader';
+import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
+import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
 
 import { Volume } from 'lucide-react';
-import * as cornerstone3 from '@cornerstonejs/core/dist/'
+import * as cornerstone3 from '@cornerstonejs/core/dist/';
 // const { isCrosshairActive } = useSelector((store: IStore) => store.viewer);
 
 const wadoRsRoot = import.meta.env.VITE_ORTRHANC_PROXY_URL;
-const NIFTI_DOMAIN = import.meta.env.VITE_NIFTI_DOMAIN
+const NIFTI_DOMAIN = import.meta.env.VITE_NIFTI_DOMAIN;
 type TViewportProps = {
     onClick?: (idx: string) => void;
     selectedViewportId?: number | string | null;
@@ -128,7 +130,6 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         }
     }, [isMPRActive, isCrosshairActive]);
 
-
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
 
@@ -140,25 +141,23 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                 }
 
                 const viewport = renderingEngine.getViewport(selectedViewportId) as Types.IVolumeViewport;
-                
-                console.log('currentStudyInstanceUid',currentStudyInstanceUid)
-                
+
+                console.log('currentStudyInstanceUid', currentStudyInstanceUid);
+
                 if (!viewport) {
                     console.error(`❌ Viewport ${selectedViewportId} not found.`);
                     return;
                 }
-                if(currentStudyInstanceUid.endsWith(".nii")||currentStudyInstanceUid.endsWith(".gz")){
-                    console.log("File name ends with .nii or .gz");
-                }
-                else{
-                    console.log("File NOt name ends with .nii or .gz");
+                if (currentStudyInstanceUid.endsWith('.nii') || currentStudyInstanceUid.endsWith('.gz')) {
+                    console.log('File name ends with .nii or .gz');
+                } else {
+                    console.log('File NOt name ends with .nii or .gz');
                     return;
                 }
-                
-                
+
                 const niftiURL = `${NIFTI_DOMAIN}/${currentStudyInstanceUid}`;
                 // const niftiURL = 'nifti/00000057_brain_flair.nii';
-                console.log('niftiURL',niftiURL)
+                console.log('niftiURL', niftiURL);
                 const volumeId = 'nifti:' + niftiURL;
                 console.log('🆔 Volume ID:', volumeId);
 
@@ -170,6 +169,8 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
 
                 console.log('📡 Setting volume in viewport...');
                 await viewport.setVolumes([{ volumeId }], true);
+                // or any supported VTK preset
+
                 viewport.resetCamera();
                 viewport.render();
 
@@ -190,23 +191,23 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
 
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-    
+
         const updateViewport = async () => {
             try {
                 if (!selectedSeriesInstanceUid || !selectedViewportId || !renderingEngine) {
                     console.warn('⚠️ Missing required values to update viewport.');
                     return;
                 }
-                
+
                 const viewport = renderingEngine.getViewport(selectedViewportId) as Types.IVolumeViewport;
-    
+
                 if (!viewport) {
                     console.error(`❌ Viewport ${selectedViewportId} not found.`);
                     return;
                 }
-    
+
                 console.log('🔄 Updating viewport for series:', selectedSeriesInstanceUid);
-                
+
                 // ✅ **Check if the series is a segmentation (`SEG`)**
                 const modality = await getSeriesModality(currentStudyInstanceUid, selectedSeriesInstanceUid);
                 if (modality === 'SEG') {
@@ -215,33 +216,30 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     return;
                 }
 
-                if(currentStudyInstanceUid.endsWith(".nii")||currentStudyInstanceUid.endsWith(".gz")){
-                    console.log("File name ends with .nii or .gz");
+                if (currentStudyInstanceUid.endsWith('.nii') || currentStudyInstanceUid.endsWith('.gz')) {
+                    console.log('File name ends with .nii or .gz');
+                } else {
+                    console.log('File NOt name ends with .nii or .gz');
                 }
-                else{
-                    console.log("File NOt name ends with .nii or .gz");
-                }
-    
+
                 // ✅ **Generate Volume ID**
                 const volumeId = `cornerstoneStreamingImageVolume:${selectedSeriesInstanceUid}`;
                 console.log('🆔 Volume ID:', volumeId);
-    
+
                 // ✅ **Retrieve Image IDs**
                 const imageIds = await createImageIdsAndCacheMetaData({
                     StudyInstanceUID: currentStudyInstanceUid,
                     SeriesInstanceUID: selectedSeriesInstanceUid,
                     wadoRsRoot: wadoRsRoot
                 });
-                
-    
+
                 // if (!imageIds || imageIds.length === 0) {
                 //     console.error('❌ No image IDs found for this series.');
                 //     return;
                 // }
-    
+
                 // console.log(`📸 Found ${imageIds.length} image IDs.`);
-    
-                  
+
                 // ✅ **Create & Load Volume**
                 console.log('🔄 Creating & caching volume...');
                 // const niftiURL =
@@ -271,17 +269,18 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                 //   const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId);
                 const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageIds });
                 await volume.load();
-    
+
                 // ✅ **Set Volume in Viewport**
                 console.log('📡 Setting volume in viewport...');
                 await viewport.setVolumes([{ volumeId }], true);
-            
+                console.log(vtkColorMaps);
+
                 // ✅ **Set Orientation**
                 const direction = viewport.getImageData()?.imageData.getDirection() as number[];
                 const orientation = DicomUtil.detectImageOrientation(
                     direction ? direction.slice(0, 6) : [1, 0, 0, 0, 1, 0]
                 );
-    
+
                 if (is3DActive) {
                     console.log('🖥️ Setting 3D mode...');
                     viewport.resetCamera();
@@ -289,26 +288,26 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     console.log('🖼️ Setting 2D orientation:', orientation);
                     viewport.setOrientation(orientation);
                 }
-    
+
                 // ✅ **Render Viewport**
                 viewport.render();
-    
+
                 // ✅ **Update State**
                 setThisViewport(viewport);
                 setThisViewportImageIds(viewport.getImageIds());
-    
+
                 dispatch(viewerSliceActions.removeClickedSeries());
                 dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
-                
+
                 console.log('✅ Viewport updated successfully!');
             } catch (error) {
                 console.error('❌ Error setting viewport:', error);
             }
         };
-    
+
         updateViewport();
     }, [selectedSeriesInstanceUid, selectedViewportId]);
-    
+
     useEffect(() => {
         if (thisViewport) {
             setCurrentImageId(thisViewportImageIds[thisViewport.getCurrentImageIdIndex()]);

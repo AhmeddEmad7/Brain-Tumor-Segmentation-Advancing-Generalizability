@@ -54,6 +54,11 @@ import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/Cor
 import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
 
 export const VIEWER_SETTINGS_MENU_ITEMS = ['About', 'License Agreement', 'Help', 'Shortcuts'];
+import ColormapSelectorMenu from '@features/viewer/components/ColormapSelectorMenu';
+import { applyColormapToViewport } from './viewer-top-bar-actions';
+import { Palette as PaletteIcon } from '@mui/icons-material';
+import { icon } from '@fortawesome/fontawesome-svg-core';
+// import ColormapSelectorMenu from '@/components/ColormapSelectorMenu';
 
 const is3DActive = store.getState().viewer.is3DActive;
 console.log('is3DActive', is3DActive);
@@ -91,6 +96,34 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         onClick: handleToolClick,
         icon: <RotationToolIcon />,
         menuComponent: <ViewerButtonMenu items={RotateButtonItems} />,
+        disabled: false
+    },
+    {
+        title: 'Colormap',
+        icon: <PaletteIcon />,
+        menuComponent: (
+            <ColormapSelectorMenu
+                applyColormap={(name) => {
+                    const state = store.getState();
+                    const renderingEngineId = state.viewer.renderingEngineId;
+                    const viewportId = state.viewer.selectedViewportId;
+
+                    let volumeId = '';
+                    if (
+                        state.viewer.currentStudyInstanceUid.endsWith('.nii') ||
+                        state.viewer.currentStudyInstanceUid.endsWith('.gz')
+                    ) {
+                        const niftiURL = `${import.meta.env.VITE_NIFTI_DOMAIN}/${state.viewer.currentStudyInstanceUid}`;
+                        volumeId = 'nifti:' + niftiURL;
+                    } else {
+                        volumeId = `cornerstoneStreamingImageVolume:${state.viewer.selectedSeriesInstanceUid}`;
+                    }
+
+                    applyColormapToViewport(name, renderingEngineId, viewportId, volumeId);
+                }}
+            />
+        ),
+        isComponentOnly: true, // ✅ ensures it's not rendered inside ViewerToolButton menu
         disabled: false
     },
     {

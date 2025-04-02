@@ -11,6 +11,8 @@ import { IStore } from '@/models';
 import { getRenderingEngine, Enums, setVolumesForViewports, CONSTANTS } from '@cornerstonejs/core';
 import * as cornerstone from '@cornerstonejs/core';
 import { createImageIdsAndCacheMetaData } from '@utilities/helpers/index';
+import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
+import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
 
 export const toggleFullScreen = () => {
     const state = store.getState();
@@ -82,7 +84,7 @@ export const toggleVolumeRendering = async (forceTo2D = false) => {
             type: newViewportType,
             element: viewport.element as HTMLDivElement,
             defaultOptions: {
-                orientation: "axial", // Reset to default AXIAL for 2D
+                orientation: 'axial', // Reset to default AXIAL for 2D
                 background: CONSTANTS.BACKGROUND_COLORS.slicer3D as [number, number, number]
             }
         }
@@ -151,11 +153,7 @@ export const toggleMPRMode = async (
         return;
     }
 
-    const orientations: OrientationAxis[] = [
-        "axial",
-        "coronal",
-        "sagittal"
-    ];
+    const orientations: OrientationAxis[] = ['axial', 'coronal', 'sagittal'];
 
     const volumeId = `cornerstoneStreamingImageVolume:${selectedSeriesInstanceUid}`;
 
@@ -210,6 +208,37 @@ export const toggleMPRMode = async (
 
 export const toggleViewportOverlayShown = () => {
     store.dispatch(viewerSliceActions.toggleInfoOnViewports());
+};
+export const applyColormapToViewport = (
+    colormapName: string,
+    renderingEngineId: string,
+    viewportId: string,
+    volumeId: string
+) => {
+    const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+    const viewport = renderingEngine?.getViewport(viewportId);
+    if (!viewport) return;
+
+    const actorEntry = viewport.getActor(volumeId);
+    const actor = actorEntry?.actor;
+    if (!actor || typeof actor.getProperty !== 'function') return;
+
+    const cfun = vtkColorTransferFunction.newInstance();
+    const preset = vtkColorMaps.getPresetByName(colormapName);
+    if (!preset) return;
+
+    cfun.applyColorMap(preset);
+    cfun.updateRange();
+
+    const property = actor.getProperty();
+    property.setRGBTransferFunction(0, cfun);
+
+    const range = viewport.getImageData()?.imageData.getPointData().getScalars().getRange();
+    if (range) {
+        cfun.setMappingRange(...range);
+    }
+
+    viewport.render();
 };
 
 export const handleToolClick = (toolName: string, mouseEvent: any) => {

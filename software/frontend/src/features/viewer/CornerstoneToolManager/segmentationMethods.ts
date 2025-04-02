@@ -2,7 +2,7 @@ import store from '@/redux/store.ts';
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import * as cornerstone from '@cornerstonejs/core';
 import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
-import { adaptersSEG, helpers } from '@cornerstonejs/adapters';
+// import { adaptersSEG, helpers } from '@cornerstonejs/adapters'; ???
 import * as cornerstoneDicomImageLoader from '@cornerstonejs/dicom-image-loader';
 import dcmjs from 'dcmjs';
 import axios from 'axios';
@@ -13,8 +13,8 @@ import { Direction } from 'react-toastify/dist/utils';
 
 const { wadouri } = cornerstoneDicomImageLoader;
 
-const { downloadDICOMData } = helpers;
-const { Cornerstone3D } = adaptersSEG;
+// const { downloadDICOMData } = helpers; ???
+// const { Cornerstone3D } = adaptersSEG; ???
 
 // Constants for DICOMWeb client
 const DICOM_URL = import.meta.env.VITE_ORTRHANC_PROXY_URL;
@@ -452,14 +452,14 @@ async function addSegmentationsToState(
     let derivedVolume;
     if (is3DActive) {
         console.log('🚀 Creating 3D Segmentation Volume...');
-        
+
         derivedVolume = await cornerstone.volumeLoader.createAndCacheDerivedSegmentationVolume(
             viewportVolumeId,
             { volumeId: segmentationId }
         );
     } else {
         console.log('🖼️ Creating 2D Labelmap Segmentation...');
-        
+
         derivedVolume = await cornerstone.volumeLoader.createAndCacheDerivedSegmentationVolume(
             viewportVolumeId,
             { volumeId: segmentationId }
@@ -481,7 +481,7 @@ async function addSegmentationsToState(
         ]);
     } else {
         console.log('🖌️ Adding 2D Labelmap Segmentation Representation...');
-        
+
         await cornerstoneTools.segmentation.addSegmentations([
             {
                 segmentationId,
@@ -497,8 +497,8 @@ async function addSegmentationsToState(
     const [uid] = await cornerstoneTools.segmentation.addSegmentationRepresentations(currentToolGroupId, [
         {
             segmentationId,
-            type: is3DActive 
-                ? cornerstoneTools.Enums.SegmentationRepresentations.Surface 
+            type: is3DActive
+                ? cornerstoneTools.Enums.SegmentationRepresentations.Surface
                 : cornerstoneTools.Enums.SegmentationRepresentations.Labelmap
         }
     ]);

@@ -102,30 +102,35 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         title: 'Colormap',
         icon: <PaletteIcon />,
         menuComponent: (
-            <ColormapSelectorMenu
-                applyColormap={(name) => {
-                    const state = store.getState();
-                    const renderingEngineId = state.viewer.renderingEngineId;
-                    const viewportId = state.viewer.selectedViewportId;
-
-                    let volumeId = '';
-                    if (
-                        state.viewer.currentStudyInstanceUid.endsWith('.nii') ||
-                        state.viewer.currentStudyInstanceUid.endsWith('.gz')
-                    ) {
-                        const niftiURL = `${import.meta.env.VITE_NIFTI_DOMAIN}/${state.viewer.currentStudyInstanceUid}`;
-                        volumeId = 'nifti:' + niftiURL;
-                    } else {
-                        volumeId = `cornerstoneStreamingImageVolume:${state.viewer.selectedSeriesInstanceUid}`;
-                    }
-
-                    applyColormapToViewport(name, renderingEngineId, viewportId, volumeId);
-                }}
-            />
+          <ColormapSelectorMenu
+            applyColormap={(vtkPresetName) => {
+              // This is your existing code that applies the selected preset
+              const state = store.getState();
+              const renderingEngineId = state.viewer.renderingEngineId;
+              const viewportId = state.viewer.selectedViewportId;
+      
+              let volumeId = '';
+              if (
+                state.viewer.currentStudyInstanceUid.endsWith('.nii') ||
+                state.viewer.currentStudyInstanceUid.endsWith('.gz')
+              ) {
+                const niftiURL = `${import.meta.env.VITE_NIFTI_DOMAIN}/${state.viewer.currentStudyInstanceUid}`;
+                volumeId = 'nifti:' + niftiURL;
+              } else {
+                volumeId = `cornerstoneStreamingImageVolume:${state.viewer.selectedSeriesInstanceUid}`;
+              }
+      
+              applyColormapToViewport(
+                vtkPresetName,
+                renderingEngineId,
+                viewportId,
+                volumeId
+              );
+            }}
+          />
         ),
-        isComponentOnly: true, // ✅ ensures it's not rendered inside ViewerToolButton menu
         disabled: false
-    },
+      },
     {
         title: 'Layout',
         icon: <LayoutIcon />,

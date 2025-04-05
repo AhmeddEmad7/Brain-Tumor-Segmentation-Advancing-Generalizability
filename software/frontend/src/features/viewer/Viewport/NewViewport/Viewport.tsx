@@ -1,5 +1,4 @@
 import * as cornerstone from '@cornerstonejs/core';
-// import hazem from '@cornerstonejs/nifti-volume-loader';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
@@ -15,11 +14,8 @@ import { readSegmentation } from '../../CornerstoneToolManager/segmentationMetho
 import { getSeriesModality } from '@features/viewer/viewer-viewport-reducers';
 import { toggleMPRMode, toggleVolumeRendering } from '@features/viewer/ViewerTopBar/viewer-top-bar-actions'; // Import your toggleMPRMode function
 import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/CornerstoneToolManager';
-// import * as cornerstoneTools from '@cornerstonejs/tools/dist/types/';
-// import {
-//     cornerstoneNiftiImageLoader,
-//     createNiftiImageIdsAndCacheMetadata,
-//   } from '@cornerstonejs/nifti-volume-loader';
+import * as cornerstoneTools from '@cornerstonejs/tools';
+
 import { cornerstoneNiftiImageVolumeLoader } from '@cornerstonejs/nifti-volume-loader';
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
 import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';

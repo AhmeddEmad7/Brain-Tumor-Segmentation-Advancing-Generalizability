@@ -2,7 +2,7 @@ import store from '@/redux/store.ts';
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import * as cornerstone from '@cornerstonejs/core';
 import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
-// import { adaptersSEG, helpers } from '@cornerstonejs/adapters'; ???
+import { adaptersSEG, helpers } from '@cornerstonejs/adapters'; 
 import * as cornerstoneDicomImageLoader from '@cornerstonejs/dicom-image-loader';
 import dcmjs from 'dcmjs';
 import axios from 'axios';
@@ -14,7 +14,7 @@ import { Direction } from 'react-toastify/dist/utils';
 const { wadouri } = cornerstoneDicomImageLoader;
 
 // const { downloadDICOMData } = helpers; ???
-// const { Cornerstone3D } = adaptersSEG; ???
+const { Cornerstone3D } = adaptersSEG; 
 
 // Constants for DICOMWeb client
 const DICOM_URL = import.meta.env.VITE_ORTRHANC_PROXY_URL;

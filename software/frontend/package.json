@@ -11,6 +11,7 @@
         "prepare": "cd ../.. && husky Software/frontend/.husky"
     },
     "dependencies": {
+        "@cornerstonejs/adapters": "^1.86.1",
         "@cornerstonejs/calculate-suv": "^1.1.0",
         "@cornerstonejs/core": "^1.86.1",
         "@cornerstonejs/dicom-image-loader": "^1.86.0",

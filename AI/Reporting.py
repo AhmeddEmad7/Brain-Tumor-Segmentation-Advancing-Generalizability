@@ -4,56 +4,63 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.units import inch
 
-def interpret_anatomical_location(centroid):
-    x, y, z = centroid  # LPS: x=left (0-240mm), y=posterior (0-240mm), z=superior (0-155mm)
-    
-    hemisphere = "left" if x > 120 else "right"  # Midline at x=120
-    
-    superior_z = 90  # Above = superior (frontal/parietal)
-    inferior_z = 60  # Below = inferior (temporal/occipital)
-    
-    anterior_y = 90   # Below = anterior (frontal/temporal)
-    posterior_y = 160  # Above = posterior (parietal/occipital)
-    
-    if y < anterior_y:
+def interpret_anatomical_location(centroid, mid_x, mid_y_anterior, mid_y_posterior, mid_z_inferior, mid_z_superior):
+    x, y, z = centroid # LPS
+
+    hemisphere = "left" if x > mid_x else "right"
+
+    # Determine anetrior and posterior "region"
+    if y < mid_y_anterior:
         region = "anterior"
-    elif y < posterior_y:
-        region = "middle"
+    elif y < mid_y_posterior:
+        region = "central anterior-posterior"
     else:
         region = "posterior"
-    
-    if z > superior_z:
+
+    # Determine superior and inferior "height"
+    if z > mid_z_superior:
         height = "superior"
-    elif z > inferior_z:
-        height = "middle"
+    elif z > mid_z_inferior:
+        height = "central superior-inferior"
     else:
         height = "inferior"
-    
+
+    # Determine lobe based on combined region + height
     if region == "anterior":
-        if height == "superior":
+        if height in ("superior", "central superior-inferior"):
             lobe = "frontal lobe"
         else:
-            lobe = "temporal lobe"  # Anterior-inferior = temporal
+            lobe = "temporal lobe"
+            
     elif region == "posterior":
-        if height == "superior":
+        if height in ("superior", "central superior-inferior"):
             lobe = "parietal lobe"
         else:
             lobe = "occipital lobe"
-    else:  # Middle region
-        if height == "superior":
+            
+    else:  # region == "central anterior-posterior"
+        if height == "inferior":
+            lobe = "temporal lobe"
+        else: #
             lobe = "frontal lobe"
-        else:
-            lobe = "temporal lobe"  # Middle-inferior = temporal
-    
-    # Insular lobe check (central deep region)
-    # if (100 <= x <= 140) and (80 <= y <= 160) and (60 <= z <= 95):
-    #     lobe = "insular lobe"
 
-    if (height == region):
-        description = f"{region} part of the brain, most likely centered in the {hemisphere} {lobe}"
+    if "central" in (region, height):
+        central_desc = []
+        if region == "central anterior-posterior":
+            central_desc.append("central anterior-posterior")
+        else:
+            central_desc.append(region)
+
+        if height == "central superior-inferior":
+            central_desc.append("central superior-inferior")
+        else:
+            central_desc.append(height)
+
+        joined_desc = " and ".join(central_desc)
+        description = f"{joined_desc} part of the brain, most likely centered in the {hemisphere} {lobe}"
     else:
         description = f"{region} and {height} part of the brain, most likely centered in the {hemisphere} {lobe}"
-    
+
     return description, hemisphere, lobe
 
 def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, voxel_size=(1,1,1)):
@@ -80,8 +87,35 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, voxel_si
     coords = np.argwhere(segmentation_mask > 0)
     centroid = tuple(np.mean(coords, axis=0).astype(int)) if len(coords) > 0 else (0, 0, 0)
     print("Tumor Centroid:", centroid)
+    
+    brain_coords = np.argwhere(brain_mask)
+    x_min, y_min, z_min = np.min(brain_coords, axis=0)
+    x_max, y_max, z_max = np.max(brain_coords, axis=0) + 1
+    
+    print(f"Brain bounding box:")
+    print(f"  x: {x_min} to {x_max}")
+    print(f"  y: {y_min} to {y_max}")
+    print(f"  z: {z_min} to {z_max}")
+    
+    # Define midlines based on actual brain bounds
+    mid_x = int((x_min + x_max) / 2)
+    mid_y_anterior = int(y_min + (y_max - y_min) * 0.45)
+    mid_y_posterior = int(y_min + (y_max - y_min) * 0.55)
+    mid_z_inferior = int(z_min + (z_max - z_min) * 0.45)
+    mid_z_superior = int(z_min + (z_max - z_min) * 0.55)
+    
+    print(f"Calculated midlines:")
+    print(f"  Mid X (left-right): {mid_x:.2f}")
+    print(f"  Mid Y anterior: {mid_y_anterior:.2f}")
+    print(f"  Mid Y posterior: {mid_y_posterior:.2f}")
+    print(f"  Mid Z inferior: {mid_z_inferior:.2f}")
+    print(f"  Mid Z superior: {mid_z_superior:.2f}")
 
-    anatomical_location, hemisphere, lobe = interpret_anatomical_location(centroid)
+    anatomical_location, hemisphere, lobe = interpret_anatomical_location(
+                                                centroid, mid_x, mid_y_anterior,
+                                                mid_y_posterior, mid_z_inferior,
+                                                mid_z_superior)
+
     
     return {
         "whole_tumor_volume": whole_tumor_vol,

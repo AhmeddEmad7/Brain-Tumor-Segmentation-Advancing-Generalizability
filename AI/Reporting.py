@@ -3,68 +3,64 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.units import inch
+from nibabel.orientations import aff2axcodes
 
-def interpret_anatomical_location(centroid, mid_x, mid_y_anterior, mid_y_posterior, mid_z_inferior, mid_z_superior):
-    x, y, z = centroid # LPS
+def interpret_anatomical_location(centroid, mid_x, mid_y_anterior, mid_y_posterior, mid_z_inferior, mid_z_superior, orientation):
+    x, y, z = centroid
 
-    hemisphere = "left" if x > mid_x else "right"
+    # Hemisphere determination (based on x-axis)
+    if orientation[0] == "L":  # R→L
+        hemisphere = "left" if x > mid_x else "right"
+    else:  # L→R
+        hemisphere = "right" if x > mid_x else "left"
 
-    # Determine anetrior and posterior "region"
-    if y < mid_y_anterior:
-        region = "anterior"
-    elif y < mid_y_posterior:
-        region = "central anterior-posterior"
-    else:
-        region = "posterior"
+    # Anterior/posterior region (based on y-axis)
+    if orientation[1] == "P":  # A→P
+        if y < mid_y_anterior:
+            region = "anterior"
+        elif y < mid_y_posterior:
+            region = "central anterior-posterior"
+        else:
+            region = "posterior"
+    else:  # P→A
+        if y > mid_y_anterior:
+            region = "anterior"
+        elif y > mid_y_posterior:
+            region = "central anterior-posterior"
+        else:
+            region = "posterior"
 
-    # Determine superior and inferior "height"
-    if z > mid_z_superior:
-        height = "superior"
-    elif z > mid_z_inferior:
-        height = "central superior-inferior"
-    else:
-        height = "inferior"
+    # Inferior/superior height (based on z-axis)
+    if orientation[2] == "S":  # I→S 
+        if z > mid_z_superior:
+            height = "superior"
+        elif z > mid_z_inferior:
+            height = "central superior-inferior"
+        else:
+            height = "inferior"
+    else:  # S→I
+        if z < mid_z_superior:
+            height = "superior"
+        elif z < mid_z_inferior:
+            height = "central superior-inferior"
+        else:
+            height = "inferior"
 
-    # Determine lobe based on combined region + height
+    # Determine lobe based on region and height
     if region == "anterior":
-        if height in ("superior", "central superior-inferior"):
-            lobe = "frontal lobe"
-        else:
-            lobe = "temporal lobe"
-            
+        lobe = "frontal lobe" if height in ("superior", "central superior-inferior") else "temporal lobe"
     elif region == "posterior":
-        if height in ("superior", "central superior-inferior"):
-            lobe = "parietal lobe"
-        else:
-            lobe = "occipital lobe"
-            
-    else:  # region == "central anterior-posterior"
-        if height == "inferior":
-            lobe = "temporal lobe"
-        else: #
-            lobe = "frontal lobe"
+        lobe = "parietal lobe" if height in ("superior", "central superior-inferior") else "occipital lobe"
+    else: # central anterior-posterior
+        lobe = "temporal lobe" if height == "inferior" else "frontal lobe"
 
-    if "central" in (region, height):
-        central_desc = []
-        if region == "central anterior-posterior":
-            central_desc.append("central anterior-posterior")
-        else:
-            central_desc.append(region)
-
-        if height == "central superior-inferior":
-            central_desc.append("central superior-inferior")
-        else:
-            central_desc.append(height)
-
-        joined_desc = " and ".join(central_desc)
-        description = f"{joined_desc} part of the brain, most likely centered in the {hemisphere} {lobe}"
-    else:
-        description = f"{region} and {height} part of the brain, most likely centered in the {hemisphere} {lobe}"
+    description = f"{region} and {height} part of the brain, most likely centered in the {hemisphere} {lobe}"
 
     return description, hemisphere, lobe
 
-def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, voxel_size=(1,1,1)):
+def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata, voxel_size=(1,1,1)):
     voxel_volume = np.prod(voxel_size)
+    orientation = aff2axcodes(metadata['affine'])
 
     # Mask out background (only consider voxels within brain region)
     brain_mask = brain_vol > 0
@@ -96,13 +92,22 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, voxel_si
     print(f"  x: {x_min} to {x_max}")
     print(f"  y: {y_min} to {y_max}")
     print(f"  z: {z_min} to {z_max}")
-    
-    # Define midlines based on actual brain bounds
+
     mid_x = int((x_min + x_max) / 2)
-    mid_y_anterior = int(y_min + (y_max - y_min) * 0.45)
-    mid_y_posterior = int(y_min + (y_max - y_min) * 0.55)
-    mid_z_inferior = int(z_min + (z_max - z_min) * 0.45)
-    mid_z_superior = int(z_min + (z_max - z_min) * 0.55)
+
+    if orientation[1] == "P":  # A→P
+        mid_y_anterior = int(y_min + (y_max - y_min) * 0.45)
+        mid_y_posterior = int(y_min + (y_max - y_min) * 0.55)
+    else:  # P→A
+        mid_y_posterior = int(y_min + (y_max - y_min) * 0.45)
+        mid_y_anterior = int(y_min + (y_max - y_min) * 0.55)
+
+    if orientation[2] == "S":  # I→S
+        mid_z_inferior = int(z_min + (z_max - z_min) * 0.45)
+        mid_z_superior = int(z_min + (z_max - z_min) * 0.55)
+    else:  # S→I
+        mid_z_superior = int(z_min + (z_max - z_min) * 0.45)
+        mid_z_inferior = int(z_min + (z_max - z_min) * 0.55)
     
     print(f"Calculated midlines:")
     print(f"  Mid X (left-right): {mid_x:.2f}")
@@ -112,10 +117,8 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, voxel_si
     print(f"  Mid Z superior: {mid_z_superior:.2f}")
 
     anatomical_location, hemisphere, lobe = interpret_anatomical_location(
-                                                centroid, mid_x, mid_y_anterior,
-                                                mid_y_posterior, mid_z_inferior,
-                                                mid_z_superior)
-
+                                            centroid, mid_x, mid_y_anterior, mid_y_posterior,
+                                            mid_z_inferior, mid_z_superior, orientation)
     
     return {
         "whole_tumor_volume": whole_tumor_vol,

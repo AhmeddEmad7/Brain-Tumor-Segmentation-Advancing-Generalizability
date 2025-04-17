@@ -4,7 +4,7 @@ import nibabel as nib
 import torch.nn.functional as F
 from monai.transforms import LoadImage, Compose, NormalizeIntensityd, AsDiscrete
 
-def load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path):   # lazem yekon el path .nii aw .nii.gz     
+def load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path):
     loadimage = LoadImage(reader='NibabelReader', image_only=False)
     
     t1c_loader, t1c_metadata = loadimage( t1c_path )

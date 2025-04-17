@@ -72,7 +72,7 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
     nifti_pred.header.set_intent('label', name='Label Map')
     nib.save(nifti_pred, os.path.join(output_dir, f"prediction_label.nii.gz"))
 
-    tumor_features = extract_tumor_features(brain_volume, prediction, mask_channels)
+    tumor_features = extract_tumor_features(brain_volume, prediction, mask_channels, metadata[0])
     findings = generate_report(tumor_features)
 
     # Generating a PDF IF NEEDED #
@@ -84,7 +84,7 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
     return prediction, findings
 
 
-# # Doing inference here
+## Doing inference here
 # t1c_path = '/kaggle/input/bratsglioma/Training/BraTS-GLI-00006-000/BraTS-GLI-00006-000-t1c.nii/00000116_brain_t1ce.nii'
 # t1n_path = '/kaggle/input/bratsglioma/Training/BraTS-GLI-00006-000/BraTS-GLI-00006-000-t1n.nii/00000116_brain_t1.nii'
 # t2f_path = '/kaggle/input/bratsglioma/Training/BraTS-GLI-00006-000/BraTS-GLI-00006-000-t2f.nii/00000116_brain_flair.nii'

@@ -1,11 +1,12 @@
 import torch
 import nibabel as nib
+import os
 from AI.DynUNet import DynUNet
+from AI.Generate_from_LLM import initialize_llm, prepare_prompt, generate_clinical_data_from_llm
 from Loader import load_sequences_from_paths
 from monai.inferers import sliding_window_inference
 from Reporting import extract_tumor_features, generate_report, generate_pdf
 from pathlib import Path
-import os
 
 def load_model(model_path):
     model_path = Path(model_path)
@@ -67,21 +68,36 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
     prediction, mask_channels, brain_volume = prediction.cpu().numpy(), mask_channels.cpu().numpy(), brain_volume[0].cpu().numpy()
     print("Prediction shape:", prediction.shape)
 
-    # Saving prediction
+    ## Saving prediction ##
     nifti_pred = nib.Nifti1Image(prediction, affine=metadata[0]['affine'])
     nifti_pred.header.set_intent('label', name='Label Map')
     nib.save(nifti_pred, os.path.join(output_dir, f"prediction_label.nii.gz"))
 
+    ## Starting report generation ##
+    print("Starting report generation...")
+    print("Loading LLM...")
+    generator = initialize_llm("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")
+    print("LLM ready!")
+
+    print("Extracting tumor features...")
     tumor_features = extract_tumor_features(brain_volume, prediction, mask_channels, metadata[0])
-    findings = generate_report(tumor_features)
+    print("Tumor features extracted!")
+
+    print("Preparing prompt...")
+    prompt = prepare_prompt(tumor_features)
+    print("Prompt prepared!")
+
+    print("Generating report data...")
+    llm_data = generate_clinical_data_from_llm(prompt, generator)
+    report_data = generate_report(tumor_features, llm_data)
+    print("Report data generated!")
 
     # Generating a PDF IF NEEDED #
-
     # patient = metadata[0]['filename_or_obj'].split('/')[5]
-    # generate_pdf(findings, patient)
+    # generate_pdf(report_data, patient)
     # print("\n==== Generated Report as PDF file ====\n")
 
-    return prediction, findings
+    return prediction, report_data
 
 
 ## Doing inference here

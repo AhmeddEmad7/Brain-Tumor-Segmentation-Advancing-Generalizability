@@ -1,6 +1,6 @@
 import numpy as np
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.units import inch
 from nibabel.orientations import aff2axcodes
@@ -56,7 +56,7 @@ def interpret_anatomical_location(centroid, mid_x, mid_y_anterior, mid_y_posteri
 
     description = f"{region} and {height} part of the brain, most likely centered in the {hemisphere} {lobe}"
 
-    return description, hemisphere, lobe
+    return description
 
 def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata, voxel_size=(1,1,1)):
     voxel_volume = np.prod(voxel_size)
@@ -92,7 +92,8 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata
     print(f"  x: {x_min} to {x_max}")
     print(f"  y: {y_min} to {y_max}")
     print(f"  z: {z_min} to {z_max}")
-
+    
+    # Define midlines based on actual brain bounds
     mid_x = int((x_min + x_max) / 2)
 
     if orientation[1] == "P":  # A→P
@@ -108,17 +109,10 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata
     else:  # S→I
         mid_z_superior = int(z_min + (z_max - z_min) * 0.45)
         mid_z_inferior = int(z_min + (z_max - z_min) * 0.55)
-    
-    print(f"Calculated midlines:")
-    print(f"  Mid X (left-right): {mid_x:.2f}")
-    print(f"  Mid Y anterior: {mid_y_anterior:.2f}")
-    print(f"  Mid Y posterior: {mid_y_posterior:.2f}")
-    print(f"  Mid Z inferior: {mid_z_inferior:.2f}")
-    print(f"  Mid Z superior: {mid_z_superior:.2f}")
 
-    anatomical_location, hemisphere, lobe = interpret_anatomical_location(
-                                            centroid, mid_x, mid_y_anterior, mid_y_posterior,
-                                            mid_z_inferior, mid_z_superior, orientation)
+    anatomical_location = interpret_anatomical_location(
+                                centroid, mid_x, mid_y_anterior, mid_y_posterior,
+                                mid_z_inferior, mid_z_superior, orientation)
     
     return {
         "whole_tumor_volume": whole_tumor_vol,
@@ -132,28 +126,35 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata
         "enhancing_percentage": enhancing_percentage,
         "tumor_centroid": centroid,
         "anatomical_location": anatomical_location,
-        "hemisphere": hemisphere,
-        "lobe": lobe
     }
 
-def generate_report(data):
+def generate_report(data, llm_data):
     return (
         f"Findings:\n"
-        f"An abnormal mass is identified in the {data['anatomical_location']}. \n\n"
+        f"An abnormal mass is identified in the {data['anatomical_location']}.\n\n"
+        
         f"Composition analysis:\n"
         f"- Enhancing component: {data['enhancing_percentage']:.2f}% of the whole lesion.\n"
         f"- Necrotic component: {data['necrosis_percentage']:.2f}% of the whole lesion.\n"
         f"- Edema component: {data['edema_percentage']:.2f}% of the whole lesion.\n"
         f"- The total lesion represents {data['whole_tumor_percentage']:.2f}% of the total brain volume.\n\n"
-        f"Quantitative analysis of the tumor segmentation reveals the following:\n"
+        
+        f"Quantitative analysis:\n"
         f"- Tumor core volume (including necrotic and enhancing components): {data['tumor_core_volume']:.2f} cc\n"
         f"- Enhancing tumor volume: {data['enhancing_tumor_volume']:.2f} cc\n"
         f"- Necrotic tumor volume: {data['necrosis_volume']:.2f} cc\n"
         f"- Edema volume: {data['edema_volume']:.2f} cc\n"
         f"- Total lesion volume: {data['whole_tumor_volume']:.2f} cc\n\n"
+        
         f"Impression:\n"
-        f"Findings are consistent with a mass lesion in the {data['hemisphere']} {data['lobe']}. Clinical correlation and further evaluation, including possible biopsy and follow-up imaging, are recommended as per clinical context."
-    )
+        f"{llm_data['impression']}\n\n"
+        
+        f"Likely Diagnosis:\n"
+        f"{llm_data['diagnosis']}\n\n"
+        
+        f"Recommendations:\n"
+        f"{llm_data['recommendations']}\n"
+        )
 
 def generate_pdf(findings, patient, filename="radiology_report.pdf"):
     doc = SimpleDocTemplate(filename, pagesize=letter,
@@ -161,13 +162,20 @@ def generate_pdf(findings, patient, filename="radiology_report.pdf"):
                             topMargin=72, bottomMargin=72)
 
     styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        name="TitleStyle",
+        parent=styles["Heading1"],
+        fontSize=24,
+        alignment=1,  # 0 = left, 1 = center, 2 = right
+        spaceAfter=20
+    )
+
+    heading3_style = styles["Normal"]
     story = []
 
-    title_style = styles["Heading1"]
-    heading3_style = styles["Heading3"]
     story.append(Paragraph("Radiology Report", title_style))
     story.append(Spacer(1, 0.1 * inch))
-    story.append(Paragraph(f"Patient: {patient}", heading3_style))
+    story.append(Paragraph(f"<b>Patient:</b> <u>{patient}</u>", heading3_style))
     story.append(Spacer(1, 0.25 * inch))
 
     body_style = styles["Normal"]
@@ -175,6 +183,11 @@ def generate_pdf(findings, patient, filename="radiology_report.pdf"):
         if line.strip() == "":
             story.append(Spacer(1, 0.2 * inch))
         else:
+            if any(line.strip().startswith(header) for header in [
+                "Findings:", "Composition analysis:", "Quantitative analysis:",
+                "Impression:", "Likely Diagnosis:", "Recommendations:"
+            ]):
+                line = f"<b>{line}</b>"
             story.append(Paragraph(line, body_style))
 
     doc.build(story)

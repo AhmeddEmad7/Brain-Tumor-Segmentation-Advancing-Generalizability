@@ -155,8 +155,8 @@ def generate_report(data, llm_data):
         f"Recommendations*:\n"
         f"{llm_data['recommendations']}\n\n\n"
         
-        f"* These sections are preliminary outputs based on automated interpretation of the above data and should be thoroughly "
-        f"reviewed and confirmed by a qualified radiologist prior to clinical application."
+        f"* These sections are preliminary outputs based on automated interpretation of the findings and analysis above, and "
+        f"should be thoroughly reviewed and confirmed by a qualified radiologist prior to clinical application."
         )
 
 def generate_pdf(findings, patient, filename="radiology_report.pdf"):

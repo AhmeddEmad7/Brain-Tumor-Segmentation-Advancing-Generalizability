@@ -10,7 +10,7 @@ from pathlib import Path
 
 def load_model(model_path):
     model_path = Path(model_path)
-    model = DynUNet( spatial_dims=3, in_channels=4, out_channels=4, deep_supervision=False)       
+    model = DynUNet(spatial_dims=3, in_channels=4, out_channels=4, deep_supervision=False)       
     if (model_path).is_file():
         print(f"Found model: {model_path}")
         ckpt = torch.load(model_path, map_location='cuda', weights_only=True) #map_location='cuda' de momken t3mlak moshkla bs sebha law zabta

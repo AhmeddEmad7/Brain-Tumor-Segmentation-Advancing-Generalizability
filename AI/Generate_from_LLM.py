@@ -76,7 +76,7 @@ def prepare_prompt(data):
         - The **Diagnosis** section should state the most probable pathological entity based on imaging features, using precise medical terminology for the grade and type. It should also emphasize that definitive diagnosis requires histopathological and molecular analysis.
         - Use clear section headers exactly as: **(1) Impression**, **(2) Diagnosis**, and **(3) Recommendations**.
         - Write in a formal, clinical tone appropriate for inclusion in a radiology report.
-        - Use bullet points only inside the Recommendations section for actionable steps or follow-up imaging.
+        - Use bullet points (circles not asterisks) only inside the Recommendations section for actionable steps or follow-up imaging.
         - Do NOT mention or assume patient age, gender, or clinical history.
         
         <|start_header_id|>user<|end_header_id|>

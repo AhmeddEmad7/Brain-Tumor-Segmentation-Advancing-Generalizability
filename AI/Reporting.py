@@ -146,14 +146,17 @@ def generate_report(data, llm_data):
         f"- Edema volume: {data['edema_volume']:.2f} cc\n"
         f"- Total lesion volume: {data['whole_tumor_volume']:.2f} cc\n\n"
         
-        f"Impression:\n"
+        f"Impression*:\n"
         f"{llm_data['impression']}\n\n"
         
-        f"Likely Diagnosis:\n"
+        f"Likely Diagnosis*:\n"
         f"{llm_data['diagnosis']}\n\n"
         
-        f"Recommendations:\n"
-        f"{llm_data['recommendations']}\n"
+        f"Recommendations*:\n"
+        f"{llm_data['recommendations']}\n\n\n"
+        
+        f"* These sections are preliminary outputs based on automated interpretation of the above data and should be thoroughly "
+        f"reviewed and confirmed by a qualified radiologist prior to clinical application."
         )
 
 def generate_pdf(findings, patient, filename="radiology_report.pdf"):
@@ -171,6 +174,13 @@ def generate_pdf(findings, patient, filename="radiology_report.pdf"):
     )
 
     heading3_style = styles["Normal"]
+    body_style = styles["Normal"]
+    footnote_style = ParagraphStyle(
+        name="FootnoteStyle",
+        parent=styles["Normal"],
+        fontSize=styles["Normal"].fontSize - 2
+    )
+
     story = []
 
     story.append(Paragraph("Radiology Report", title_style))
@@ -178,16 +188,24 @@ def generate_pdf(findings, patient, filename="radiology_report.pdf"):
     story.append(Paragraph(f"<b>Patient:</b> <u>{patient}</u>", heading3_style))
     story.append(Spacer(1, 0.25 * inch))
 
-    body_style = styles["Normal"]
     for line in findings.split('\n'):
         if line.strip() == "":
             story.append(Spacer(1, 0.2 * inch))
         else:
-            if any(line.strip().startswith(header) for header in [
+            line_stripped = line.strip()
+            is_header = any(line_stripped.startswith(header) for header in [
                 "Findings:", "Composition analysis:", "Quantitative analysis:",
-                "Impression:", "Likely Diagnosis:", "Recommendations:"
-            ]):
+                "Impression*:", "Likely Diagnosis*:", "Recommendations*:"
+            ])
+            is_footnote = line_stripped.startswith("* These")
+
+            if is_header:
                 line = f"<b>{line}</b>"
-            story.append(Paragraph(line, body_style))
+                story.append(Paragraph(line, body_style))
+            elif is_footnote:
+                line = f"<b><i>{line}</i></b>"
+                story.append(Paragraph(line, footnote_style))
+            else:
+                story.append(Paragraph(line, body_style))
 
     doc.build(story)

@@ -15,6 +15,7 @@ const invert = () => {
     ) as Types.IVolumeViewport;
 
     // Invert the viewport
+
     const { invert } = viewport.getProperties();
     viewport.setProperties({ invert: !invert });
 

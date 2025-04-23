@@ -1,4 +1,5 @@
 // Define a type for the viewport configuration
+import { PixelDataTypedArray } from '@cornerstonejs/core/src/types/PixelDataTypedArray';
 export interface IViewportConfig {
     viewportId: string;
     type: string; // Assuming this is a string, adjust the type as necessary
@@ -25,6 +26,12 @@ export interface IAnnotationTool {
     toolName: string;
     mouseBinding: number;
 }
+export interface segmentation3D {
+    scalarData: number[] ;
+    dimensions: [number, number, number];
+    spacing: [number, number, number];
+    origin: [number, number, number];
+}
 
 export interface ISegmentation {
     volumeId?: string;
@@ -45,4 +52,5 @@ export interface ISegmentation {
         isVisible: boolean;
         isLocked: boolean;
     }[];
+    segmentationVolume: string;
 }

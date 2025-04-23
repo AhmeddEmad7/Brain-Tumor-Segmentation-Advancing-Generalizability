@@ -109,7 +109,8 @@
         "slate-react": "^0.105.0",
         "tailwind-merge": "^2.2.1",
         "tailwindcss-animate": "^1.0.7",
-        "ts-node": "^10.9.2"
+        "ts-node": "^10.9.2",
+        "vtk.js": "^32.14.0"
     },
     "devDependencies": {
         "@types/lodash.debounce": "^4.0.9",

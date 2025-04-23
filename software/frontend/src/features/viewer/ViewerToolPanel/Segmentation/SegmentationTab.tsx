@@ -20,7 +20,7 @@ const SegmentationTab = () => {
     return (
         <div>
             <AdvancedToolBox title={'Segmentation Tools'} items={advancedToolConfig} />
-            <ActiveLearning />
+            {/* <ActiveLearning /> */}
             <AISegmentation />
             <SegmentationGroupTable
                 segmentations={segmentations}

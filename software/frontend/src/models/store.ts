@@ -42,6 +42,7 @@ export interface IStoreViewerSlice {
     layout: ILayout;
     isMPRActive: boolean, // Default state for MPR
     is3DActive: boolean, // Default state for 3D
+    isCrosshairActive:boolean,
     isRightPanelOpen: boolean;
     isStudiesPanelOpen: boolean;
     isInfoOnViewportsShown: boolean;

@@ -11,8 +11,9 @@ type TViewportOverlayProps = {
 };
 
 const ViewportOverlay = ({ currentImageId, viewport }: TViewportOverlayProps) => {
-    if (!currentImageId || !viewport) return null;
+    if (!currentImageId || !viewport || typeof viewport.getZoom !== 'function') return null;
 
+    if (!viewport) return null;
     const { isInfoOnViewportsShown } = useSelector((store: IStore) => store.viewer);
 
     const { rows, columns, sliceThickness, sliceLocation } = getMetadataByImageId(
@@ -33,8 +34,7 @@ const ViewportOverlay = ({ currentImageId, viewport }: TViewportOverlayProps) =>
     const windowCenter = 0;
     const wwwc = `W: ${HelpersUtil.formatNumberPrecision(windowWidth, 0)} L: ${HelpersUtil.formatNumberPrecision(windowCenter, 0)}`;
     const imageDimensions = `${columns?.value} x ${rows?.value}`;
-
-    const zoom = viewport.getZoom() * 100;
+    const zoom = viewport?.getZoom() * 100;
     const imageIds = viewport.getImageIds();
     const imageIndex = imageIds.indexOf(currentImageId) + 1;
     const numImages = imageIds.length;

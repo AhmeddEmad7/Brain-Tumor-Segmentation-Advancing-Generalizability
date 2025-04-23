@@ -33,7 +33,13 @@ const viewerUiReducer = {
             numCols: 3
         };
 
-    }
+    },
+    resetViewerLayout: (state: IStoreViewerSlice) => {
+        state.layout = {
+          numRows: 1,
+          numCols: 1
+        };
+      }
 };
 
 export default viewerUiReducer;

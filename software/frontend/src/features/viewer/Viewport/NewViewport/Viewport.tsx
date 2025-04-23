@@ -15,13 +15,10 @@ import { getSeriesModality } from '@features/viewer/viewer-viewport-reducers';
 import { toggleMPRMode, toggleVolumeRendering } from '@features/viewer/ViewerTopBar/viewer-top-bar-actions'; // Import your toggleMPRMode function
 import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/CornerstoneToolManager';
 import * as cornerstoneTools from '@cornerstonejs/tools';
-
 import { cornerstoneNiftiImageVolumeLoader } from '@cornerstonejs/nifti-volume-loader';
-import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
-import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
-
 import { Volume } from 'lucide-react';
-import * as cornerstone3 from '@cornerstonejs/core/dist/';
+
+// import * as cornerstone3 from '@cornerstonejs/core/src/loaders/';
 // const { isCrosshairActive } = useSelector((store: IStore) => store.viewer);
 
 const wadoRsRoot = import.meta.env.VITE_ORTRHANC_PROXY_URL;
@@ -40,7 +37,6 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
     const [thisViewport, setThisViewport] = useState<Types.IVolumeViewport | null>(null);
     const [thisViewportImageIds, setThisViewportImageIds] = useState<string[]>([]);
     const [hasCinePlayer, setHasCinePlayer] = useState<boolean>(false);
-    // const mina = hazem.cornerstoneNiftiImageVolumeLoader
     const viewportRef = useRef<HTMLDivElement>(null);
     const cineRef = useRef<HTMLDivElement>(null);
     const {
@@ -51,11 +47,13 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         currentStudyInstanceUid,
         isMPRActive,
         is3DActive,
-        isCrosshairActive
+        isCrosshairActive,
     } = useSelector((store: IStore) => store.viewer);
-
     const dispatch = useDispatch();
-
+    const segmentationVolume = useSelector((s: IStore) =>
+        s.viewer.segmentations.find((seg) => seg.isActive)?.segmentationVolume
+      );
+      console.log('segmentationVolume', segmentationVolume);
     // handleViewportClick is a function that takes an id and dispatches an action to the viewerSlice
     const handleViewportClick = (id: string) => {
         dispatch(viewerSliceActions.setSelectedViewport(id));
@@ -63,6 +61,69 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
             onClick(id);
         }
     };
+//     const addSegmentationMesh = async (
+//         viewport: Types.IVolumeViewport,
+//         segmentationVolumeId: string
+//       ) => {
+//         if (hasMeshBeenAdded.current) return;
+//         hasMeshBeenAdded.current = true;
+      
+//         const segVol = cornerstone.cache.getVolume(segmentationVolumeId);
+//         console.log('segVol', segVol);
+//         if (!segVol) {
+//           console.warn('Segmentation volume not found.');
+//           return;
+//         }
+      
+//         // const segImageData = segVol.imageData!;
+//         const segImageData = segVol.imageData!;
+//         const buffer = segImageData.getPointData().getScalars().getData();
+//         const dims = segImageData.getDimensions();
+//         const spacing = segImageData.getSpacing();
+//         const origin = segImageData.getOrigin();
+      
+//         const vtkSeg = vtkImageData.newInstance({ dimensions: dims, spacing, origin });
+//         vtkSeg.getPointData().setScalars(
+//           vtkDataArray.newInstance({ values: buffer, numberOfComponents: 1 })
+//         );
+      
+//         const mc = vtkImageMarchingCubes.newInstance({
+//           contourValue: 0.5,
+//           computeNormals: true,
+//           mergePoints: true,
+//         });
+//         mc.setInputData(vtkSeg);
+//         mc.update();
+//         const polydata = mc.getOutputData();
+      
+//         const mapper = vtkMapper.newInstance();
+//         mapper.setInputData(polydata);
+      
+//         const actor = vtkActor.newInstance();
+//         actor.setMapper(mapper);
+//         actor.getProperty().setColor(1, 0, 0);
+//         console.log('actorsasdsdasdasdasd');
+//         actor.getProperty().setOpacity(0.5);
+//         // console.log('📦 Segmentation buffer min/max:', Math.min(...buffer), Math.max(...buffer));
+//         const min = Array.from(buffer).reduce((a, b) => Math.min(a, b), Infinity);
+//         const max = Array.from(buffer).reduce((a, b) => Math.max(a, b), -Infinity);
+//         console.log('📦 Segmentation buffer min/max:', min, max);
+//         console.log('🧠 segmentationVolume ID:', segmentationVolume);
+
+//         vtkMatrixBuilder
+//   .buildFromDegree()
+//   .translate(50, 10, -10) // 👉 try (100, 0, 0), (-100, 0, 0), (0, 100, 0) etc. to shift position
+//   .apply(actor.getUserMatrix());
+//         viewport.addActor({ uid: 'SegMesh', actor });
+//         viewport.resetCamera();
+//         viewport.render();
+//       };
+//     const hasMeshBeenAdded = useRef(false);
+    useEffect(() => {
+        if (!thisViewport || !thisViewport.getImageIds) {
+        console.warn('🛑 Viewport not ready for overlay:', thisViewport);
+        }
+    }, [thisViewport]);
     useEffect(() => {
         if (selectedSeriesInstanceUid && is3DActive) {
             getSeriesModality(currentStudyInstanceUid, selectedSeriesInstanceUid).then((modality) => {
@@ -104,27 +165,6 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         viewport.render();
     }, [isMPRActive, is3DActive, selectedViewportId, selectedSeriesInstanceUid]);
 
-    useEffect(() => {
-        if (selectedSeriesInstanceUid && isMPRActive) {
-            // Trigger MPR mode whenever the series changes
-            toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
-        }
-    }, [selectedSeriesInstanceUid, renderingEngineId, currentStudyInstanceUid]);
-
-    useEffect(() => {
-        if (isMPRActive && isCrosshairActive) {
-            const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-            if (!renderingEngine) return;
-
-            const viewport = renderingEngine.getViewport(selectedViewportId);
-            if (!viewport) return;
-
-            CornerstoneToolManager.setToolActive(
-                cornerstoneTools.CrosshairsTool.toolName,
-                cornerstoneTools.Enums.MouseBindings.Primary
-            );
-        }
-    }, [isMPRActive, isCrosshairActive]);
 
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
@@ -184,7 +224,6 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         // add if Nifti here
         updateViewportNifti();
     }, [selectedViewportId]);
-
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
 
@@ -229,39 +268,11 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     wadoRsRoot: wadoRsRoot
                 });
 
-                // if (!imageIds || imageIds.length === 0) {
-                //     console.error('❌ No image IDs found for this series.');
-                //     return;
-                // }
-
-                // console.log(`📸 Found ${imageIds.length} image IDs.`);
+            
 
                 // ✅ **Create & Load Volume**
                 console.log('🔄 Creating & caching volume...');
-                // const niftiURL =
-                // 'https://ohif-assets.s3.us-east-2.amazonaws.com/nifti/CTACardio.nii.gz';
-                // const volumeId = 'nifti:' + niftiURL;
-                // console.log('🆔 Volume ID:', volumeId);
-                // cornerstone.imageLoader.registerImageLoader('nifti', cornerstoneNiftiImageLoader)
-                // const imageIds = await createNiftiImageIdsAndCacheMetadata({ url: niftiURL });
-                // console.log('Image IDs:', imageIds);
-
-                // const viewportInputArray:any = [
-                //     {
-                //       viewportId: selectedViewportId,
-                //       type: cornerstone.Enums.ViewportType.STACK,
-                //       element: viewport.element
-                //     },
-                //   ];
-                //   renderingEngine.setViewports(viewportInputArray);
-                //   const vps = renderingEngine.getStackViewports();
-                //   const viewport2 = vps[0];
-
-                //   viewport2.setStack(imageIds);
-                //   viewport2.resetCamera();
-                //   renderingEngine.render();
-                //   viewport2.render();
-
+ 
                 //   const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId);
                 const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageIds });
                 await volume.load();
@@ -269,22 +280,6 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                 // ✅ **Set Volume in Viewport**
                 console.log('📡 Setting volume in viewport...');
                 await viewport.setVolumes([{ volumeId }], true);
-                console.log(vtkColorMaps);
-
-                // ✅ **Set Orientation**
-                const direction = viewport.getImageData()?.imageData.getDirection() as number[];
-                const orientation = DicomUtil.detectImageOrientation(
-                    direction ? direction.slice(0, 6) : [1, 0, 0, 0, 1, 0]
-                );
-
-                if (is3DActive) {
-                    console.log('🖥️ Setting 3D mode...');
-                    viewport.resetCamera();
-                } else {
-                    console.log('🖼️ Setting 2D orientation:', orientation);
-                    viewport.setOrientation(orientation);
-                }
-
                 // ✅ **Render Viewport**
                 viewport.render();
 
@@ -346,7 +341,7 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
     useResizeObserver(viewportRef, handleResize);
 
     const cineHeight = detectCineHeight(vNeighbours || 1);
-
+    
     return (
         <div className={'flex-col'}>
             <div
@@ -355,8 +350,9 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                 onClick={() => handleViewportClick(id)}
                 className={`${hasCinePlayer ? `${cineHeight[0]}` : 'h-full'} w-full relative bg-black ${selectedViewportId === id ? 'border-2 border-AAPrimary' : ''}`}
             >
-                <ViewportOverlay viewport={thisViewport} currentImageId={currentImageId} />
+                <ViewportOverlay viewport={thisViewport&& thisViewport.getImageIds.length?thisViewport:null} currentImageId={currentImageId} />
             </div>
+
             {hasCinePlayer && (
                 <div ref={cineRef} className={`${cineHeight[1]}`}>
                     <CinePlayer viewportElementRef={viewportRef} />

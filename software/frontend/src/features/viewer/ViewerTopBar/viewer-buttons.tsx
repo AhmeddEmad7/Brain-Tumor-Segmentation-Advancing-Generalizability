@@ -18,6 +18,8 @@ import {
     Upload as UploadIcon,
     ThreeDRotationSharp as ThreeDRotationIcon
 } from '@mui/icons-material';
+import * as cornerstoneTools from '@cornerstonejs/tools';
+import * as cornerstone from '@cornerstonejs/core';
 import { LuAxis3D } from 'react-icons/lu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLayerGroup, faUpDownLeftRight, faCirclePlay } from '@fortawesome/free-solid-svg-icons';
@@ -58,6 +60,7 @@ import ColormapSelectorMenu from '@features/viewer/components/ColormapSelectorMe
 import { applyColormapToViewport } from './viewer-top-bar-actions';
 import { Palette as PaletteIcon } from '@mui/icons-material';
 import { icon } from '@fortawesome/fontawesome-svg-core';
+import { setActiveSegmentIndex } from '@cornerstonejs/tools/dist/types/stateManagement/segmentation/segmentIndex';
 // import ColormapSelectorMenu from '@/components/ColormapSelectorMenu';
 
 const is3DActive = store.getState().viewer.is3DActive;
@@ -177,38 +180,57 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
     },
     {
         title: 'MPR',
-        onClick: () => {
-            const state = store.getState();
-            const renderingEngineId = state.viewer.renderingEngineId;
-            const currentStudyInstanceUid = state.viewer.currentStudyInstanceUid;
-            const selectedSeriesInstanceUid = state.viewer.selectedSeriesInstanceUid;
+        onClick: async () => {
+          const state = store.getState();
+          const renderingEngineId = state.viewer.renderingEngineId;
+          const currentStudyInstanceUid = state.viewer.currentStudyInstanceUid;
+          const selectedSeriesInstanceUid = state.viewer.selectedSeriesInstanceUid;
+          const isActive = state.viewer.isMPRActive;
+        //   const isMPRActive = state.viewer.isMPRActive;
+      
+          if (!isActive) {
             store.dispatch(viewerSliceActions.setMPRActive(true));
-            toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
+            // store.dispatch(setActiveSegmentIndex)
+            store.dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
+            await toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
+          } else {
+            CornerstoneToolManager.disableAllTools();
+            store.dispatch(viewerSliceActions.resetViewerLayout());
+            store.dispatch(viewerSliceActions.setMPRActive(false));
+          }
         },
         icon: <LuAxis3D />,
         disabled: false
-    },
-    {
+      },
+      {
         title: 'Crosshair',
         onClick: () => {
-            const state = store.getState();
-            const isCurrentlyActive = state.viewer.isCrosshairActive;
-
-            store.dispatch(viewerSliceActions.setCrosshairActive(!isCurrentlyActive));
-
-            if (!isCurrentlyActive) {
-                CornerstoneToolManager.disableAllTools();
-                CornerstoneToolManager.setToolActive(
-                    cornerstoneTools.CrosshairsTool.toolName,
-                    cornerstoneTools.Enums.MouseBindings.Primary
-                );
-            } else {
-                CornerstoneToolManager.setToolDisabled(cornerstoneTools.CrosshairsTool.toolName);
-            }
+          const state = store.getState();
+          const renderingEngineId = state.viewer.renderingEngineId;
+          const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+          const isCurrentlyActive = state.viewer.isCrosshairActive;
+      
+          const viewports = renderingEngine?.getViewports();
+          if (!viewports || viewports.length < 2) {
+            console.warn('❌ Crosshairs require at least two viewports.');
+            return;
+          }
+      
+          store.dispatch(viewerSliceActions.setCrosshairActive(!isCurrentlyActive));
+      
+          if (!isCurrentlyActive) {
+            CornerstoneToolManager.disableAllTools();
+            CornerstoneToolManager.setToolActive(
+              cornerstoneTools.CrosshairsTool.toolName,
+              cornerstoneTools.Enums.MouseBindings.Primary
+            );
+          } else {
+            CornerstoneToolManager.disableAllTools();
+          }
         },
         icon: <GiCrosshair />,
         disabled: false
-    },
+      },
     {
         icon: <ThreeDIcon />,
         title: '3D',

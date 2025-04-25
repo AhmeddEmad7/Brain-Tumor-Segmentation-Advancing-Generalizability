@@ -115,13 +115,7 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata
         mid_z_superior = int(z_min + (z_max - z_min) * 0.45)
         mid_z_inferior = int(z_min + (z_max - z_min) * 0.55)
     
-    print(f"Calculated midlines:")
-    print(f"  Mid X (left-right): {mid_x:.2f}")
-    print(f"  Mid Y anterior: {mid_y_anterior:.2f}")
-    print(f"  Mid Y posterior: {mid_y_posterior:.2f}")
-    print(f"  Mid Z inferior: {mid_z_inferior:.2f}")
-    print(f"  Mid Z superior: {mid_z_superior:.2f}\n")
-
+    print(f"Calculated midlines!")
     findings = interpret_anatomical_location(
                                 centroid, mid_x, mid_y_anterior, mid_y_posterior,
                                 mid_z_inferior, mid_z_superior, orientation)

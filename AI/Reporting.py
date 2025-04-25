@@ -52,11 +52,16 @@ def interpret_anatomical_location(centroid, mid_x, mid_y_anterior, mid_y_posteri
     elif region == "posterior":
         lobe = "parietal lobe" if height in ("superior", "central superior-inferior") else "occipital lobe"
     else: # central anterior-posterior
-        lobe = "temporal lobe" if height == "inferior" else "frontal lobe"
+        lobe = "temporal lobe" if height == "inferior" else "parietal lobe"
 
-    description = f"{region} and {height} part of the brain, most likely centered in the {hemisphere} {lobe}"
-
-    return description
+    if "central" in region and "central" in height:
+        return f"An abnormal mass is identified centered along both the anteroposterior and craniocaudal axes, most likely centered in the {hemisphere} {lobe}.\n"
+    elif "central" in region:
+        return f"An abnormal mass is identified in the {height} part of the brain, centered along the anteroposterior axis, and most likely located in the {hemisphere} {lobe}.\n"
+    elif "central" in height:
+        return f"An abnormal mass is identified in the {region} part of the brain, centered along the craniocaudal axis, and most likely located in the {hemisphere} {lobe}.\n"
+    else:
+        return f"An abnormal mass is identified in the {region} and {height} part of the brain, most likely centered in the {hemisphere} {lobe}.\n"
 
 def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata, voxel_size=(1,1,1)):
     voxel_volume = np.prod(voxel_size)
@@ -109,8 +114,15 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata
     else:  # S→I
         mid_z_superior = int(z_min + (z_max - z_min) * 0.45)
         mid_z_inferior = int(z_min + (z_max - z_min) * 0.55)
+    
+    print(f"Calculated midlines:")
+    print(f"  Mid X (left-right): {mid_x:.2f}")
+    print(f"  Mid Y anterior: {mid_y_anterior:.2f}")
+    print(f"  Mid Y posterior: {mid_y_posterior:.2f}")
+    print(f"  Mid Z inferior: {mid_z_inferior:.2f}")
+    print(f"  Mid Z superior: {mid_z_superior:.2f}\n")
 
-    anatomical_location = interpret_anatomical_location(
+    findings = interpret_anatomical_location(
                                 centroid, mid_x, mid_y_anterior, mid_y_posterior,
                                 mid_z_inferior, mid_z_superior, orientation)
     
@@ -125,13 +137,13 @@ def extract_tumor_features(brain_vol, segmentation_mask, mask_channels, metadata
         "edema_percentage": edema_percentage,
         "enhancing_percentage": enhancing_percentage,
         "tumor_centroid": centroid,
-        "anatomical_location": anatomical_location,
+        "findings": findings,
     }
 
 def generate_report(data, llm_data):
     return (
         f"Findings:\n"
-        f"An abnormal mass is identified in the {data['anatomical_location']}.\n\n"
+        f"{data['findings']}\n"
         
         f"Composition analysis:\n"
         f"- Enhancing component: {data['enhancing_percentage']:.2f}% of the whole lesion.\n"

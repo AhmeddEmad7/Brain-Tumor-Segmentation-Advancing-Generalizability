@@ -54,8 +54,9 @@ def extract_radiology_sections(output_text):
     return extracted
 
 def format_summary(data):
+    location = data['findings'].split("identified", 1)[1].strip().capitalize()
     return (
-        f"- Location: {data['anatomical_location']}.\n"
+        f"- Location: {location}.\n"
         f"- Enhancing component: {data['enhancing_percentage']:.2f}% ({data['enhancing_tumor_volume']:.2f} cc)\n"
         f"- Necrotic component: {data['necrosis_percentage']:.2f}% ({data['necrosis_volume']:.2f} cc)\n"
         f"- Edema: {data['edema_percentage']:.2f}% ({data['edema_volume']:.2f} cc)\n"

@@ -23,14 +23,87 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
-import { groupDataBySubjectSessionCategory } from '@features/studies-table/nifti-studies-table/groupDataBysubject';
-import CollapsibleTable from '@features/studies-table/nifti-studies-table/nifti-collapsibleTable.tsx';
+import { flattenNiftiData } from './flattenNiftiData';
 function StudiesDataTable({ data }: { data: INiftiTableStudy[] }) {
-    // 1) Group your flat data into hierarchical data
-    const subjects = groupDataBySubjectSessionCategory(data);
+    const [searchValues, setSearchValues] = useState(Array(tableColumnHeadings.length).fill(''));
+    const dispatch = useDispatch();
+    const theme = useTheme();
+
+    const handleSearchChange = (index: number, value: string) => {
+      const newSearchValues = [...searchValues];
+      newSearchValues[index] = value;
+      setSearchValues(newSearchValues);
+    };
   
-    // 2) Pass that into the CollapsibleTable
-    return <CollapsibleTable subjects={subjects} />;
+    const filterRows = () => {
+      return data.filter(row =>
+        tableColumnHeadings.every((col, i) => {
+          if (!col.searchable) return true;
+          const searchVal = searchValues[i].toLowerCase();
+          const rowVal = String((row as any)[col.key] || '').toLowerCase();
+          return rowVal.includes(searchVal);
+        })
+      );
+    };
+  
+    const filteredRows = filterRows();
+  
+    return (
+      <Box>
+        <TableContainer component={Box} className="overflow-auto">
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                {tableColumnHeadings.map((col, i) => (
+                  <StyledTableCell key={i}>
+                    <Box className="flex items-center">
+                      {col.searchable ? (
+                        <>
+                          <StudiesTableHeaderSearchInput
+                            displayName={col.displayName}
+                            index={i}
+                            onChange={handleSearchChange}
+                            theme={theme}
+                          />
+                          <SearchIcon />
+                        </>
+                      ) : (
+                        col.displayName
+                      )}
+                    </Box>
+                  </StyledTableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+  
+            <TableBody>
+              {filteredRows.map((row) => (
+                <StyledTableRow key={row.id}>
+                  <StyledTableCell>
+                    <Checkbox />
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Link to={`/viewer?StudyInstanceUID=${row.filePath}`} target="_blank">
+                      <VisibilityIcon sx={{ cursor: 'pointer' }} />
+                    </Link>
+                  </StyledTableCell>
+                  <StyledTableCell>{row.fileName}</StyledTableCell>
+                  <StyledTableCell>{row.projectSub}</StyledTableCell>
+                  <StyledTableCell>{row.category}</StyledTableCell>
+                  <StyledTableCell>{row.session}</StyledTableCell>
+                  <StyledTableCell>
+                    <IconButton onClick={() => dispatch(deleteNiftiThunk(row.id))}>
+                      <MdDeleteForever />
+                    </IconButton>
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    );
   }
+  
   
   export default StudiesDataTable;

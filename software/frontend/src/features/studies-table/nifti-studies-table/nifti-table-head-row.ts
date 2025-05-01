@@ -28,7 +28,7 @@ const tableColumnHeadings: INiftiTableColumnHead[] = [
     },
     {
         displayName: 'Session',
-        key: 'sequence',
+        key: 'session',
         searchable: true
     },
     {

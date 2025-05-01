@@ -1,0 +1,4 @@
+FROM redis/redis-stack:latest
+EXPOSE  8001 6379
+VOLUME ["/data"]
+CMD ["redis-server", "--appendonly", "yes"]

@@ -23,7 +23,6 @@ import * as cornerstone from '@cornerstonejs/core';
 import { LuAxis3D } from 'react-icons/lu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLayerGroup, faUpDownLeftRight, faCirclePlay } from '@fortawesome/free-solid-svg-icons';
-import { FaPaintBrush } from 'react-icons/fa';
 import { GiCrosshair } from 'react-icons/gi'; // Import crosshair icon
 
 import store from '@/redux/store.ts';

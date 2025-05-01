@@ -1,5 +1,5 @@
 import { AdvancedToolBox, SegmentationGroupTable } from '@ui/library';
-import advancedToolConfig from '../AdvancedToolConfig.ts';
+import advancedToolConfig from '../AdvancedToolConfig.tsx';
 import {
     handleSegmentationDelete,
     handleSegmentationVisibilityToggle,
@@ -28,7 +28,7 @@ const SegmentationTab = () => {
                 showDeleteSegment={true} 
                 showAddSegment={true}
                 segmentationConfig={{
-                    fillAlpha: 0.5,
+                    fillAlpha: 0.9,
                     fillAlphaInactive: 0.5,
                     outlineWidthActive: 2,
                     outlineOpacityActive: 1,

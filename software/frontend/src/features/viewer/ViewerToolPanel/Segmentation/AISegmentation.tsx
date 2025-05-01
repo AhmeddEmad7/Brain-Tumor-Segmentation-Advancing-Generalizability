@@ -79,7 +79,7 @@ const AISegmentation = () => {
 
     return (
         <div>
-            <PanelSection title={'AI Based Segmentation'}>
+            <PanelSection title={'Segmentation'}>
                 <ServerSelection
                     defaultModel={selectedModel.name}
                     onModelChange={handleModelChange}

@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { PanelSection, Tooltip } from '@ui/library';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import ToolSettings from './ToolSettings.tsx';
+import { ReactElement } from 'react';
+import React from 'react';
 
 export type TOption = {
     id?: string;
@@ -21,7 +23,7 @@ export type TOption = {
 
 export type TItem = {
     name: string;
-    icon: IconProp;
+    icon: IconProp | ReactElement;  
     active?: boolean;
     options?: TOption[];
     onClick?: (name: string) => void;
@@ -72,8 +74,19 @@ const AdvancedToolbox = ({ title, items }: TAdvancedToolboxProps) => {
                                             item.disabled && 'opacity-50',
                                             !item.disabled && 'hover:bg-[#2086C0] cursor-pointer hover:text-white' // Even lighter on hover
                                         )}
-                                    >
-                                        <FontAwesomeIcon icon={item.icon} />
+                                    > 
+                                       {React.isValidElement(item.icon) ? (
+                                                                    item.icon // Material Icon
+                                                                ) : (
+                                                                    <FontAwesomeIcon
+                                                                        icon={
+                                                                            (item.icon as any).iconName === 'square'
+                                                                                ? ['far', 'square']
+                                                                                : (item.icon as IconProp)
+                                                                        }
+                                                                        className="text-white text-xl"
+                                                                    />
+                                                                )}
                                     </div>
                                 </div>
                             </Tooltip>

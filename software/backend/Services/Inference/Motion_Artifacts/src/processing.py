@@ -31,9 +31,7 @@ client_redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
 def load_model():
 
     global model_path
-
     print('loading the model')
-
     model = keras.models.load_model(
         model_path,
         custom_objects={

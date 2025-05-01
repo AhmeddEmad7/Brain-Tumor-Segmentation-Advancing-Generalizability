@@ -5,15 +5,22 @@ from app.schemas import RequestReport
 
 def create_report(db: Session, report: RequestReport):
     try:
-        new_report = Report(**report.model_dump())
+        new_report = Report(studyId=report.studyId, content=report.content)
         db.add(new_report)
         db.commit()
         db.refresh(new_report)
         return new_report
-    except:
+    except Exception as e:
+        db.rollback()
+        print(f"❌ Error creating report: {e}")
         return None
 
-
+def get_reports_by_study_id(db: Session, study_id: str):
+    try:
+        reports = db.query(Report).filter(Report.studyId == study_id).all()
+        return reports
+    except:
+        return None
 def get_reports(db: Session):
     try:
         return db.query(Report).all()

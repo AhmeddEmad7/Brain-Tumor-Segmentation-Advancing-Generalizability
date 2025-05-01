@@ -9,3 +9,11 @@ psycopg2==2.9.9
 pika==1.3.2
 redis
 django-revproxy==0.12.0
+numpy
+dicomweb_client                                                
+redis
+SimpleITK
+pydicom_seg                                                    
+pydicom==2.3.0                                                 
+                                                        
+transformers                                                   

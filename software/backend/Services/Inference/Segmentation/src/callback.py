@@ -8,7 +8,7 @@ import pydicom
 import requests
 import redis
 from src.processing import get_dicom_series, nifti_to_dicom_seg , segmentation 
-from src.colored_dicom import convert_array_to_dicom_seg
+import pika
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 studies_dir = os.path.join(current_dir, '..', 'studies')
@@ -25,6 +25,11 @@ redis_port = int(os.getenv('REDIS_PORT', 6379))
 redis_db = int(os.getenv('REDIS_DB', 0))
 
 client_redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
+
+def store_finding_in_redis(study_uid: str, finding: str):
+    redis_key = f"report_{study_uid}"
+    client_redis.set(redis_key, finding)
+    print(f"Stored finding for study {study_uid} in Redis under key {redis_key}")
 
 def segmentation_callback(ch, method, properties, body):
     print(f" [Segmentation] Received {body.decode()}, starting processing...")
@@ -43,13 +48,8 @@ def segmentation_callback(ch, method, properties, body):
         volume_path = get_dicom_series(study_uid, value, key)
         volume_paths[key] = volume_path
         print(f"Volume path: {volume_path}")
-
-    # 2. load the volumes
-    # t1 = nib.load(volume_paths['t1']).get_fdata()
-    # t2 = nib.load(volume_paths['t2']).get_fdata()
-    # flair = nib.load(volume_paths['flair']).get_fdata()
-    # t1ce = nib.load(volume_paths['t1c']).get_fdata()
-
+        
+        
     t1 = volume_paths['t1']
     t2 = volume_paths['t2']
     flair = volume_paths['flair']
@@ -62,8 +62,12 @@ def segmentation_callback(ch, method, properties, body):
 
     ###### INSERT THE MODEL FUNCTION HERE ######
     output_dir = os.path.join(studies_dir, study_uid)
-    segmentation_mask_nifti_path = segmentation(t1ce, t1, flair, t2, output_dir)
-    # segmentation_mask = np.flip(segmentation_mask, axis=1)
+    segmentation_mask_nifti_path,finding = segmentation(t1ce, t1, flair, t2, output_dir)
+    
+    # send the finding to MQ
+    print("Finding:", finding)
+    print("Sending reporting message...")
+    store_finding_in_redis(study_uid, finding)
     # End the timer
     end_time = time.time()
 
@@ -72,8 +76,6 @@ def segmentation_callback(ch, method, properties, body):
     
     # save the corrected volume
     print("Saving the segmentation mask As nifti...")
-    # nib.save(nib.Nifti1Image(np.array(segmentation_mask), np.eye(4)),
-    #          os.path.join(studies_dir, study_uid, 'segmentation.nii.gz'))
 
     print("Converting to DICOM SEG...")
     print(sequences['t1'])

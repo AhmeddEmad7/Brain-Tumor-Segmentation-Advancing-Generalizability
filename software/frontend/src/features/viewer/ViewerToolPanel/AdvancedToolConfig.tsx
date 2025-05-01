@@ -1,9 +1,15 @@
-import { faEraser, faPaintBrush, faShapes } from '@fortawesome/free-solid-svg-icons';
+import { faEraser, faPaintBrush, faShapes,faSquareFull,faSquare} from '@fortawesome/free-solid-svg-icons';
+// <FontAwesomeIcon icon="fa-regular fa-square" />
 import { CornerstoneToolManager, SEGMENTATION_TOOLS } from '@features/viewer/CornerstoneToolManager';
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import store from '@/redux/store.ts';
 import { TItem } from '@ui/library/AdvancedToolBox/AdvancedToolBox.tsx';
-
+import CropSquareIcon from '@mui/icons-material/CropSquare';
+import {
+    showFillAndOutline,
+    showOutlineOnly
+  } from '@features/viewer/CornerstoneToolManager/segmentationMethods';
+import SquareIcon from '@mui/icons-material/Square';
 const { utilities: cstUtils } = cornerstoneTools;
 
 const { segmentation: segmentationUtils } = cstUtils;
@@ -141,6 +147,17 @@ const advancedToolConfig: TItem[] = [
             }
         ]
     },
+    {
+        name:'Fill',
+        onClick:()=> showFillAndOutline(),
+        icon:<SquareIcon className="text-white text-xl" />,
+    },
+    {
+        name:'outline',
+        onClick:()=>showOutlineOnly(),
+        icon: <CropSquareIcon className="text-white text-xl" />,
+    },
+
     {
         name: 'Shapes',
         onClick: () => handleToolChange('Shapes'),

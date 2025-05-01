@@ -1,16 +1,17 @@
 import { Dispatch, PayloadAction } from '@reduxjs/toolkit';
 import { IStoreViewerSlice } from '@/models';
 import { ISegmentation } from '@models/viewer.ts';
+
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import * as cornerstone from '@cornerstonejs/core';
 import store from '@/redux/store.ts';
 import { viewerSliceActions } from './viewer-slice';
 
 
-const segmentationAdditionMapper = (segmentationData: { id: string; volumeId: string; uid: string }) => {
+const segmentationAdditionMapper = (segmentationData: { id: string; volumeId: string; uid: string,   segmentationVolume: string}) => {
     return {
         id: segmentationData.id,
-        uid: segmentationData.uid,
+        uid: segmentationData.uid??'',
         volumeId: segmentationData.volumeId,
         activeSegmentIndex: 1,
         isActive: true,
@@ -27,20 +28,24 @@ const segmentationAdditionMapper = (segmentationData: { id: string; volumeId: st
                 isVisible: true,
                 isLocked: false
             }
-        ]
+        ],
+        segmentationVolume: segmentationData.segmentationVolume,
+        
+
     } as ISegmentation;
 };
 
 const viewerSegmentationReducer = {
+
     addSegmentation(
         state: IStoreViewerSlice,
-        action: PayloadAction<{ id: string; volumeId: string; uid: string }>
+        action: PayloadAction<{ id: string; volumeId: string; uid?: string, segmentationVolume: string }>,
     ) {
         // check if the segmentation already exists
         const segmentationIndex = state.segmentations.findIndex(
             (segmentation) => segmentation.id === action.payload.id
         );
-
+        
         for (const segmentation of state.segmentations) {
             segmentation.isActive = false;
         }
@@ -49,6 +54,7 @@ const viewerSegmentationReducer = {
             return;
         }
         const segmentation = segmentationAdditionMapper(action.payload);
+        segmentation.isActive = true;
         state.segmentations.push(segmentation);
     },
 

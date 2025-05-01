@@ -80,6 +80,7 @@
         "dcmjs": "^0.30.3",
         "dicom-parser": "^1.8.21",
         "dicomweb-client": "^0.10.4",
+        "framer-motion": "^12.9.2",
         "install": "^0.13.0",
         "lodash.debounce": "^4.0.8",
         "lucide-react": "^0.395.0",

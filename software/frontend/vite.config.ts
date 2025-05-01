@@ -35,6 +35,9 @@ export default defineConfig({
       '@utilities': path.resolve(__dirname, './src/utilities/')
     }
   },
+  worker: {
+    format: 'es',
+  },
   server: {
     host: true,
     port: 5000,

@@ -4,3 +4,6 @@ node_modules
 **/.venv/
 **/.idea/
 .DS_Store
+*.pdf
+*.log
+*.rdb

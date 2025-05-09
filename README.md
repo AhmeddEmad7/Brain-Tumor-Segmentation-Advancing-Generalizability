@@ -5,7 +5,7 @@ This platform consists of multiple services such as `ApiGateway`,`Frontend`, `Re
 
 ---
 
-## 📦Backend and Services Overview
+## 📦 Services Overview
 
 ```
 software/

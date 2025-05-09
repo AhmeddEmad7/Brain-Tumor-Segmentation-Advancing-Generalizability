@@ -16,10 +16,14 @@ An advanced medical imaging platform specifically designed for brain tumor analy
 * **Frontend**: React 18, TypeScript, Vite
 * **Medical Imaging**: Cornerstone3D, VTK.js
 * **AI Integration**: RabbitMQ, Redis
-* **DICOM Services**: Orthanc PACS
+* **DICOM Services**: Orthanc PACS Dicom Web
 * **Containerization**: Docker, Microservices
 * **Database**: PostgreSQL
-* **API Gateway**: FastAPI
+* **API Gateway**: Django
+*  **Inference** : Django
+* **Reporting** : FastAPI
+* **Nifti Storage** : FastAPI
+
 
 ## 2. Medical Image Import and Compatibility
 
@@ -30,6 +34,7 @@ An advanced medical imaging platform specifically designed for brain tumor analy
   * Single/Multi-frame images
   * Enhanced DICOM
   * DICOM-SEG
+  
 * **NIfTI**
 
   * `.nii` and `.nii.gz`
@@ -42,9 +47,7 @@ An advanced medical imaging platform specifically designed for brain tumor analy
 
 * Automated DICOM metadata extraction
 * NIfTI header parsing
-* Image normalization
-* Motion artifact correction
-* SUV calculation for PET
+
 
 ## 3. Viewing Capabilities
 
@@ -163,7 +166,7 @@ An advanced medical imaging platform specifically designed for brain tumor analy
 * AI-assisted report generation
 * Measurement integration
 * Image screenshots
-* AI findings inclusion by Mr. Hazem
+* AI findings inclusion
 
 ### Export Formats
 

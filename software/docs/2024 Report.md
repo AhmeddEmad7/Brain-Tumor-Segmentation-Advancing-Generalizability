@@ -58,6 +58,10 @@
     * Integration with AI models for clinical report assistance
   * Snapshot Capture for Report Inclusion
   * Editable Report Interface (Real-time)
+  ### Export Formats
+  
+  * PDF reports
+  * Custom templates
 
 * **NIfTI Storage Service**
 

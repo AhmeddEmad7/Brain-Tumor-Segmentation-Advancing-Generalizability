@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import classnames from 'classnames';
 import { Button } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
-import { DicomUtil } from '@/utilities';
 
 type ReportingTableProps = {
     data: IStudyReport[];
@@ -23,7 +21,6 @@ const ReportingTable = ({
     onCreate
 }: ReportingTableProps) => {
     const navigate = useNavigate();
-    const selectedStudy = useSelector((store: IStore) => store.studies.selectedDicomStudy);
 
     return (
         <div>
@@ -38,17 +35,15 @@ const ReportingTable = ({
                         <List.Item>
                             <List.Item.Meta
                                 title={
-                                    <a
-                                        href={`/report/${item.id}/study/${item.studyId}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 font-bold hover:text-black hover:cursor-pointer"
-                                        >
+                                    <p
+                                        className="text-AAPrimary font-bold hover:text-gray-200 hover:cursor-pointer"
+                                        onClick={() => navigate(`/report/${item.id}/study/${item.studyId}`)}
+                                    >
                                         Report {index + 1}
-                                    </a>
+                                    </p>
                                 }
                                 description={
-                                    <p className="text-gray-300">{DicomUtil.formatDate(selectedStudy.studyDate)}</p>
+                                    <p className="text-gray-300">{renderContent(item.content, 5)}</p>
                                 }
                             />
                             <DeleteIcon

@@ -68,6 +68,19 @@ export default function Report() {
       <NextThemesProvider attribute="class" defaultTheme="dark" enableSystem={false}>
         <TooltipProvider>
           <Box className="flex-col mt-4 space-y-5">
+            {/* Render snapshots if available
+            {snapshotsElement && (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+                {snapshotsElement.images.map((img: string, index: number) => (
+                  <img
+                    key={index}
+                    src={img}
+                    alt={`Snapshot ${index}`}
+                    style={{ maxWidth: '300px' }}
+                  />
+                ))}
+              </Box>
+            )} */}
             <Box className="h-3/4">
               {/* Pass the rest of the report content to the PlateEditor */}
               <PlateEditor initialReadOnly={true} initialReport={newReportContent} />

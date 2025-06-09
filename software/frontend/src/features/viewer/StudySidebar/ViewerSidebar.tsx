@@ -35,7 +35,7 @@ const ViewerSidebar = ({ className }: { className?: string }) => {
             onContextMenu={(e) => e.preventDefault()}
         >
             {/* Toggle Button */}
-            {/* <Button
+            <Button
                 variant="contained"
                 color="secondary"
                 size="small"
@@ -43,7 +43,7 @@ const ViewerSidebar = ({ className }: { className?: string }) => {
                 onClick={() => setIsSidebarVisible(!isSidebarVisible)}
             >
                 {isSidebarVisible ? 'Hide Studies' : 'Show Studies'}
-            </Button> */}
+            </Button>
 
             {/* Show or Hide StudyCard */}
             {isSidebarVisible && selectedDicomStudy && <StudyCard studyData={selectedDicomStudy} />}

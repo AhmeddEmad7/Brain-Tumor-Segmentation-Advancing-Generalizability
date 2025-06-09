@@ -4,7 +4,7 @@ import { uiSliceActions } from '@ui/ui-slice.ts';
 import { viewerSliceActions } from '@features/viewer/viewer-slice';
 import store from '@/redux/store';
 import { useNavigate } from 'react-router-dom';
-import { urlToDataURL } from '../report/components/toBase64';
+
 /**
  * The URL for the reporting API.
  */
@@ -25,130 +25,19 @@ const templateReportContent = `[
  *
  * @param {string} studyInstanceUid - The study instance UID.
  * @param {string} reportContent - The report content.
-//  */
-function formatTextToSlateBlocks(text: string) {
-    const blocks: any[] = [];
-    const lines = text.split('\n');
-
-    lines.forEach((line) => {
-        if (
-            line.startsWith("Findings:") ||
-            line.startsWith("Composition analysis:") ||
-            line.startsWith("Quantitative analysis:") ||
-            line.startsWith("Impression*:") ||
-            line.startsWith("Likely Diagnosis*:") ||
-            line.startsWith("Recommendations*:")||
-            line.startsWith("* These sections are preliminar")
-        ) {
-            blocks.push({
-                id: crypto.randomUUID(),
-                type: "h2",
-                children: [{ text: line }]
-            });
-        } 
-        else {
-            blocks.push({
-                id: crypto.randomUUID(),
-                type: "p",
-                children: [{ text: "    " + line }]
-            });
-        }
-    });
-
-    return blocks;
-}
-
-export const generatePdfReportThunk = (
-    studyInstanceUid: string,
-    header: {
-      patientName: string,
-      patientId: string;
-      modality: string;
-    },
-    blocks: any[]
-  ) => {
+ */
+export const createReportThunk = (studyInstanceUid: string, navigate: any,snapshots:any) => {
     return async (dispatch: Dispatch) => {
-      try {
-        const blocksCopy = [...blocks];
-        const imageBlockIndex = blocksCopy.findIndex((b) => b.type === 'images');
-  
-        if (imageBlockIndex !== -1) {
-          const imageBlock = blocksCopy[imageBlockIndex];
-  
-          const dataURIs = await Promise.all(
-            imageBlock.images.map((imgUrl: string) => urlToDataURL(imgUrl))
-          );
-  
-          blocksCopy[imageBlockIndex] = {
-            ...imageBlock,
-            data: dataURIs,
-          };
-          delete blocksCopy[imageBlockIndex].images;
+        const templateContent  = JSON.parse(templateReportContent)
+
+        const snapshotsElements ={
+            id: "snapshots",       // unique key or id
+            type: "images",        // custom type to signal image content
+            images: snapshots.map((s:any) => s.image)
         }
-        console.log('blocksCopy', blocksCopy);
-        console.log('JSON blocksCopy', JSON.stringify(blocksCopy));
-        const response = await AxiosUtil.sendRequest({
-          method: 'POST',
-          url: `${REPORTING_API_URL}/report/generate-pdf`,
-          data: {
-            studyId: studyInstanceUid,
-            header: header,
-            content: JSON.stringify(blocksCopy),
-          },
-        });
-  
-        if (response?.code === 200 ) {
-          dispatch(
-            uiSliceActions.setNotification({
-              type: 'success',
-              content: '📄 PDF has been generated and saved on the server!',
-            })
-          );
-        } else {
-          throw new Error('Backend response status not success');
-        }
-      } catch (err) {
-        console.error('PDF generation error:', err);
-        dispatch(
-          uiSliceActions.setNotification({
-            type: 'error',
-            content: '❌ Failed to generate PDF!',
-          })
-        );
-      }
-    };
-  };
-  
-export const createReportThunk = (studyInstanceUid: string, navigate: any, snapshots: any) => {
-    return async (dispatch: Dispatch) => {
-        // 1. Try to get the report content from Redis
-        const redisRes = await AxiosUtil.sendRequest({
-            method: 'GET',
-            url: `${REPORTING_API_URL}/report/redis/${studyInstanceUid}`,
-        });
-
-        let reportContent: any;
-        console.log('redisRes', redisRes);
-        console.log('studyInstanceUid', studyInstanceUid);
- if (redisRes && typeof redisRes.content === 'string' && redisRes.content.trim().length > 0) {
-    console.log('✅ Found Redis report. Formatting...');
-    reportContent = formatTextToSlateBlocks(redisRes.content);
-} else {
-    console.warn('⚠️ Redis is empty or error occurred. Using template.');
-    reportContent = JSON.parse(templateReportContent);
-}
-
-        // 2. Add snapshot element (images)
-        const snapshotsElements = {
-            id: "snapshots",
-            type: "images",
-            images: snapshots.map((s: any) => s.image)
-        };
-
-        const finalContent = [snapshotsElements, ...reportContent];
+        const finalContent = [snapshotsElements,...templateContent]
         const finalContentString = JSON.stringify(finalContent);
 
-        // 3. Save to the database via the backend API
         const res = await AxiosUtil.sendRequest({
             method: 'POST',
             url: `${REPORTING_API_URL}/report/`,
@@ -157,9 +46,10 @@ export const createReportThunk = (studyInstanceUid: string, navigate: any, snaps
                 content: finalContentString
             }
         });
-
-        if (!res) return;
-
+            console.log("res report created", res);
+        if (!res) {
+            return;
+        }
         store.dispatch(fetchStudyReportByIdThunk(studyInstanceUid));
 
         dispatch(
@@ -168,11 +58,10 @@ export const createReportThunk = (studyInstanceUid: string, navigate: any, snaps
                 content: 'Report has been created successfully!'
             })
         );
-
+        console.log(`/report/${res.result.id}/study/${studyInstanceUid}`)
         navigate(`/report/${res.data.result.id}/study/${studyInstanceUid}`);
     };
 };
-
 
 /**
  * Updates the report content for the specified study.

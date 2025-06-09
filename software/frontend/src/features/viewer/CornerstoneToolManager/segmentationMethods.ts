@@ -124,7 +124,7 @@ export const showFillAndOutline = async() =>{
         [cornerstoneTools.Enums.SegmentationRepresentations.Labelmap]:{
         renderFill:true,
         renderOutline:true,
-        fillAlpha:0.9,
+        fillAlpha:0.8,
         outlineOpacity:1,
         outlineWidthActive:2
     }
@@ -153,25 +153,7 @@ export const showOutlineOnly= async () =>{
       });
 }
 
-export const setSegmentationOpacity = async (opacity: number) => {
-    const state = store.getState();
-    const { selectedViewportId } = state.viewer;
 
-    // Retrieve the rendering engine and viewport using the selected viewport ID.
-    const {  currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
-    const activeSegmentationRepresentation =
-        cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
-            currentToolGroupId
-        );
-
-    // Set the opacity for the segmentation representation
-    cornerstoneTools.segmentation.config.setSegmentationRepresentationSpecificConfig(currentToolGroupId, activeSegmentationRepresentation.segmentationRepresentationUID, {
-        [cornerstoneTools.Enums.SegmentationRepresentations.Labelmap]: {
-            fillAlpha: opacity,
-            outlineOpacity: opacity
-        }
-    });
-}
 export const saveSegmentation = async () => {
     const state = store.getState();
     const { selectedViewportId } = state.viewer;

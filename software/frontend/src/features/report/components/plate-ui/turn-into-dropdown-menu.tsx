@@ -134,7 +134,7 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
                     pressed={openState.open}
                     tooltip="Turn into"
                     isDropdown
-                    className="lg:min-w-[130px] text-black"
+                    className="lg:min-w-[130px]"
                 >
                     <SelectedItemIcon className="size-5 lg:hidden" />
                     <span className="max-lg:hidden">{selectedItemLabel}</span>
@@ -142,10 +142,10 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="start" className="min-w-0">
-                <DropdownMenuLabel className='text-white bg-gray-950' >Turn into</DropdownMenuLabel>
+                <DropdownMenuLabel>Turn into</DropdownMenuLabel>
 
                 <DropdownMenuRadioGroup
-                    className="flex flex-col gap-0.5 text-white text-lg bg-gray-950"
+                    className="flex flex-col gap-0.5"
                     value={value}
                     onValueChange={(type) => {
                         // if (type === 'ul' || type === 'ol') {

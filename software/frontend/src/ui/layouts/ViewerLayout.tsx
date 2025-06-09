@@ -19,7 +19,7 @@ const ViewerLayout = () => {
 
             <ViewerTopBar />
             <div className={'flex'}>
-                <div className={'h-[93vh] w-3/12 max-w-52'}>
+                <div className={'h-[93vh] w-2/12 max-w-52'}>
                     <ViewerSidebar className={'h-full'} />
                 </div>
                 <div className={'h-auto flex-grow w-11/12'} onContextMenu={(e) => e.preventDefault()}>

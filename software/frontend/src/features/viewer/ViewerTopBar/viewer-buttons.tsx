@@ -99,87 +99,8 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         icon: <RotationToolIcon />,
         menuComponent: <ViewerButtonMenu items={RotateButtonItems} />,
         disabled: false
-      },
-      {
-          title: 'Layout',
-          icon: <LayoutIcon />,
-          menuComponent: <LayoutSelector rows={4} columns={4} />,
-          disabled: false
-      },
-      {
-        title: 'MPR',
-        onClick: async () => {
-          const state = store.getState();
-          const renderingEngineId = state.viewer.renderingEngineId;
-          const currentStudyInstanceUid = state.viewer.currentStudyInstanceUid;
-          const selectedSeriesInstanceUid = state.viewer.selectedSeriesInstanceUid;
-          const isActive = state.viewer.isMPRActive;
-        //   const isMPRActive = state.viewer.isMPRActive;
-      
-          if (!isActive) {
-            store.dispatch(viewerSliceActions.setMPRActive(true));
-            // store.dispatch(setActiveSegmentIndex)
-            store.dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
-            await toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
-          } else {
-            CornerstoneToolManager.disableAllTools();
-            store.dispatch(viewerSliceActions.resetViewerLayout());
-            store.dispatch(viewerSliceActions.setMPRActive(false));
-          }
-        },
-        icon: <LuAxis3D />,
-        disabled: false
-      },
-       {
-        icon: <ThreeDIcon />,
-        title: '3D',
-        onClick: async () => {
-            await toggleVolumeRendering();
-        },
-        disabled: false // Disable the 3D button itself when already in 3D mode
     },
-        {
-        icon: <ResetIcon />,
-        title: 'Reset',
-        disabled: false
-    },
-     {
-        title: 'Crosshair',
-        onClick: () => {
-          const state = store.getState();
-          const renderingEngineId = state.viewer.renderingEngineId;
-          const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-          const isCurrentlyActive = state.viewer.isCrosshairActive;
-      
-          const viewports = renderingEngine?.getViewports();
-          if (!viewports || viewports.length < 2) {
-            console.warn('❌ Crosshairs require at least two viewports.');
-            return;
-          }
-      
-          store.dispatch(viewerSliceActions.setCrosshairActive(!isCurrentlyActive));
-      
-          if (!isCurrentlyActive) {
-            CornerstoneToolManager.disableAllTools();
-            CornerstoneToolManager.setToolActive(
-              cornerstoneTools.CrosshairsTool.toolName,
-              cornerstoneTools.Enums.MouseBindings.Primary
-            );
-          } else {
-            CornerstoneToolManager.disableAllTools();
-          }
-        },
-        icon: <GiCrosshair />,
-        disabled: false
-      },
-   
     {
-        icon: <ThreeDRotationIcon />,
-        title: 'Render',
-        onClick: handleToolClick,
-        disabled: !is3DActive
-    },
-     {
         title: 'Colormap',
         icon: <PaletteIcon />,
         menuComponent: (
@@ -212,6 +133,12 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         ),
         disabled: false
       },
+    {
+        title: 'Layout',
+        icon: <LayoutIcon />,
+        menuComponent: <LayoutSelector rows={4} columns={4} />,
+        disabled: false
+    },
     {
         title: 'Magnify',
         onClick: handleToolClick,
@@ -250,8 +177,78 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         onClick: toggleViewportOverlayShown,
         disabled: is3DActive
     },
-    
-
+    {
+        title: 'MPR',
+        onClick: async () => {
+          const state = store.getState();
+          const renderingEngineId = state.viewer.renderingEngineId;
+          const currentStudyInstanceUid = state.viewer.currentStudyInstanceUid;
+          const selectedSeriesInstanceUid = state.viewer.selectedSeriesInstanceUid;
+          const isActive = state.viewer.isMPRActive;
+        //   const isMPRActive = state.viewer.isMPRActive;
+      
+          if (!isActive) {
+            store.dispatch(viewerSliceActions.setMPRActive(true));
+            // store.dispatch(setActiveSegmentIndex)
+            store.dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
+            await toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
+          } else {
+            CornerstoneToolManager.disableAllTools();
+            store.dispatch(viewerSliceActions.resetViewerLayout());
+            store.dispatch(viewerSliceActions.setMPRActive(false));
+          }
+        },
+        icon: <LuAxis3D />,
+        disabled: false
+      },
+      {
+        title: 'Crosshair',
+        onClick: () => {
+          const state = store.getState();
+          const renderingEngineId = state.viewer.renderingEngineId;
+          const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+          const isCurrentlyActive = state.viewer.isCrosshairActive;
+      
+          const viewports = renderingEngine?.getViewports();
+          if (!viewports || viewports.length < 2) {
+            console.warn('❌ Crosshairs require at least two viewports.');
+            return;
+          }
+      
+          store.dispatch(viewerSliceActions.setCrosshairActive(!isCurrentlyActive));
+      
+          if (!isCurrentlyActive) {
+            CornerstoneToolManager.disableAllTools();
+            CornerstoneToolManager.setToolActive(
+              cornerstoneTools.CrosshairsTool.toolName,
+              cornerstoneTools.Enums.MouseBindings.Primary
+            );
+          } else {
+            CornerstoneToolManager.disableAllTools();
+          }
+        },
+        icon: <GiCrosshair />,
+        disabled: false
+      },
+    {
+        icon: <ThreeDIcon />,
+        title: '3D',
+        onClick: async () => {
+            await toggleVolumeRendering();
+        },
+        disabled: false // Disable the 3D button itself when already in 3D mode
+    },
+    {
+        icon: <ThreeDRotationIcon />,
+        title: 'Render',
+        onClick: handleToolClick,
+        disabled: !is3DActive
+    },
+    {
+        icon: <ResetIcon />,
+        title: 'Reset',
+        disabled: false
+    }
 ];
 const VIEWER_OPTION_BUTTONS = [
     {

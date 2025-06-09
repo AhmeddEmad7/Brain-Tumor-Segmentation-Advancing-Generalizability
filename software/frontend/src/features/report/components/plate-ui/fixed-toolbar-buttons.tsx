@@ -35,12 +35,12 @@ export function FixedToolbarButtons() {
             >
                 {!readOnly && (
                     <>
-                        <ToolbarGroup noSeparator >
-                            <InsertDropdownMenu  />
+                        <ToolbarGroup noSeparator>
+                            <InsertDropdownMenu />
                             <TurnIntoDropdownMenu />
                         </ToolbarGroup>
 
-                        <ToolbarGroup className='text-black'>
+                        <ToolbarGroup>
                             <MarkToolbarButton tooltip="Bold (⌘+B)" nodeType={MARK_BOLD}>
                                 <Icons.bold />
                             </MarkToolbarButton>

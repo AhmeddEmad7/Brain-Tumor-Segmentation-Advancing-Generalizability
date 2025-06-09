@@ -41,11 +41,10 @@ const ViewerToolPanel = () => {
                             <Typography variant="caption">Measurements</Typography>
                         </Box>
                         <Box className="flex flex-col items-center">
-                            <IconButton onClick={() => setActiveTabIndex(4)}>
-                                <FontAwesomeIcon icon={faFile} className="mr-2" />
+                            <IconButton onClick={() => setActiveTabIndex(2)}>
+                                <FontAwesomeIcon icon={faBriefcaseMedical} />
                             </IconButton>
-                            <Typography variant="caption">Reporting</Typography>
-
+                            <Typography variant="caption">Motion Correction</Typography>
                         </Box>
                     </Box>
                     <IconButton onClick={handleMenuClick}>
@@ -61,8 +60,8 @@ const ViewerToolPanel = () => {
                         <MenuItem onClick={() => handleMenuClose(3)}>
                             <FontAwesomeIcon icon={faPlus} className="mr-2" /> Sequence Synthesis
                         </MenuItem>
-                        <MenuItem onClick={() => handleMenuClose(2)}>
-                            <FontAwesomeIcon icon={faBriefcaseMedical} className="mr-2" /> Motion Correction
+                        <MenuItem onClick={() => handleMenuClose(4)}>
+                            <FontAwesomeIcon icon={faFile} className="mr-2" /> Reporting
                         </MenuItem>
                     </Menu>
                 </Box>

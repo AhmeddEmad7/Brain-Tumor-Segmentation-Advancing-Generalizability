@@ -31,7 +31,7 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
         ),
         viewing: (
             <>
-                <Icons.viewing className="mr-2 size-5"  />
+                <Icons.viewing className="mr-2 size-5" />
                 <span className="hidden lg:inline">Viewing</span>
             </>
         )
@@ -44,14 +44,13 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
                     pressed={openState.open}
                     tooltip="Editing mode"
                     isDropdown
-                    className="min-w-[auto] lg:min-w-[130px] "
+                    className="min-w-[auto] lg:min-w-[130px]"
                 >
                     {item[value]}
                 </ToolbarButton>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="start" className="min-w-[180px]">
-                <div className='text-black'>
                 <DropdownMenuRadioGroup
                     className="flex flex-col gap-0.5"
                     value={value}
@@ -70,12 +69,11 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
                             return;
                         }
                     }}
-                > 
+                >
                     <DropdownMenuRadioItem value="editing">{item.editing}</DropdownMenuRadioItem>
 
                     <DropdownMenuRadioItem value="viewing">{item.viewing}</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
-                    </div>
             </DropdownMenuContent>
         </DropdownMenu>
     );

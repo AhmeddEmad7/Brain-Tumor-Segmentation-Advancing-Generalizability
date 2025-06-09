@@ -13,8 +13,8 @@ def load_model(model_path):
     model = DynUNet(spatial_dims=3, in_channels=4, out_channels=4, deep_supervision=False)       
     if (model_path).is_file():
         print(f"Found model: {model_path}")
-        ckpt = torch.load(model_path, map_location='cuda', weights_only=True) #map_location='cuda' de momken t3mlak moshkla bs sebha law zabta
-        model.load_state_dict(ckpt['teacher_model'])
+        ckpt = torch.load(model_path, map_location='cuda', weights_only=True)
+        model.load_state_dict(ckpt['student_model'])
         print(f"Loaded model: {model_path}")
     
     return model
@@ -76,7 +76,7 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
     ## Starting report generation ##
     print("Starting report generation...")
     print("Loading LLM...")
-    generator = initialize_llm("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")
+    generator = initialize_llm("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") #Put in .env
     print("LLM ready!")
 
     print("Extracting tumor features...")

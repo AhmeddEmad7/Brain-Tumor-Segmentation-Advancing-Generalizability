@@ -104,7 +104,7 @@ def segmentation_callback(ch, method, properties, body):
     
     
 label_info = [
-    {"name": "Label1", "description": "Necrosis region", "color": (255, 0, 0), "model_name": "Teacher_model_after_epoch_105_v1.0"},
+    {"name": "Label1", "description": "Necrosis region", "color": (255, 0, 0), "model_name": "AIModel_v1.0"},
     {"name": "Label2", "description": "Edema region", "color": (0, 255, 0), "model_name": "AIModel_v1.0"},
     {"name": "Label3", "description": "Enhancing Tumor", "color": (0, 0, 255), "model_name": "AIModel_v1.0"},
 ]

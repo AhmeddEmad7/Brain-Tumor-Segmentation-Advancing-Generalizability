@@ -111,7 +111,7 @@ export function InsertDropdownMenu(props: DropdownMenuProps) {
     return (
         <DropdownMenu modal={false} {...openState} {...props}>
             <DropdownMenuTrigger asChild>
-                <ToolbarButton pressed={openState.open} tooltip="Insert" isDropdown>
+                <ToolbarButton pressed={openState.open} tooltip="Insert" isDropdown >
                     <Icons.add />
                 </ToolbarButton>
             </DropdownMenuTrigger>
@@ -128,7 +128,7 @@ export function InsertDropdownMenu(props: DropdownMenuProps) {
                         {nestedItems.map(({ value: type, label: itemLabel, icon: Icon }) => (
                             <DropdownMenuItem
                                 key={type}
-                                className="min-w-[180px]"
+                                className="min-w-[180px] text-black"
                                 onSelect={async () => {
                                     switch (type) {
                                         // case ELEMENT_CODE_BLOCK: {

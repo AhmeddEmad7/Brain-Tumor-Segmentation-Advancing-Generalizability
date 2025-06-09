@@ -116,9 +116,20 @@ async def generate_pdf(req: PDFRequest, db: Session = Depends(get_db)):
         # 👇 Headings
         if block_type == "h2":
             text = " ".join(child.get("text", "") for child in block.get("children", []))
+            wrapped_lines = wrap(text, width=55)  # Adjust width for heading lines
+
             c.setFont("Helvetica-Bold", 13)
-            c.drawString(50, y, text)
-            y -= 18
+            for line in wrapped_lines:
+                
+                if y < 60:
+                    c.showPage()
+                    y = 800
+                    c.setFont("Helvetica-Bold", 13)  # Reset font after page break
+
+                c.drawString(50, y, line)
+                y -= 18
+
+            y -= 5  # spacing after heading
             continue
 
         # 👇 Paragraphs with word wrapping

@@ -21,7 +21,7 @@ const ViewportOverlay = ({ currentImageId, viewport }: TViewportOverlayProps) =>
         currentImageId
     );
     const { seriesNumber, seriesDescription } = getMetadataByImageId('generalSeriesModule', currentImageId);
-    const { studyDate, studyTime, studyDescription } = getMetadataByImageId(
+    const { studyDate, studyTime } = getMetadataByImageId(
         'generalStudyModule',
         currentImageId
     );
@@ -48,7 +48,6 @@ const ViewportOverlay = ({ currentImageId, viewport }: TViewportOverlayProps) =>
                 </div>
 
                 <div className={`absolute top-0 right-0 text-right text-sm text-white p-2`}>
-                    <div>{studyDescription?.value}</div>
                     <div>
                         {DicomUtil.formatDate(studyDate?.value)} {DicomUtil.formatTime(studyTime?.value)}
                     </div>

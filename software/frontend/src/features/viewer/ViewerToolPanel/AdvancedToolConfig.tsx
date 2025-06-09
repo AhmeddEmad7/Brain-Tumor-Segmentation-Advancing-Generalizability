@@ -7,7 +7,8 @@ import { TItem } from '@ui/library/AdvancedToolBox/AdvancedToolBox.tsx';
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 import {
     showFillAndOutline,
-    showOutlineOnly
+    showOutlineOnly,
+    setSegmentationOpacity
   } from '@features/viewer/CornerstoneToolManager/segmentationMethods';
 import SquareIcon from '@mui/icons-material/Square';
 const { utilities: cstUtils } = cornerstoneTools;
@@ -96,6 +97,16 @@ const advancedToolConfig: TItem[] = [
                 onChange: (num: number | string) => handleBrushSizeChange(num as number)
             },
             {
+                id: 'opacity',
+                name: 'Opacity',
+                type: 'range',
+                min: 0,
+                max: 1,
+                value: 0.5,
+                step: 0.01,
+                onChange: (num: number | string) => setSegmentationOpacity(num as number)
+            },
+            {
                 name: 'Mode',
                 type: 'radio',
                 value: 'Circle',
@@ -128,6 +139,16 @@ const advancedToolConfig: TItem[] = [
                 value: 5,
                 step: 1,
                 onChange: (num: number | string) => handleBrushSizeChange(num as number)
+            },
+            {
+                id: 'opacity',
+                name: 'Opacity',
+                type: 'range',
+                min: 0,
+                max: 1,
+                value: 0.5,
+                step: 0.01,
+                onChange: (num: number | string) => setSegmentationOpacity(num as number)
             },
             {
                 name: 'Mode',

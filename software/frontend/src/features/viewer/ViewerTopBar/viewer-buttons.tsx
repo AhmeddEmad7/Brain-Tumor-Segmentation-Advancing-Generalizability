@@ -130,20 +130,7 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         icon: <LuAxis3D />,
         disabled: false
       },
-       {
-        icon: <ThreeDIcon />,
-        title: '3D',
-        onClick: async () => {
-            await toggleVolumeRendering();
-        },
-        disabled: false // Disable the 3D button itself when already in 3D mode
-    },
-        {
-        icon: <ResetIcon />,
-        title: 'Reset',
-        disabled: false
-    },
-     {
+      {
         title: 'Crosshair',
         onClick: () => {
           const state = store.getState();
@@ -173,45 +160,59 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         disabled: false
       },
    
+       {
+        icon: <ThreeDIcon />,
+        title: '3D',
+        onClick: async () => {
+            await toggleVolumeRendering();
+        },
+        disabled: false // Disable the 3D button itself when already in 3D mode
+    },
+    // {
+    //    title: 'Colormap',
+    //    icon: <PaletteIcon />,
+    //    menuComponent: (
+    //      <ColormapSelectorMenu
+    //        applyColormap={(vtkPresetName) => {
+    //          // This is your existing code that applies the selected preset
+    //          const state = store.getState();
+    //          const renderingEngineId = state.viewer.renderingEngineId;
+    //          const viewportId = state.viewer.selectedViewportId;
+     
+    //          let volumeId = '';
+    //          if (
+    //            state.viewer.currentStudyInstanceUid.endsWith('.nii') ||
+    //            state.viewer.currentStudyInstanceUid.endsWith('.gz')
+    //          ) {
+    //            const niftiURL = `${import.meta.env.VITE_NIFTI_DOMAIN}/${state.viewer.currentStudyInstanceUid}`;
+    //            volumeId = 'nifti:' + niftiURL;
+    //          } else {
+    //            volumeId = `cornerstoneStreamingImageVolume:${state.viewer.selectedSeriesInstanceUid}`;
+    //          }
+     
+    //          applyColormapToViewport( 
+    //            vtkPresetName,
+    //            renderingEngineId,
+    //            viewportId,
+    //            volumeId
+    //          );
+    //        }}
+    //      />
+    //    ),
+    //    disabled: false
+    //  },
+   
+    {
+        icon: <ResetIcon />,
+        title: 'Reset',
+        disabled: false
+    },
     {
         icon: <ThreeDRotationIcon />,
         title: 'Render',
         onClick: handleToolClick,
         disabled: !is3DActive
     },
-     {
-        title: 'Colormap',
-        icon: <PaletteIcon />,
-        menuComponent: (
-          <ColormapSelectorMenu
-            applyColormap={(vtkPresetName) => {
-              // This is your existing code that applies the selected preset
-              const state = store.getState();
-              const renderingEngineId = state.viewer.renderingEngineId;
-              const viewportId = state.viewer.selectedViewportId;
-      
-              let volumeId = '';
-              if (
-                state.viewer.currentStudyInstanceUid.endsWith('.nii') ||
-                state.viewer.currentStudyInstanceUid.endsWith('.gz')
-              ) {
-                const niftiURL = `${import.meta.env.VITE_NIFTI_DOMAIN}/${state.viewer.currentStudyInstanceUid}`;
-                volumeId = 'nifti:' + niftiURL;
-              } else {
-                volumeId = `cornerstoneStreamingImageVolume:${state.viewer.selectedSeriesInstanceUid}`;
-              }
-      
-              applyColormapToViewport(
-                vtkPresetName,
-                renderingEngineId,
-                viewportId,
-                volumeId
-              );
-            }}
-          />
-        ),
-        disabled: false
-      },
     {
         title: 'Magnify',
         onClick: handleToolClick,

@@ -34,21 +34,24 @@ const ReportingTable = ({
             <div className="p-2">
                 <List
                     dataSource={data}
-                    renderItem={(item,index) => (
+                    renderItem={(item, index) => (
                         <List.Item>
                             <List.Item.Meta
                                 title={
-                                    <a
-                                        href={`/report/${item.id}/study/${item.studyId}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 font-bold hover:text-black hover:cursor-pointer"
+                                    <div className="flex justify-between items-center text-white font-sans text-base">
+                                        <a
+                                            href={`/report/${item.id}/study/${item.studyId}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                         >
-                                        Report {index + 1}
-                                    </a>
+                                            Report {index + 1}
+                                        </a>
+                                    </div>
                                 }
                                 description={
-                                    <p className="text-gray-300">{DicomUtil.formatDate(selectedStudy.studyDate)}</p>
+                                    <p className="text-gray-300">
+                                        {DicomUtil.formatDate(selectedStudy.studyDate)}
+                                    </p>
                                 }
                             />
                             <DeleteIcon

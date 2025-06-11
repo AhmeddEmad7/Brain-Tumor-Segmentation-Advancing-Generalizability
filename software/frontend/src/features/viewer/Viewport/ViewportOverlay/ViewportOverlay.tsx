@@ -42,12 +42,12 @@ const ViewportOverlay = ({ currentImageId, viewport }: TViewportOverlayProps) =>
     const metadataOverlay = () => {
         return (
             <>
-                <div className={`absolute top-0 left-0 text-sm text-white p-2`}>
+                <div className={`absolute top-7 left-0 text-sm text-white p-2`}>
                     <div>{DicomUtil.formatPatientName(patientName?.value)}</div>
                     <div>{patientId?.value}</div>
                 </div>
 
-                <div className={`absolute top-0 right-0 text-right text-sm text-white p-2`}>
+                <div className={`absolute top-7 right-0 text-right text-sm text-white p-2`}>
                     <div>
                         {DicomUtil.formatDate(studyDate?.value)} {DicomUtil.formatTime(studyTime?.value)}
                     </div>

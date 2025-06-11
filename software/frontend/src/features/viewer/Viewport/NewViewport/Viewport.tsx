@@ -17,6 +17,7 @@ import CornerstoneToolManager from '@/features/viewer/CornerstoneToolManager/Cor
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import { cornerstoneNiftiImageVolumeLoader } from '@cornerstonejs/nifti-volume-loader';
 import { Volume } from 'lucide-react';
+import { OrientationMenu } from '@features/viewer/components/OrientationMenu';
 
 // import * as cornerstone3 from '@cornerstonejs/core/src/loaders/';
 // const { isCrosshairActive } = useSelector((store: IStore) => store.viewer);
@@ -47,13 +48,13 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         currentStudyInstanceUid,
         isMPRActive,
         is3DActive,
-        isCrosshairActive,
+        isCrosshairActive
     } = useSelector((store: IStore) => store.viewer);
     const dispatch = useDispatch();
-    const segmentationVolume = useSelector((s: IStore) =>
-        s.viewer.segmentations.find((seg) => seg.isActive)?.segmentationVolume
-      );
-      console.log('segmentationVolume', segmentationVolume);
+    const segmentationVolume = useSelector(
+        (s: IStore) => s.viewer.segmentations.find((seg) => seg.isActive)?.segmentationVolume
+    );
+    console.log('segmentationVolume', segmentationVolume);
     // handleViewportClick is a function that takes an id and dispatches an action to the viewerSlice
     const handleViewportClick = (id: string) => {
         dispatch(viewerSliceActions.setSelectedViewport(id));
@@ -61,67 +62,67 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
             onClick(id);
         }
     };
-//     const addSegmentationMesh = async (
-//         viewport: Types.IVolumeViewport,
-//         segmentationVolumeId: string
-//       ) => {
-//         if (hasMeshBeenAdded.current) return;
-//         hasMeshBeenAdded.current = true;
-      
-//         const segVol = cornerstone.cache.getVolume(segmentationVolumeId);
-//         console.log('segVol', segVol);
-//         if (!segVol) {
-//           console.warn('Segmentation volume not found.');
-//           return;
-//         }
-      
-//         // const segImageData = segVol.imageData!;
-//         const segImageData = segVol.imageData!;
-//         const buffer = segImageData.getPointData().getScalars().getData();
-//         const dims = segImageData.getDimensions();
-//         const spacing = segImageData.getSpacing();
-//         const origin = segImageData.getOrigin();
-      
-//         const vtkSeg = vtkImageData.newInstance({ dimensions: dims, spacing, origin });
-//         vtkSeg.getPointData().setScalars(
-//           vtkDataArray.newInstance({ values: buffer, numberOfComponents: 1 })
-//         );
-      
-//         const mc = vtkImageMarchingCubes.newInstance({
-//           contourValue: 0.5,
-//           computeNormals: true,
-//           mergePoints: true,
-//         });
-//         mc.setInputData(vtkSeg);
-//         mc.update();
-//         const polydata = mc.getOutputData();
-      
-//         const mapper = vtkMapper.newInstance();
-//         mapper.setInputData(polydata);
-      
-//         const actor = vtkActor.newInstance();
-//         actor.setMapper(mapper);
-//         actor.getProperty().setColor(1, 0, 0);
-//         console.log('actorsasdsdasdasdasd');
-//         actor.getProperty().setOpacity(0.5);
-//         // console.log('📦 Segmentation buffer min/max:', Math.min(...buffer), Math.max(...buffer));
-//         const min = Array.from(buffer).reduce((a, b) => Math.min(a, b), Infinity);
-//         const max = Array.from(buffer).reduce((a, b) => Math.max(a, b), -Infinity);
-//         console.log('📦 Segmentation buffer min/max:', min, max);
-//         console.log('🧠 segmentationVolume ID:', segmentationVolume);
+    //     const addSegmentationMesh = async (
+    //         viewport: Types.IVolumeViewport,
+    //         segmentationVolumeId: string
+    //       ) => {
+    //         if (hasMeshBeenAdded.current) return;
+    //         hasMeshBeenAdded.current = true;
 
-//         vtkMatrixBuilder
-//   .buildFromDegree()
-//   .translate(50, 10, -10) // 👉 try (100, 0, 0), (-100, 0, 0), (0, 100, 0) etc. to shift position
-//   .apply(actor.getUserMatrix());
-//         viewport.addActor({ uid: 'SegMesh', actor });
-//         viewport.resetCamera();
-//         viewport.render();
-//       };
-//     const hasMeshBeenAdded = useRef(false);
+    //         const segVol = cornerstone.cache.getVolume(segmentationVolumeId);
+    //         console.log('segVol', segVol);
+    //         if (!segVol) {
+    //           console.warn('Segmentation volume not found.');
+    //           return;
+    //         }
+
+    //         // const segImageData = segVol.imageData!;
+    //         const segImageData = segVol.imageData!;
+    //         const buffer = segImageData.getPointData().getScalars().getData();
+    //         const dims = segImageData.getDimensions();
+    //         const spacing = segImageData.getSpacing();
+    //         const origin = segImageData.getOrigin();
+
+    //         const vtkSeg = vtkImageData.newInstance({ dimensions: dims, spacing, origin });
+    //         vtkSeg.getPointData().setScalars(
+    //           vtkDataArray.newInstance({ values: buffer, numberOfComponents: 1 })
+    //         );
+
+    //         const mc = vtkImageMarchingCubes.newInstance({
+    //           contourValue: 0.5,
+    //           computeNormals: true,
+    //           mergePoints: true,
+    //         });
+    //         mc.setInputData(vtkSeg);
+    //         mc.update();
+    //         const polydata = mc.getOutputData();
+
+    //         const mapper = vtkMapper.newInstance();
+    //         mapper.setInputData(polydata);
+
+    //         const actor = vtkActor.newInstance();
+    //         actor.setMapper(mapper);
+    //         actor.getProperty().setColor(1, 0, 0);
+    //         console.log('actorsasdsdasdasdasd');
+    //         actor.getProperty().setOpacity(0.5);
+    //         // console.log('📦 Segmentation buffer min/max:', Math.min(...buffer), Math.max(...buffer));
+    //         const min = Array.from(buffer).reduce((a, b) => Math.min(a, b), Infinity);
+    //         const max = Array.from(buffer).reduce((a, b) => Math.max(a, b), -Infinity);
+    //         console.log('📦 Segmentation buffer min/max:', min, max);
+    //         console.log('🧠 segmentationVolume ID:', segmentationVolume);
+
+    //         vtkMatrixBuilder
+    //   .buildFromDegree()
+    //   .translate(50, 10, -10) // 👉 try (100, 0, 0), (-100, 0, 0), (0, 100, 0) etc. to shift position
+    //   .apply(actor.getUserMatrix());
+    //         viewport.addActor({ uid: 'SegMesh', actor });
+    //         viewport.resetCamera();
+    //         viewport.render();
+    //       };
+    //     const hasMeshBeenAdded = useRef(false);
     useEffect(() => {
         if (!thisViewport || !thisViewport.getImageIds) {
-        console.warn('🛑 Viewport not ready for overlay:', thisViewport);
+            console.warn('🛑 Viewport not ready for overlay:', thisViewport);
         }
     }, [thisViewport]);
     useEffect(() => {
@@ -136,6 +137,7 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
             });
         }
     }, [selectedSeriesInstanceUid]);
+
     // 🔹 Ensure correct tools are applied when mode changes
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
@@ -164,7 +166,6 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
         // 🔄 **Ensure viewport is refreshed after tool change**
         viewport.render();
     }, [isMPRActive, is3DActive, selectedViewportId, selectedSeriesInstanceUid]);
-
 
     useEffect(() => {
         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
@@ -268,11 +269,9 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                     wadoRsRoot: wadoRsRoot
                 });
 
-            
-
                 // ✅ **Create & Load Volume**
                 console.log('🔄 Creating & caching volume...');
- 
+
                 //   const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId);
                 const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageIds });
                 await volume.load();
@@ -341,7 +340,39 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
     useResizeObserver(viewportRef, handleResize);
 
     const cineHeight = detectCineHeight(vNeighbours || 1);
-    
+
+    // Add new useEffect to monitor viewport properties
+    useEffect(() => {
+        if (!thisViewport) return;
+
+        // Get initial properties
+        const initialProps = thisViewport.getProperties();
+
+        // Create a function to check for property changes
+        const checkProperties = () => {
+            const currentProps = thisViewport.getProperties();
+
+            // Compare properties that should trigger a re-render
+            if (
+                JSON.stringify(currentProps.colormap) !== JSON.stringify(initialProps.colormap) ||
+                JSON.stringify(currentProps.voiRange) !== JSON.stringify(initialProps.voiRange) ||
+                currentProps.invert !== initialProps.invert
+            ) {
+                thisViewport.render();
+                // Update initial props for next comparison
+                Object.assign(initialProps, currentProps);
+            }
+        };
+
+        // Set up an interval to check for changes
+        const intervalId = setInterval(checkProperties, 100); // Check every 100ms
+
+        // Cleanup interval on unmount
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [thisViewport]); // Only re-run if thisViewport changes
+
     return (
         <div className={'flex-col'}>
             <div
@@ -350,7 +381,16 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                 onClick={() => handleViewportClick(id)}
                 className={`${hasCinePlayer ? `${cineHeight[0]}` : 'h-full'} w-full relative bg-black ${selectedViewportId === id ? 'border-2 border-x-blue-200' : ''}`}
             >
-                <ViewportOverlay viewport={thisViewport&& thisViewport.getImageIds.length?thisViewport:null} currentImageId={currentImageId} />
+                  {selectedViewportId === id && (
+                <div className="absolute top-1 left-1 z-50">
+                <OrientationMenu viewportId={id} />
+                </div>
+            )}
+
+                <ViewportOverlay
+                    viewport={thisViewport && thisViewport.getImageIds.length ? thisViewport : null}
+                    currentImageId={currentImageId}
+                />
             </div>
 
             {hasCinePlayer && (

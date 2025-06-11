@@ -6,7 +6,14 @@ import SequenceSynthesisTab from './Synthesis/SequenceSynthesisTab.tsx';
 import MotionArtifactsCorrectionTab from './MotionArtifactsCorrection/MotionArtifactsCorrectionTab.tsx';
 import ReportingTab from './Reporting/ReportingTab.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRuler, faBrush, faBriefcaseMedical, faPlus, faFile, faBars } from '@fortawesome/free-solid-svg-icons';
+import {
+    faRuler,
+    faBrush,
+    faBriefcaseMedical,
+    faPlus,
+    faFile,
+    faBars
+} from '@fortawesome/free-solid-svg-icons';
 import { Box, Menu, MenuItem, IconButton, Typography } from '@mui/material';
 
 const ViewerToolPanel = () => {
@@ -24,54 +31,58 @@ const ViewerToolPanel = () => {
     };
 
     return (
-        <Box>
+        <Box className="h-full">
             <SidePanel title={'Tools'}>
-                <Box className="flex justify-between items-center p-2">
-                    <Box className="flex gap-4">
-                        <Box className="flex flex-col items-center">
-                            <IconButton onClick={() => setActiveTabIndex(0)}>
-                                <FontAwesomeIcon icon={faBrush} />
-                            </IconButton>
-                            <Typography variant="caption">Segmentation</Typography>
+                <Box className="flex flex-col h-full">
+                    <Box className="flex justify-between items-center p-2">
+                        <Box className="flex gap-4">
+                            <Box className="flex flex-col items-center">
+                                <IconButton onClick={() => setActiveTabIndex(0)}>
+                                    <FontAwesomeIcon icon={faBrush} />
+                                </IconButton>
+                                <Typography variant="caption">Segmentation</Typography>
+                            </Box>
+                            <Box className="flex flex-col items-center">
+                                <IconButton onClick={() => setActiveTabIndex(1)}>
+                                    <FontAwesomeIcon icon={faRuler} />
+                                </IconButton>
+                                <Typography variant="caption">Measurements</Typography>
+                            </Box>
+                            <Box className="flex flex-col items-center">
+                                <IconButton onClick={() => setActiveTabIndex(4)}>
+                                    <FontAwesomeIcon icon={faFile} className="mr-2" />
+                                </IconButton>
+                                <Typography variant="caption">Reporting</Typography>
+                            </Box>
                         </Box>
-                        <Box className="flex flex-col items-center">
-                            <IconButton onClick={() => setActiveTabIndex(1)}>
-                                <FontAwesomeIcon icon={faRuler} />
-                            </IconButton>
-                            <Typography variant="caption">Measurements</Typography>
-                        </Box>
-                        <Box className="flex flex-col items-center">
-                            <IconButton onClick={() => setActiveTabIndex(4)}>
-                                <FontAwesomeIcon icon={faFile} className="mr-2" />
-                            </IconButton>
-                            <Typography variant="caption">Reporting</Typography>
-
-                        </Box>
+                        <IconButton onClick={handleMenuClick}>
+                            <FontAwesomeIcon icon={faBars} />
+                        </IconButton>
+                        <Menu
+                            anchorEl={menuAnchor}
+                            open={open}
+                            onClose={() => setMenuAnchor(null)}
+                            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                        >
+                            <MenuItem onClick={() => handleMenuClose(3)}>
+                                <FontAwesomeIcon icon={faPlus} className="mr-2" /> Sequence Synthesis
+                            </MenuItem>
+                            <MenuItem onClick={() => handleMenuClose(2)}>
+                                <FontAwesomeIcon icon={faBriefcaseMedical} className="mr-2" /> Motion
+                                Correction
+                            </MenuItem>
+                        </Menu>
                     </Box>
-                    <IconButton onClick={handleMenuClick}>
-                        <FontAwesomeIcon icon={faBars} />
-                    </IconButton>
-                    <Menu
-                        anchorEl={menuAnchor}
-                        open={open}
-                        onClose={() => setMenuAnchor(null)}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                    >
-                        <MenuItem onClick={() => handleMenuClose(3)}>
-                            <FontAwesomeIcon icon={faPlus} className="mr-2" /> Sequence Synthesis
-                        </MenuItem>
-                        <MenuItem onClick={() => handleMenuClose(2)}>
-                            <FontAwesomeIcon icon={faBriefcaseMedical} className="mr-2" /> Motion Correction
-                        </MenuItem>
-                    </Menu>
-                </Box>
-                <Box className="p-4 overflow-y-auto" sx={{ maxHeight: '80vh' }}>
-                    {activeTabIndex === 0 && <SegmentationTab />}
-                    {activeTabIndex === 1 && <MeasurementsTab />}
-                    {activeTabIndex === 2 && <MotionArtifactsCorrectionTab />}
-                    {activeTabIndex === 3 && <SequenceSynthesisTab />}
-                    {activeTabIndex === 4 && <ReportingTab />}
+                    <Box className="flex-1 p-4 overflow-y-auto overflow-x-auto transition-all duration-300">
+                        <div className="min-w-full">
+                            {activeTabIndex === 0 && <SegmentationTab />}
+                            {activeTabIndex === 1 && <MeasurementsTab />}
+                            {activeTabIndex === 2 && <MotionArtifactsCorrectionTab />}
+                            {activeTabIndex === 3 && <SequenceSynthesisTab />}
+                            {activeTabIndex === 4 && <ReportingTab />}
+                        </div>
+                    </Box>
                 </Box>
             </SidePanel>
         </Box>

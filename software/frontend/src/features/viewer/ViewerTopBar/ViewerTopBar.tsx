@@ -21,8 +21,8 @@ const ViewerTopBar = () => {
     const isMPRActive = useSelector((state: IStore) => state.viewer.isMPRActive);
     const isDarkMode = theme.palette.mode === 'dark';
     const tools = VIEWER_TOOLS_BUTTONS(is3DActive);
-    const primaryTools = tools.slice(0, 9);
-    const otherTools = tools.slice(9);
+    const primaryTools = tools.slice(0, 10);
+    const otherTools = tools.slice(10);
     
 
 

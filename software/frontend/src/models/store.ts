@@ -39,6 +39,7 @@ export interface IStoreStudiesSlice {
 export interface IStoreViewerSlice {
     // ui
     isFullScreen: boolean;
+    isColorBarVisible : boolean;
     layout: ILayout;
     isMPRActive: boolean, // Default state for MPR
     is3DActive: boolean, // Default state for 3D

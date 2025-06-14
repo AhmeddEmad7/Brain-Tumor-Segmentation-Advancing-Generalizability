@@ -2,23 +2,17 @@ import store from '@/redux/store.ts';
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import * as cornerstone from '@cornerstonejs/core';
 import { viewerSliceActions } from '@features/viewer/viewer-slice.ts';
-import { adaptersSEG, helpers } from '@cornerstonejs/adapters'; 
+import { adaptersSEG, helpers } from '@cornerstonejs/adapters';
 import * as cornerstoneDicomImageLoader from '@cornerstonejs/dicom-image-loader';
 import dcmjs from 'dcmjs';
 import axios from 'axios';
-// import { registerPolySegWorker } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation/polySeg/registerPolySegWorker';
-// import { registerPolySegWorker } from '@cornerstonejs/tools/src/stateManagement/segmentation/polySeg/registerPolySegWorker';
-import { api } from 'dicomweb-client'
+import { api } from 'dicomweb-client';
 import { getAndSetSeriesInstances } from '../viewer-viewport-reducers';
 import { Direction } from 'react-toastify/dist/utils';
 
-// import { renderSegmentationAsSurface } from './surface'; // ✅ Import surface rendering function
-// import { createMeshActor } from '@cornerstonejs/streaming-image-volume-loader';
-
 const { wadouri } = cornerstoneDicomImageLoader;
-
 const { downloadDICOMData } = helpers;
-const { Cornerstone3D } = adaptersSEG; 
+const { Cornerstone3D } = adaptersSEG;
 type SegmentStats = {
     label: number;
     voxelCount: number;
@@ -30,7 +24,7 @@ type SegmentStats = {
     maxHU: number;
     skewness: number;
     kurtosis: number;
-  };
+};
 // Constants for DICOMWeb client
 const DICOM_URL = import.meta.env.VITE_ORTRHANC_PROXY_URL;
 const SINGLEPART = true;
@@ -94,7 +88,7 @@ export const addSegmentation = async () => {
 
     const newSegmentationId = `SEGMENTATION_${segmentations.length}`;
     const is3DActive = true;
-    addSegmentationsToState(newSegmentationId, viewport, currentToolGroupId, 1,is3DActive);
+    addSegmentationsToState(newSegmentationId, viewport, currentToolGroupId, 1, is3DActive);
 
     viewport.render();
 };
@@ -106,126 +100,129 @@ export const addSegmentation = async () => {
  *
  * @returns {Promise<void>} A promise that resolves when the segmentation mask has been downloaded.
  */
-export const showFillAndOutline = async() =>{
+export const showFillAndOutline = async () => {
     const state = store.getState();
     const { selectedViewportId } = state.viewer;
-    cornerstoneTools.BidirectionalTool
+    cornerstoneTools.BidirectionalTool;
     // Retrieve the rendering engine and viewport using the selected viewport ID.
-    const {  currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
+    const { currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
     const activeSegmentationRepresentation =
-    cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
-        currentToolGroupId
+        cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
+            currentToolGroupId
+        );
+    const canConvertToSurface = cornerstoneTools.segmentation.polySeg.canComputeRequestedRepresentation(
+        activeSegmentationRepresentation.segmentationRepresentationUID
     );
-    const canConvertToSurface = cornerstoneTools.segmentation.polySeg.canComputeRequestedRepresentation(activeSegmentationRepresentation.segmentationRepresentationUID);
-    console.log('canConvertToSurface',canConvertToSurface)
+    console.log('canConvertToSurface', canConvertToSurface);
     console.log('UID', activeSegmentationRepresentation.segmentationRepresentationUID);
-    cornerstoneTools.segmentation.config.setSegmentationRepresentationSpecificConfig(currentToolGroupId,activeSegmentationRepresentation.segmentationRepresentationUID,{
-    
-        [cornerstoneTools.Enums.SegmentationRepresentations.Labelmap]:{
-        renderFill:true,
-        renderOutline:true,
-        fillAlpha:0.9,
-        outlineOpacity:1,
-        outlineWidthActive:2
-    }
-    })
-}
+    cornerstoneTools.segmentation.config.setSegmentationRepresentationSpecificConfig(
+        currentToolGroupId,
+        activeSegmentationRepresentation.segmentationRepresentationUID,
+        {
+            [cornerstoneTools.Enums.SegmentationRepresentations.Labelmap]: {
+                renderFill: true,
+                renderOutline: true,
+                fillAlpha: 0.9,
+                outlineOpacity: 1,
+                outlineWidthActive: 2
+            }
+        }
+    );
+};
 
-export const showOutlineOnly= async () =>{
+export const showOutlineOnly = async () => {
     const state = store.getState();
     const { selectedViewportId } = state.viewer;
 
     // Retrieve the rendering engine and viewport using the selected viewport ID.
-    const {  currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
+    const { currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
     const activeSegmentationRepresentation =
-    cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
-        currentToolGroupId
-    );
+        cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
+            currentToolGroupId
+        );
 
-    cornerstoneTools.segmentation.config.setSegmentationRepresentationSpecificConfig(currentToolGroupId, activeSegmentationRepresentation.segmentationRepresentationUID, {
-        [cornerstoneTools.Enums.SegmentationRepresentations.Labelmap]: {
-          renderFill: false,
-          renderOutline: true,
-          outlineWidthActive: 2,
-          fillAlpha:0.9,
-          outlineOpacity:0.9
+    cornerstoneTools.segmentation.config.setSegmentationRepresentationSpecificConfig(
+        currentToolGroupId,
+        activeSegmentationRepresentation.segmentationRepresentationUID,
+        {
+            [cornerstoneTools.Enums.SegmentationRepresentations.Labelmap]: {
+                renderFill: false,
+                renderOutline: true,
+                outlineWidthActive: 2,
+                fillAlpha: 0.9,
+                outlineOpacity: 0.9
+            }
         }
-      });
-}
+    );
+};
 
 export const setSegmentationOpacity = async (opacity: number) => {
     const state = store.getState();
     const { selectedViewportId } = state.viewer;
 
     // Retrieve the rendering engine and viewport using the selected viewport ID.
-    const {  currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
+    const { currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
     const activeSegmentationRepresentation =
         cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
             currentToolGroupId
         );
 
     // Set the opacity for the segmentation representation
-    cornerstoneTools.segmentation.config.setSegmentationRepresentationSpecificConfig(currentToolGroupId, activeSegmentationRepresentation.segmentationRepresentationUID, {
-        [cornerstoneTools.Enums.SegmentationRepresentations.Labelmap]: {
-            fillAlpha: opacity,
-            outlineOpacity: opacity
+    cornerstoneTools.segmentation.config.setSegmentationRepresentationSpecificConfig(
+        currentToolGroupId,
+        activeSegmentationRepresentation.segmentationRepresentationUID,
+        {
+            [cornerstoneTools.Enums.SegmentationRepresentations.Labelmap]: {
+                fillAlpha: opacity,
+                outlineOpacity: opacity
+            }
         }
-    });
-}
+    );
+};
 export const saveSegmentation = async () => {
     const state = store.getState();
     const { selectedViewportId } = state.viewer;
-
-    // Retrieve the rendering engine and viewport using the selected viewport ID.
     const { viewport, currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
-
-    // Get the volume ID from the viewport.
     const viewportVolumeId = viewport.getActorUIDs()[0];
-
-    // Retrieve the cached volume data.
     const cacheVolume = cornerstone.cache.getVolume(viewportVolumeId);
-    const csImages = cacheVolume.getCornerstoneImages();
 
-    // Get the active segmentation representation for the current tool group.
+    // Get the active segmentation representation
     const activeSegmentationRepresentation =
         cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
             currentToolGroupId
         );
 
-    // Retrieve the cached segmentation volume data.
+    // Get segmentation volume
     const cacheSegmentationVolume = cornerstone.cache.getVolume(
         activeSegmentationRepresentation.segmentationId
     );
+
     const segmentation3D = {
-        data: Array.from(new Uint8Array(cacheSegmentationVolume.scalarData)),
-        dimension: cacheSegmentationVolume.dimension,
+        data: Array.from(new Uint8Array(cacheSegmentationVolume.getScalarData())),
+        dimensions: cacheSegmentationVolume.dimensions,
         spacing: cacheSegmentationVolume.spacing,
         origin: cacheSegmentationVolume.origin,
-        Direction: cacheSegmentationVolume.direction
+        direction: cacheSegmentationVolume.direction
     };
-    // const segmentationData = Array.from(new Uint8Array(cacheSegmentationVolume.scalarData));
-    console.log('segmentationData', segmentation3D);
-    // Generate 2D label maps from the 3D segmentation volume.
+
+    // Generate label maps
     const labelmapData = Cornerstone3D.Segmentation.generateLabelMaps2DFrom3D(cacheSegmentationVolume);
+    const segmentsMetadata = {};
 
-    // Initialize metadata array for segments.
-    labelmapData.metadata = [];
-
-    // Generate metadata for each segment in the label map.
+    // Generate metadata for each segment
     labelmapData.segmentsOnLabelmap.forEach((segmentIndex) => {
         const color = cornerstoneTools.segmentation.config.color.getColorForSegmentIndex(
             currentToolGroupId,
             activeSegmentationRepresentation.segmentationRepresentationUID,
             segmentIndex
         );
-        const segmentMetadata = generateMockMetadata(segmentIndex, color);
-        labelmapData.metadata[segmentIndex] = segmentMetadata;
+        segmentsMetadata[segmentIndex] = generateMockMetadata(segmentIndex, color);
     });
 
-    // Generate the segmentation dataset for DICOM export.
+    // Generate segmentation dataset
     const generatedSegmentation = Cornerstone3D.Segmentation.generateSegmentation(
-        csImages,
-        labelmapData,
+        cacheVolume.imageIds,
+        { ...labelmapData, metadata: segmentsMetadata },
         cornerstone.metaData
     );
 
@@ -302,7 +299,7 @@ export const saveSegmentation = async () => {
 //     // Re-render the image to apply changes
 //     cornerstone.updateImage(element);
 //   }
-  
+
 export const downloadSegmentation = async () => {
     // Get the current application state and selected viewport ID.
     const state = store.getState();
@@ -432,9 +429,8 @@ export const uploadSegmentation = async () => {
 export const readSegmentation = async (input: File | string) => {
     let imageId, arrayBuffer;
     const state = store.getState();
-    const { currentStudyInstanceUid, is3DActive,selectedViewportId ,renderingEngineId } = state.viewer; // ✅ Get 3D flag
+    const { currentStudyInstanceUid, is3DActive, selectedViewportId, renderingEngineId } = state.viewer; // ✅ Get 3D flag
 
-    
     if (typeof input === 'string') {
         const seriesInstanceUID = input;
         const client = new api.DICOMwebClient({ url: DICOM_URL, singlepart: SINGLEPART });
@@ -460,67 +456,67 @@ export const readSegmentation = async (input: File | string) => {
         arrayBuffer = image.data.byteArray.buffer;
     }
     // const { selectedViewportId ,renderingEngineId} = state.viewer;
-    
+
     console.log('arrayBuffer', arrayBuffer);
     // const { viewport, currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
-//     if(is3DActive){
-        
-//         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-//         if (!renderingEngine) return;
-        
-//         const segResult = await Cornerstone3D.Segmentation.generateToolState( viewport.getImageIds(), arrayBuffer, cornerstone.metaData);
-//         const segBuffer = segResult.labelmapBufferArray[0];  // assuming one segment
-//     const voxels = new Uint8Array(segBuffer);
-//     // console.log(`Max label value = ${Math.max(...voxels)}`);  // expect 1 or more
-//     const labelArray = new Uint8Array(segResult.labelmapBufferArray[0]);
-//     const vtkSegData = vtkDataArray.newInstance({
-//       values: labelArray,
-//       numberOfComponents: 1,
-//       name: 'SegmentMask'
-//     });
-//     // 1) Grab the primary volume ID from the viewport  
-//     const primaryVolumeId = viewport.getActorUIDs()[0];  
-//     console.log('primaryVolumeId', primaryVolumeId);
-//     // 2) Fetch it out of the Cornerstone cache  
-//     const primaryVolume   = cornerstone.cache.getVolume(primaryVolumeId)!;  
-//     console.log('primaryVolume', primaryVolume);
-//     // 3) Now pull its real geometry  
-//     const dims    = primaryVolume.imageData!.getDimensions();  
-//     const spacing = primaryVolume.imageData!.getSpacing();  
-//     const origin  = primaryVolume.imageData!.getOrigin();  
-    
-//     // 4) Use *those* when you build your vtkImageData:
-//     const segImageData = vtkImageData.newInstance();
-//     segImageData.setOrigin(...origin);
-//     segImageData.setSpacing(...spacing);
-//     segImageData.setExtent(
-//         0, dims[0] - 1,
-//         0, dims[1] - 1,
-//         0, dims[2] - 1
-//     );
+    //     if(is3DActive){
 
-//     segImageData.getPointData().setScalars(vtkSegData);
-    
-//     const marcher = vtkImageMarchingCubes.newInstance({
-//         contourValue: 0.5,
-//         computeNormals: true,
-//         mergePoints: true
-//     });
-//     marcher.setInputData(segImageData);
-//     const segmentationMesh = marcher.getOutputData();
-//       const segMapper = vtkMapper.newInstance();
-//     segMapper.setInputData(segmentationMesh);
-//     const segActor = vtkActor.newInstance();
-//     segActor.setMapper(segMapper);
-//     viewport.addActor(
-//         {uid: 'SegRawVTK',actor:segActor});
-//     viewport.resetCamera();
-//     viewport.render();
-//     return;
-// }
+    //         const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+    //         if (!renderingEngine) return;
 
-const stats = computeSegmentationStat();
-console.log("stats ",stats);
+    //         const segResult = await Cornerstone3D.Segmentation.generateToolState( viewport.getImageIds(), arrayBuffer, cornerstone.metaData);
+    //         const segBuffer = segResult.labelmapBufferArray[0];  // assuming one segment
+    //     const voxels = new Uint8Array(segBuffer);
+    //     // console.log(`Max label value = ${Math.max(...voxels)}`);  // expect 1 or more
+    //     const labelArray = new Uint8Array(segResult.labelmapBufferArray[0]);
+    //     const vtkSegData = vtkDataArray.newInstance({
+    //       values: labelArray,
+    //       numberOfComponents: 1,
+    //       name: 'SegmentMask'
+    //     });
+    //     // 1) Grab the primary volume ID from the viewport
+    //     const primaryVolumeId = viewport.getActorUIDs()[0];
+    //     console.log('primaryVolumeId', primaryVolumeId);
+    //     // 2) Fetch it out of the Cornerstone cache
+    //     const primaryVolume   = cornerstone.cache.getVolume(primaryVolumeId)!;
+    //     console.log('primaryVolume', primaryVolume);
+    //     // 3) Now pull its real geometry
+    //     const dims    = primaryVolume.imageData!.getDimensions();
+    //     const spacing = primaryVolume.imageData!.getSpacing();
+    //     const origin  = primaryVolume.imageData!.getOrigin();
+
+    //     // 4) Use *those* when you build your vtkImageData:
+    //     const segImageData = vtkImageData.newInstance();
+    //     segImageData.setOrigin(...origin);
+    //     segImageData.setSpacing(...spacing);
+    //     segImageData.setExtent(
+    //         0, dims[0] - 1,
+    //         0, dims[1] - 1,
+    //         0, dims[2] - 1
+    //     );
+
+    //     segImageData.getPointData().setScalars(vtkSegData);
+
+    //     const marcher = vtkImageMarchingCubes.newInstance({
+    //         contourValue: 0.5,
+    //         computeNormals: true,
+    //         mergePoints: true
+    //     });
+    //     marcher.setInputData(segImageData);
+    //     const segmentationMesh = marcher.getOutputData();
+    //       const segMapper = vtkMapper.newInstance();
+    //     segMapper.setInputData(segmentationMesh);
+    //     const segActor = vtkActor.newInstance();
+    //     segActor.setMapper(segMapper);
+    //     viewport.addActor(
+    //         {uid: 'SegRawVTK',actor:segActor});
+    //     viewport.resetCamera();
+    //     viewport.render();
+    //     return;
+    // }
+
+    const stats = computeSegmentationStat();
+    console.log('stats ', stats);
     if (!arrayBuffer) {
         console.error('Failed to load segmentation: No data available.');
         return;
@@ -530,124 +526,119 @@ console.log("stats ",stats);
     await loadSegmentation(arrayBuffer, is3DActive);
 };
 
-
-export const computeSegmentationStat =async() =>{
+export const computeSegmentationStat = async () => {
     const state = store.getState();
-  const { selectedViewportId, segmentations } = state.viewer;
-    console.log('segmentations volume',segmentations[0])
-    console.log('segmentations uid',segmentations[1])
-    console.log('segmentations segment index',segmentations[2])
-    cornerstoneTools.segmentation.polySeg.computeAndAddSurfaceRepresentation
-  // Get the segmentation linked to the current viewport
-  const segmentation= segmentations.find(
-    seg => seg.isActive
-);
+    const { selectedViewportId, segmentations } = state.viewer;
+    console.log('segmentations volume', segmentations[0]);
+    console.log('segmentations uid', segmentations[1]);
+    console.log('segmentations segment index', segmentations[2]);
+    cornerstoneTools.segmentation.polySeg.computeAndAddSurfaceRepresentation;
+    // Get the segmentation linked to the current viewport
+    const segmentation = segmentations.find((seg) => seg.isActive);
 
-  if (!segmentation) {
-    console.warn("❌ No segmentation found for selected viewport");
-    return;
-  }
-console.log("segmentation.segmentationVolume",segmentation.segmentationVolume)
-  const segmentationVolume = cornerstone.cache.getVolume(segmentation.segmentationVolume);
-  console.log('segmentationVolume123',segmentationVolume)
-  const sourceVolume = cornerstone.cache.getVolume(segmentation.volumeId!);
+    if (!segmentation) {
+        console.warn('❌ No segmentation found for selected viewport');
+        return;
+    }
+    console.log('segmentation.segmentationVolume', segmentation.segmentationVolume);
+    const segmentationVolume = cornerstone.cache.getVolume(segmentation.segmentationVolume);
+    console.log('segmentationVolume123', segmentationVolume);
+    const sourceVolume = cornerstone.cache.getVolume(segmentation.volumeId!);
 
-  if (!segmentationVolume || !sourceVolume) {
-    console.warn("🚫 Missing segmentation or source volume in cache");
-    return;
-  }
-  const labelData = new Uint8Array(segmentationVolume.getScalarData());
-  console.log('labelData',labelData)
-  const imageData = new Float32Array(sourceVolume.getScalarData());
-  const [dimX, dimY, dimZ] = segmentationVolume.dimensions;
-  const [sx, sy, sz] = segmentationVolume.spacing;
-  const voxelVolume = sx * sy * sz;
+    if (!segmentationVolume || !sourceVolume) {
+        console.warn('🚫 Missing segmentation or source volume in cache');
+        return;
+    }
+    const labelData = new Uint8Array(segmentationVolume.getScalarData());
+    console.log('labelData', labelData);
+    const imageData = new Float32Array(sourceVolume.getScalarData());
+    const [dimX, dimY, dimZ] = segmentationVolume.dimensions;
+    const [sx, sy, sz] = segmentationVolume.spacing;
+    const voxelVolume = sx * sy * sz;
 
-  const statsByLabel: Record<number, any> = {};
+    const statsByLabel: Record<number, any> = {};
 
-  for (let z = 0; z < dimZ; z++) {
-    for (let y = 0; y < dimY; y++) {
-      for (let x = 0; x < dimX; x++) {
-        const index = z * dimY * dimX + y * dimX + x;
-        const label = labelData[index];
+    for (let z = 0; z < dimZ; z++) {
+        for (let y = 0; y < dimY; y++) {
+            for (let x = 0; x < dimX; x++) {
+                const index = z * dimY * dimX + y * dimX + x;
+                const label = labelData[index];
 
-        if (label === 0) continue;
+                if (label === 0) continue;
 
-        const value = imageData[index];
+                const value = imageData[index];
 
-        if (!statsByLabel[label]) {
-          const segment = segmentation.segments.find(s => s.segmentIndex === label);
-          statsByLabel[label] = {
-            labelName: segment?.label ?? `Segment ${label}`,
-            color: segment?.color ?? [255, 255, 255],
-            count: 0,
-            sum: 0,
-            values: [],
-            min: Infinity,
-            max: -Infinity,
-            sumX: 0,
-            sumY: 0,
-            sumZ: 0,
-          };
+                if (!statsByLabel[label]) {
+                    const segment = segmentation.segments.find((s) => s.segmentIndex === label);
+                    statsByLabel[label] = {
+                        labelName: segment?.label ?? `Segment ${label}`,
+                        color: segment?.color ?? [255, 255, 255],
+                        count: 0,
+                        sum: 0,
+                        values: [],
+                        min: Infinity,
+                        max: -Infinity,
+                        sumX: 0,
+                        sumY: 0,
+                        sumZ: 0
+                    };
+                }
+
+                const s = statsByLabel[label];
+
+                s.count++;
+                s.sum += value;
+                s.values.push(value);
+                s.min = Math.min(s.min, value);
+                s.max = Math.max(s.max, value);
+                s.sumX += x;
+                s.sumY += y;
+                s.sumZ += z;
+            }
         }
+    }
 
+    // Final stats calculations
+    for (const label in statsByLabel) {
         const s = statsByLabel[label];
+        s.mean = s.sum / s.count;
 
-        s.count++;
-        s.sum += value;
-        s.values.push(value);
-        s.min = Math.min(s.min, value);
-        s.max = Math.max(s.max, value);
-        s.sumX += x;
-        s.sumY += y;
-        s.sumZ += z;
-      }
+        let varianceSum = 0;
+        for (const val of s.values) {
+            varianceSum += Math.pow(val - s.mean, 2);
+        }
+        s.std = Math.sqrt(varianceSum / s.count);
+
+        s.values.sort((a, b) => a - b);
+        const mid = Math.floor(s.count / 2);
+        s.median = s.count % 2 === 0 ? (s.values[mid - 1] + s.values[mid]) / 2 : s.values[mid];
+
+        let skewSum = 0;
+        let kurtSum = 0;
+        for (const val of s.values) {
+            const diff = (val - s.mean) / s.std;
+            skewSum += diff ** 3;
+            kurtSum += diff ** 4;
+        }
+        s.skewness = skewSum / s.count;
+        s.kurtosis = kurtSum / s.count - 3;
+
+        s.volume = s.count * voxelVolume;
+
+        const cx = s.sumX / s.count;
+        const cy = s.sumY / s.count;
+        const cz = s.sumZ / s.count;
+        s.center = [
+            segmentationVolume.origin[0] + cx * sx,
+            segmentationVolume.origin[1] + cy * sy,
+            segmentationVolume.origin[2] + cz * sz
+        ];
+
+        delete s.values; // optional
     }
-  }
 
-  // Final stats calculations
-  for (const label in statsByLabel) {
-    const s = statsByLabel[label];
-    s.mean = s.sum / s.count;
-
-    let varianceSum = 0;
-    for (const val of s.values) {
-      varianceSum += Math.pow(val - s.mean, 2);
-    }
-    s.std = Math.sqrt(varianceSum / s.count);
-
-    s.values.sort((a, b) => a - b);
-    const mid = Math.floor(s.count / 2);
-    s.median = s.count % 2 === 0
-      ? (s.values[mid - 1] + s.values[mid]) / 2
-      : s.values[mid];
-
-    let skewSum = 0;
-    let kurtSum = 0;
-    for (const val of s.values) {
-      const diff = (val - s.mean) / s.std;
-      skewSum += diff ** 3;
-      kurtSum += diff ** 4;
-    }
-    s.skewness = skewSum / s.count;
-    s.kurtosis = kurtSum / s.count - 3;
-
-    s.volume = s.count * voxelVolume;
-
-    const cx = s.sumX / s.count;
-    const cy = s.sumY / s.count;
-    const cz = s.sumZ / s.count;
-    s.center = [
-      segmentationVolume.origin[0] + cx * sx,
-      segmentationVolume.origin[1] + cy * sy,
-      segmentationVolume.origin[2] + cz * sz
-    ];
-
-    delete s.values; // optional
-  }
-
-  console.log('🧠 Segment Statistics:', statsByLabel);
-  return statsByLabel;
+    console.log('🧠 Segment Statistics:', statsByLabel);
+    return statsByLabel;
 };
 
 /**
@@ -658,9 +649,9 @@ console.log("segmentation.segmentationVolume",segmentation.segmentationVolume)
  */
 async function loadSegmentation(arrayBuffer: ArrayBuffer, is3DActive: boolean) {
     const state = store.getState();
-    const { selectedViewportId ,renderingEngineId} = state.viewer;
+    const { selectedViewportId, renderingEngineId } = state.viewer;
     const { viewport, currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
-    cornerstoneTools.segmentation
+    cornerstoneTools.segmentation;
     if (!viewport) {
         console.error('❌ Viewport not found for segmentation.');
         return;
@@ -670,16 +661,14 @@ async function loadSegmentation(arrayBuffer: ArrayBuffer, is3DActive: boolean) {
     console.log('Segmentation Volume ID in segmentation methods:', newSegmentationId);
 
     // ✅ Generate segmentation tool state
-    
+
     ////////////////////test /////////////////////////
-const generateToolState = await Cornerstone3D.Segmentation.generateToolState(
-    viewport.getImageIds(),
-    arrayBuffer,
-    cornerstone.metaData
-);
+    const generateToolState = await Cornerstone3D.Segmentation.generateToolState(
+        viewport.getImageIds(),
+        arrayBuffer,
+        cornerstone.metaData
+    );
     console.log('🔄 Generating Segmentation Tool State:', generateToolState);
-
-
 
     // ✅ Add segmentation state (Labelmap for 2D, Surface for 3D)
     const derivedVolume = await addSegmentationsToState(
@@ -690,47 +679,51 @@ const generateToolState = await Cornerstone3D.Segmentation.generateToolState(
         is3DActive
     );
     const stats = computeSegmentationStat();
-    console.log("stats ",stats);
-        console.log('✅ Derived Volume Created:', derivedVolume);
+    console.log('stats ', stats);
+    console.log('✅ Derived Volume Created:', derivedVolume);
 
     // ✅ Assign segmentation data to volume
     const scalarData = derivedVolume.getScalarData();
     const combinedBuffer = new Uint8Array(scalarData.length);
     let offset = 0;
-    console.log("scalarData", scalarData);
-    console.log("combinedBuffer", combinedBuffer);
-
+    console.log('scalarData', scalarData);
+    console.log('combinedBuffer', combinedBuffer);
 
     for (const slice of generateToolState.labelmapBufferArray) {
-      combinedBuffer.set(new Uint8Array(slice), offset);
-      offset += slice.byteLength;
+        combinedBuffer.set(new Uint8Array(slice), offset);
+        offset += slice.byteLength;
     }
-    console.log("  derivedVolume.imageData",   derivedVolume.imageData);
+    console.log('  derivedVolume.imageData', derivedVolume.imageData);
     scalarData.set(combinedBuffer);
     const imageData = derivedVolume.imageData;
     imageData.getPointData().getScalars().setData(scalarData); // ⬅️ critical!
-    console.log("imageData1", imageData);
+    console.log('imageData1', imageData);
     imageData.modified(); // ⬅️ refreshes internal structures
-    console.log("imageData2", imageData);
+    console.log('imageData2', imageData);
     viewport.render();
 }
 
-async function ensureSurfaceSegmentation(){
-    // registerPolySegWorker(); 
+async function ensureSurfaceSegmentation() {
     const state = store.getState();
-    const { selectedViewportId ,renderingEngineId} = state.viewer;
-    const { viewport, currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
+    const { selectedViewportId } = state.viewer;
+    const { currentToolGroupId } = getRenderingAndViewport(selectedViewportId);
     const activeSegmentationRepresentation =
-    cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
-        currentToolGroupId
-    );
-    
-    try{
-        await cornerstoneTools.segmentation.polySeg.computeAndAddSurfaceRepresentation(activeSegmentationRepresentation.segmentationId, {
-            segmentIndices: [0,1,2], // or [0,1,2,...] for all segments
-            segmentationRepresentationUID: activeSegmentationRepresentation.segmentationRepresentationUID, // or representation UID
-          });
-    }catch(err){
+        cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(
+            currentToolGroupId
+        );
+
+    try {
+        // Use standard surface representation
+        await cornerstoneTools.segmentation.addSegmentationRepresentations(currentToolGroupId, [
+            {
+                segmentationId: activeSegmentationRepresentation.segmentationId,
+                type: cornerstoneTools.Enums.SegmentationRepresentations.Surface,
+                options: {
+                    // Add any surface-specific options here
+                }
+            }
+        ]);
+    } catch (err) {
         console.error('Surface conversion failed:', err);
     }
 }
@@ -750,64 +743,63 @@ async function addSegmentationsToState(
     currentToolGroupId: string,
     numberOfSegments: number,
     is3DActive: boolean
-  ) {
+) {
     const viewportVolumeId = viewport.getActorUIDs()[0];
-  
+
     const derivedVolume = await cornerstone.volumeLoader.createAndCacheDerivedSegmentationVolume(
-      viewportVolumeId,
-      { volumeId: segmentationId }
+        viewportVolumeId,
+        { volumeId: segmentationId }
     );
-  const representationType = is3DActive
-  ? cornerstoneTools.Enums.SegmentationRepresentations.Surface
-  : cornerstoneTools.Enums.SegmentationRepresentations.Labelmap;
+    const representationType = is3DActive
+        ? cornerstoneTools.Enums.SegmentationRepresentations.Surface
+        : cornerstoneTools.Enums.SegmentationRepresentations.Labelmap;
 
     await cornerstoneTools.segmentation.addSegmentations([
-      {
-        segmentationId,
-        representation: {
-          type: cornerstoneTools.Enums.SegmentationRepresentations.Labelmap,
-          data: { volumeId: segmentationId }
+        {
+            segmentationId,
+            representation: {
+                type: cornerstoneTools.Enums.SegmentationRepresentations.Labelmap,
+                data: { volumeId: segmentationId }
+            }
         }
-      }
     ]);
-  
-    const [uid] = await cornerstoneTools.segmentation.addSegmentationRepresentations(currentToolGroupId, [
-      {
-        segmentationId,
-        type: cornerstoneTools.Enums.SegmentationRepresentations.Labelmap,
-        options: {
-          polySeg: {
-            enabled: true,
-          }
-        }
-      }
 
+    const [uid] = await cornerstoneTools.segmentation.addSegmentationRepresentations(currentToolGroupId, [
+        {
+            segmentationId,
+            type: cornerstoneTools.Enums.SegmentationRepresentations.Labelmap,
+            options: {
+                polySeg: {
+                    enabled: true
+                }
+            }
+        }
     ]);
-  
+
     cornerstoneTools.segmentation.activeSegmentation.setActiveSegmentationRepresentation(
-      currentToolGroupId,
-      uid
+        currentToolGroupId,
+        uid
     );
-    console.log("segmentation bbnbossss henaaaasd")
+    console.log('segmentation bbnbossss henaaaasd');
     // 🧠 If in 3D mode, also compute Surface representation
     if (is3DActive) {
         // cornerstoneTools.segmentation.polySeg.
-      console.log('🔁 Converting Labelmap to Surface...');
-      await ensureSurfaceSegmentation();
+        console.log('🔁 Converting Labelmap to Surface...');
+        await ensureSurfaceSegmentation();
     }
-  
+
     store.dispatch(
-      viewerSliceActions.addSegmentation({
-        id: segmentationId,
-        volumeId: viewportVolumeId,
-        uid,
-        segmentationVolume: derivedVolume.volumeId
-      })
+        viewerSliceActions.addSegmentation({
+            id: segmentationId,
+            volumeId: viewportVolumeId,
+            uid,
+            segmentationVolume: derivedVolume.volumeId
+        })
     );
-  
+
     addSegmentToSegmentation(numberOfSegments);
-  
+
     return derivedVolume;
-  }
-  
+}
+
 export default getRenderingAndViewport;

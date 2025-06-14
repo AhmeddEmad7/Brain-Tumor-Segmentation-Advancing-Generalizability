@@ -43,17 +43,15 @@ const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx, disabled }:
         <>
             <StyledDiv
                 aria-haspopup="true"
-                className={'flex items-center justify-center p-1'}
+                className={'flex items-center justify-center mr-1'}
                 sx={{
                     ...sx,
                     cursor: disabled ? 'not-allowed' : 'pointer',
-                    opacity: disabled ? 0.4 : 1 // Greyed out when disabled
+                    opacity: disabled ? 0.3 : 1 // Greyed out when disabled
                 }}
             >
                 <div
-                    className={
-                        'flex flex-col items-center justify-center cursor-pointer w-4/5 overflow-hidden'
-                    }
+                    className={'flex flex-col items-center justify-center rounded-md '}
                     onMouseUp={handleClick}
                     title={title}
                     aria-disabled={disabled}
@@ -61,12 +59,12 @@ const ViewerToolButton = ({ title, onClick, menuComponent, icon, sx, disabled }:
                     <div className={'text-2xl'}>
                         <SvgIcon fontSize={'inherit'}>{icon}</SvgIcon>
                     </div>
-                    <div className={'truncate text-xs'}>{title}</div>
+                    <div className={'text-xs'}>{title}</div>
                 </div>
 
                 <Box
                     onClick={handleDropdownClick}
-                    className={'cursor-pointer'}
+                    className={'cursor-pointer '}
                     sx={{ color: theme.palette.secondary.main }}
                 >
                     {menuComponent && <ArrowDropDownIcon />}

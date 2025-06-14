@@ -1,16 +1,17 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 type TMenuButtonProps = {
     icon: ReactNode;
     label: string;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 export type TViewerButtonItems = {
     icon: ReactNode;
     label: string;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent) => void;
     divider?: boolean;
+    component?: ReactNode;
 };
 
 type TViewerButtonMenu = {
@@ -24,7 +25,7 @@ const buttonStyle =
 
 const MenuButton = ({ icon, label, onClick }: TMenuButtonProps) => {
     return (
-        <div className={buttonStyle} onClick={onClick}>
+        <div className={buttonStyle} onClick={(e) => onClick?.(e)}>
             <div className={'text-lg'}>{icon}</div>
             <div className={'truncate text-xm'}> {label}</div>
         </div>
@@ -36,10 +37,14 @@ const ViewerButtonMenu = ({ items }: TViewerButtonMenu) => {
         <div className={'min-w-36'}>
             {items.map((item, index) => {
                 return (
-                    <>
-                        <MenuButton key={index} icon={item.icon} label={item.label} onClick={item.onClick} />
+                    <div key={index}>
+                        {item.component ? (
+                            item.component
+                        ) : (
+                            <MenuButton icon={item.icon} label={item.label} onClick={item.onClick} />
+                        )}
                         {item.divider && <hr className={'m-2 border-gray-600'} />}
-                    </>
+                    </div>
                 );
             })}
         </div>

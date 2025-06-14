@@ -1,11 +1,11 @@
 import torch
 import nibabel as nib
 import os
-from .DynUNet import DynUNet
-from .Generate_from_LLM import initialize_llm, prepare_prompt, generate_clinical_data_from_llm
-from .Loader import load_sequences_from_paths
+from DynUNet import DynUNet
+from Generate_from_LLM import initialize_llm, prepare_prompt, generate_clinical_data_from_llm
+from Loader import load_sequences_from_paths
 from monai.inferers import sliding_window_inference
-from .Reporting import extract_tumor_features, generate_report, generate_pdf
+from Reporting import extract_tumor_features, generate_report, generate_pdf
 from pathlib import Path
 
 def load_model(model_path):
@@ -44,7 +44,7 @@ def save_nifti_volumes(int_volumes, metadata, output_dir):
         print(f"Saved: {file_path}")
 
 def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, 
-              model_path=r'"C:\Users\hazem\Downloads\Teacher_model_after_epoch_100_trainLoss_0.5972_valLoss_0.3019.pth"'):
+              model_path=r'"D:\Brain-Tumor-Segmentation-Advancing-Generalizability\AI\model\Final_KD_Student_Model_v2.pth"'):
     input_data, int_volumes, metadata, brain_volume = load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path)
     save_nifti_volumes(int_volumes, metadata, output_dir)
     
@@ -104,13 +104,13 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir,
 
 
 # # Doing inference here
-# t1c_path = r'C:\Users\hazem\Downloads\seqHIghRes/00000057_brain_t1ce.nii'
-# t1n_path = r'C:\Users\hazem\Downloads\seqHIghRes/00000057_brain_t1.nii'
-# t2f_path = r'C:\Users\hazem\Downloads\seqHIghRes/00000057_brain_flair.nii'
-# t2w_path = r'C:\Users\hazem\Downloads\seqHIghRes/00000057_brain_t2.nii'
+t1c_path = r'D:\dataswt\seqHIghRes\00000057_brain_t1ce.nii'
+t1n_path = r'D:\dataswt\seqHIghRes\00000057_brain_t1.nii'
+t2f_path = r'D:\dataswt\seqHIghRes\00000057_brain_flair.nii'
+t2w_path = r'D:\dataswt\seqHIghRes\00000057_brain_t2.nii'
 # model_path = r'C:\Downloads\Teacher_model_after_epoch_76_trainLoss_0.6067_valLoss_0.3000.pth'
 # # seg_path = '/kaggle/input/bratsglioma/Training/BraTS-GLI-00006-000/BraTS-GLI-00006-000-seg.nii'
 
-# output_dir = r'C:\Users\hazem\Downloads\seqHIghRes'
-# prediction, findings = inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path)
+output_dir = r'D:\dataswt\seqHIghRes'
+prediction, findings = inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir)
 # # print('Inference done!')

@@ -35,7 +35,7 @@ const SidePanel = ({ children, title, headerComponent }: TSidePanelProps) => {
                 )}
                 <div className="opacity-0">hidd</div>
             </div>
-            <div className="p-4">{isOpen && children}</div>
+            <div className="h-[calc(100%-3rem)] overflow-hidden">{isOpen && children}</div>
         </div>
     );
 };

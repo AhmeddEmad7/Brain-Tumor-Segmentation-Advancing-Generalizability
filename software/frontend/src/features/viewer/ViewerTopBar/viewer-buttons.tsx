@@ -20,6 +20,7 @@ import {
 } from '@mui/icons-material';
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import * as cornerstone from '@cornerstonejs/core';
+import { Types } from '@cornerstonejs/core';
 import { LuAxis3D } from 'react-icons/lu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLayerGroup, faUpDownLeftRight, faCirclePlay } from '@fortawesome/free-solid-svg-icons';
@@ -99,68 +100,68 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         icon: <RotationToolIcon />,
         menuComponent: <ViewerButtonMenu items={RotateButtonItems} />,
         disabled: false
-      },
-      {
-          title: 'Layout',
-          icon: <LayoutIcon />,
-          menuComponent: <LayoutSelector rows={4} columns={4} />,
-          disabled: false
-      },
-      {
+    },
+    {
+        title: 'Layout',
+        icon: <LayoutIcon />,
+        menuComponent: <LayoutSelector rows={4} columns={4} is3DPrimaryLayoutActive={true} />,
+        disabled: false
+    },
+    {
         title: 'MPR',
         onClick: async () => {
-          const state = store.getState();
-          const renderingEngineId = state.viewer.renderingEngineId;
-          const currentStudyInstanceUid = state.viewer.currentStudyInstanceUid;
-          const selectedSeriesInstanceUid = state.viewer.selectedSeriesInstanceUid;
-          const isActive = state.viewer.isMPRActive;
-        //   const isMPRActive = state.viewer.isMPRActive;
-      
-          if (!isActive) {
-            store.dispatch(viewerSliceActions.setMPRActive(true));
-            // store.dispatch(setActiveSegmentIndex)
-            store.dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
-            await toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
-          } else {
-            CornerstoneToolManager.disableAllTools();
-            store.dispatch(viewerSliceActions.resetViewerLayout());
-            store.dispatch(viewerSliceActions.setMPRActive(false));
-          }
+            const state = store.getState();
+            const renderingEngineId = state.viewer.renderingEngineId;
+            const currentStudyInstanceUid = state.viewer.currentStudyInstanceUid;
+            const selectedSeriesInstanceUid = state.viewer.selectedSeriesInstanceUid;
+            const isActive = state.viewer.isMPRActive;
+            //   const isMPRActive = state.viewer.isMPRActive;
+
+            if (!isActive) {
+                store.dispatch(viewerSliceActions.setMPRActive(true));
+                // store.dispatch(setActiveSegmentIndex)
+                store.dispatch(viewerSliceActions.setClickedSeries(selectedSeriesInstanceUid));
+                await toggleMPRMode(renderingEngineId, selectedSeriesInstanceUid, currentStudyInstanceUid);
+            } else {
+                CornerstoneToolManager.disableAllTools();
+                store.dispatch(viewerSliceActions.resetViewerLayout());
+                store.dispatch(viewerSliceActions.setMPRActive(false));
+            }
         },
         icon: <LuAxis3D />,
         disabled: false
-      },
-      {
+    },
+    {
         title: 'Crosshair',
         onClick: () => {
-          const state = store.getState();
-          const renderingEngineId = state.viewer.renderingEngineId;
-          const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-          const isCurrentlyActive = state.viewer.isCrosshairActive;
-      
-          const viewports = renderingEngine?.getViewports();
-          if (!viewports || viewports.length < 2) {
-            console.warn('❌ Crosshairs require at least two viewports.');
-            return;
-          }
-      
-          store.dispatch(viewerSliceActions.setCrosshairActive(!isCurrentlyActive));
-      
-          if (!isCurrentlyActive) {
-            CornerstoneToolManager.disableAllTools();
-            CornerstoneToolManager.setToolActive(
-              cornerstoneTools.CrosshairsTool.toolName,
-              cornerstoneTools.Enums.MouseBindings.Primary
-            );
-          } else {
-            CornerstoneToolManager.disableAllTools();
-          }
+            const state = store.getState();
+            const renderingEngineId = state.viewer.renderingEngineId;
+            const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+            const isCurrentlyActive = state.viewer.isCrosshairActive;
+
+            const viewports = renderingEngine?.getViewports();
+            if (!viewports || viewports.length < 2) {
+                console.warn('❌ Crosshairs require at least two viewports.');
+                return;
+            }
+
+            store.dispatch(viewerSliceActions.setCrosshairActive(!isCurrentlyActive));
+
+            if (!isCurrentlyActive) {
+                CornerstoneToolManager.disableAllTools();
+                CornerstoneToolManager.setToolActive(
+                    cornerstoneTools.CrosshairsTool.toolName,
+                    cornerstoneTools.Enums.MouseBindings.Primary
+                );
+            } else {
+                CornerstoneToolManager.disableAllTools();
+            }
         },
         icon: <GiCrosshair />,
         disabled: false
-      },
-   
-       {
+    },
+
+    {
         icon: <ThreeDIcon />,
         title: '3D',
         onClick: async () => {
@@ -168,40 +169,6 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         },
         disabled: false // Disable the 3D button itself when already in 3D mode
     },
-    // {
-    //    title: 'Colormap',
-    //    icon: <PaletteIcon />,
-    //    menuComponent: (
-    //      <ColormapSelectorMenu
-    //        applyColormap={(vtkPresetName) => {
-    //          // This is your existing code that applies the selected preset
-    //          const state = store.getState();
-    //          const renderingEngineId = state.viewer.renderingEngineId;
-    //          const viewportId = state.viewer.selectedViewportId;
-     
-    //          let volumeId = '';
-    //          if (
-    //            state.viewer.currentStudyInstanceUid.endsWith('.nii') ||
-    //            state.viewer.currentStudyInstanceUid.endsWith('.gz')
-    //          ) {
-    //            const niftiURL = `${import.meta.env.VITE_NIFTI_DOMAIN}/${state.viewer.currentStudyInstanceUid}`;
-    //            volumeId = 'nifti:' + niftiURL;
-    //          } else {
-    //            volumeId = `cornerstoneStreamingImageVolume:${state.viewer.selectedSeriesInstanceUid}`;
-    //          }
-     
-    //          applyColormapToViewport( 
-    //            vtkPresetName,
-    //            renderingEngineId,
-    //            viewportId,
-    //            volumeId
-    //          );
-    //        }}
-    //      />
-    //    ),
-    //    disabled: false
-    //  },
-   
     {
         icon: <ResetIcon />,
         title: 'Reset',
@@ -250,9 +217,7 @@ const VIEWER_TOOLS_BUTTONS = (is3DActive) => [
         title: 'Info',
         onClick: toggleViewportOverlayShown,
         disabled: is3DActive
-    },
-    
-
+    }
 ];
 const VIEWER_OPTION_BUTTONS = [
     {

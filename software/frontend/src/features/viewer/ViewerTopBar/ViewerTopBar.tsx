@@ -23,8 +23,6 @@ const ViewerTopBar = () => {
     const tools = VIEWER_TOOLS_BUTTONS(is3DActive);
     const primaryTools = tools.slice(0, 10);
     const otherTools = tools.slice(10);
-    
-
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedTool, setSelectedTool] = useState<ViewerButtonType | null>(null);
@@ -66,58 +64,54 @@ const ViewerTopBar = () => {
 
             <Box className={'flex justify-center items-center'} sx={{ gap: 1 }}>
                 {primaryTools.map((button, index) => (
-                    <Tooltip
-                        key={index}
-                        title={button.disabled ? 'Not available on the current viewport' : button.title}
-                        arrow
-                    >
-                        <div>
-                            <ViewerToolButton
-                                onClick={button.onClick}
-                                icon={button.icon}
-                                menuComponent={button.menuComponent}
-                                title={button.title}
-                                disabled={button.disabled}
-                                sx={{
-                                    width: '60px',
-                                    minWidth: 'auto',
-                                    cursor: button.disabled ? 'not-allowed' : 'pointer',
-                                    color: isDarkMode ? '#FFFFFF' : '#000000'
-                                }}
-                            />
-                        </div>
-                    </Tooltip>
+                    <div key={index}>
+                        <ViewerToolButton
+                            onClick={button.onClick}
+                            icon={button.icon}
+                            menuComponent={button.menuComponent}
+                            title={button.title}
+                            disabled={button.disabled}
+                            sx={{
+                                width: '60px',
+                                minWidth: 'auto',
+                                cursor: button.disabled ? 'not-allowed' : 'pointer',
+                                color: isDarkMode ? '#FFFFFF' : '#000000'
+                            }}
+                        />
+                    </div>
                 ))}
-                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} >
+                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                     {otherTools.map((tool, index) => (
-                        <MenuItem key={index} onClick={() => handleToolSelect(tool)} sx={{ color: '#00A8E8'  }}>
-                        <Box component="span" sx={{  marginRight: 1 ,}}>{tool.icon}</Box> 
-                        {tool.title}
-                    </MenuItem>
+                        <MenuItem
+                            key={index}
+                            onClick={() => handleToolSelect(tool)}
+                            sx={{ color: '#00A8E8' }}
+                        >
+                            <Box component="span" sx={{ marginRight: 1 }}>
+                                {tool.icon}
+                            </Box>
+                            {tool.title}
+                        </MenuItem>
                     ))}
                 </Menu>
                 {/* New Dynamic Button */}
                 {selectedTool && (
-                    <Tooltip title={selectedTool.title} arrow>
-                        <ViewerToolButton
-                            onClick={selectedTool.onClick}
-                            icon={selectedTool.icon}
-                            title={selectedTool.title}
-                            disabled={selectedTool.disabled}
-                            sx={{
-                                width: '60px',
-                                minWidth: 'auto',
-                                cursor: selectedTool.disabled ? 'not-allowed' : 'pointer',
-                                color: isDarkMode ? '#FFFFFF' : '#000000'
-                            }}
-                        />
-                    </Tooltip>
+                    <ViewerToolButton
+                        onClick={selectedTool.onClick}
+                        icon={selectedTool.icon}
+                        title={selectedTool.title}
+                        disabled={selectedTool.disabled}
+                        sx={{
+                            width: '60px',
+                            minWidth: 'auto',
+                            cursor: selectedTool.disabled ? 'not-allowed' : 'pointer',
+                            color: isDarkMode ? '#FFFFFF' : '#000000'
+                        }}
+                    />
                 )}
-                <Tooltip title={'More Tools'} arrow>
-                    <IconButton onClick={handleMenuOpen}>
-                        <ExpandCircleDownIcon />
-                    </IconButton>
-                </Tooltip>
+                <IconButton onClick={handleMenuOpen}>
+                    <ExpandCircleDownIcon />
+                </IconButton>
             </Box>
 
             <Box className={'flex items-center'}>

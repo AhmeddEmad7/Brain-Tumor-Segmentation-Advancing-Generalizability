@@ -78,24 +78,32 @@ export const toggleVolumeRendering = async (forceTo2D = false) => {
     }
 
     // **Step 4: Configure and Enable New Viewport**
-    const viewportInputArray = [
-        {
-            viewportId: selectedViewportId,
-            type: newViewportType,
-            element: viewport.element as HTMLDivElement,
-            defaultOptions: {
-                orientation: 'axial', // Reset to default AXIAL for 2D
-                background: CONSTANTS.BACKGROUND_COLORS.slicer3D as [number, number, number]
-            }
-        }
-    ];
-    renderingEngine.setViewports(viewportInputArray);
+    // const viewportInputArray = [
+    //     {
+    //         viewportId: selectedViewportId,
+    //         type: newViewportType,
+    //         element: viewport.element as HTMLDivElement,
+    //         defaultOptions: {
+    //             orientation: 'axial', // Reset to default AXIAL for 2D
+    //             background: CONSTANTS.BACKGROUND_COLORS.slicer3D as [number, number, number]
+    //         }
+    //     }
+    // ];
+    // renderingEngine.setViewports(viewportInputArray);
+    // renderingEngine.enableElement({
+    //     viewportId: selectedViewportId,
+    //     type: newViewportType,
+    //     element: viewport.element as HTMLDivElement
+    // });
     renderingEngine.enableElement({
         viewportId: selectedViewportId,
         type: newViewportType,
-        element: viewport.element as HTMLDivElement
+        element: viewport.element as HTMLDivElement,
+        defaultOptions: {
+            orientation: 'axial',
+            // background: CONSTANTS.BACKGROUND_COLORS.slicer3D as [number, number, number]
+        }
     });
-
     // **Step 5: Retrieve Updated Viewport**
     viewport = renderingEngine.getViewport(selectedViewportId) as
         | Types.IVolumeViewport
@@ -163,7 +171,7 @@ export const toggleMPRMode = async (
         SeriesInstanceUID: selectedSeriesInstanceUid,
         wadoRsRoot: wadoRsRoot
     });
-
+    console.log("imageIds",imageIds )
     const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, {
         imageIds
     });

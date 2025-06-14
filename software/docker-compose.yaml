@@ -1,4 +1,4 @@
-version: "3.8"
+# version: "3.8"
 
 volumes:
   api_gateway_db_data:
@@ -85,26 +85,26 @@ services:
     volumes:
       - ./backend/Services/RabbitMQ:/var/lib/rabbitmq
 
-  reporting_service:
-    build: ./backend/Services/Reporting
-    container_name: gp_reporting_service
-    ports:
-      - "9000:9000"
-    volumes:
-      - ./backend/Services/Reporting:/usr/src/app:ro
-    depends_on:
-      - reporting_db
+  # reporting_service:
+  #   build: ./backend/Services/Reporting
+  #   container_name: gp_reporting_service
+  #   ports:
+  #     - "9000:9000"
+  #   volumes:
+  #     - ./backend/Services/Reporting:/usr/src/app:ro
+  #   depends_on:
+  #     - reporting_db
 
 
-  nifti_storage:
-    build: ./backend/Services/NiftiStorage/
-    container_name: gp_nifti_storage
-    ports:
-      - "7070:8080"
-    volumes:
-      - ./backend/Services/NiftiStorage:/usr/src/app
-    depends_on:
-      - nifti_db
+  # nifti_storage:
+  #   build: ./backend/Services/NiftiStorage/
+  #   container_name: gp_nifti_storage
+  #   ports:
+  #     - "7070:8080"
+  #   volumes:
+  #     - ./backend/Services/NiftiStorage:/usr/src/app
+  #   depends_on:
+  #     - nifti_db
 
   nifti_db:
     image: postgres:latest
@@ -119,6 +119,14 @@ services:
       - nifti_db_data:/var/lib/postgresql/data
     restart: always
 
+  # segmentation_inference:
+  #   build: ./backend/Services/Inference/Segmentation
+  #   container_name: gp_segmentation_inference
+  #   volumes:
+  #     - ./backend/Services/Inference/Segmentation:/usr/src/app
+  #   depends_on:
+  #     - rabbitmq
+
   # motion_artifacts_inference:
   #   build: ./backend/Services/Inference/Motion Artifacts
   #   container_name: gp_motion_artifacts_inference
@@ -127,13 +135,6 @@ services:
   #   depends_on:
   #     - rabbitmq
 
-  # segmentation_inference:
-  #   build: ./backend/Services/Inference/Segmentation
-  #   container_name: gp_segmentation_inference
-  #   volumes:
-  #     - ./backend/Services/Inference/Segmentation:/usr/src/app
-  #   depends_on:
-  #     - rabbitmq
 
 
 

@@ -13,7 +13,7 @@
         {
             "name": "MMM.AI UNet Model",
             "url": "http://localhost:8000/inference/segmentation",
-            "neededSequences": ["t1", "t1c", "t2", "flair"]
+            "neededSequences": ["t1c", "t1", "flair", "t2"]
         },
         {
             "name": "Oxford RNN Model",

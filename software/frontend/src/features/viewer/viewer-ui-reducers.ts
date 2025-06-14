@@ -24,6 +24,12 @@ const viewerUiReducer = {
     set3DActive: (state: IStoreViewerSlice, action: PayloadAction<boolean>) => {
         state.is3DActive = action.payload;
     },
+    setAxialPrimaryLayoutActive: (state: IStoreViewerSlice, action: PayloadAction<boolean>) => {
+        state.isAxialPrimaryLayoutActive = action.payload;
+    },
+    set3DPrimaryLayoutActive: (state: IStoreViewerSlice, action: PayloadAction<boolean>) => {
+        state.is3DPrimaryLayoutActive = action.payload;
+    },
     toggleMPRLayout: (
         state: IStoreViewerSlice,
         action: PayloadAction<{ orientations: OrientationAxis[] }>
@@ -32,14 +38,16 @@ const viewerUiReducer = {
             numRows: 1,
             numCols: 3
         };
-
     },
     resetViewerLayout: (state: IStoreViewerSlice) => {
         state.layout = {
-          numRows: 1,
-          numCols: 1
+            numRows: 1,
+            numCols: 1
         };
-      }
+    },
+    setColorBarVisible: (state: IStoreViewerSlice, action: PayloadAction<boolean>) => {
+        state.isColorBarVisible = action.payload;
+    }
 };
 
 export default viewerUiReducer;

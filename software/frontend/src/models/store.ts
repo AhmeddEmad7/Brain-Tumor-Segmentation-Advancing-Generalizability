@@ -39,11 +39,13 @@ export interface IStoreStudiesSlice {
 export interface IStoreViewerSlice {
     // ui
     isFullScreen: boolean;
-    isColorBarVisible : boolean;
+    isColorBarVisible: boolean;
     layout: ILayout;
-    isMPRActive: boolean, // Default state for MPR
-    is3DActive: boolean, // Default state for 3D
-    isCrosshairActive:boolean,
+    isMPRActive: boolean; // Default state for MPR
+    is3DActive: boolean; // Default state for 3D
+    isAxialPrimaryLayoutActive: boolean; // Default state for Axial Primary
+    is3DPrimaryLayoutActive: boolean; // Default state for 3D Primary
+    isCrosshairActive: boolean;
     isRightPanelOpen: boolean;
     isStudiesPanelOpen: boolean;
     isInfoOnViewportsShown: boolean;
@@ -68,6 +70,12 @@ export interface IStoreViewerSlice {
 export const initialState: IStoreViewerSlice = {
     // ui
     isFullScreen: false,
+    isMPRActive: false,
+    is3DActive: false,
+    isAxialPrimaryLayoutActive: false,
+    is3DPrimaryLayoutActive: false,
+    isCrosshairActive: false,
+    isColorBarVisible: false,
     layout: {
         numRows: 1,
         numCols: 1

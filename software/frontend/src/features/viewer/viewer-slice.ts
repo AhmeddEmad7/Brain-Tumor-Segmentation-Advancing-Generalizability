@@ -11,6 +11,8 @@ const initialState: IStoreViewerSlice = {
     isMPRActive: false, // Default state for MPR
     isCrosshairActive: false, // Default state for Crosshair
     is3DActive: false, // Default state for 3D
+    isAxialPrimaryLayoutActive: false, // Default state for Axial Primary
+    isColorBarVisible: false,
     layout: {
         numRows: 1,
         numCols: 1
@@ -44,6 +46,9 @@ const viewportsSlice = createSlice({
         ...viewerSegmentationReducer,
         setCrosshairActive: (state, action) => {
             state.isCrosshairActive = action.payload; //  Define setCrosshairActive
+        },
+        setColorBarVisible: (state, action) => {
+            state.isColorBarVisible = action.payload;
         }
     }
 });

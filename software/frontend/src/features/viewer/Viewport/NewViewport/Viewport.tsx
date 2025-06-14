@@ -381,11 +381,11 @@ const Viewport = ({ onClick, id, vNeighbours }: TViewportProps) => {
                 onClick={() => handleViewportClick(id)}
                 className={`${hasCinePlayer ? `${cineHeight[0]}` : 'h-full'} w-full relative bg-black ${selectedViewportId === id ? 'border-2 border-x-blue-200' : ''}`}
             >
-                  {selectedViewportId === id && (
-                <div className="absolute top-1 left-1 z-50">
-                <OrientationMenu viewportId={id} />
-                </div>
-            )}
+                {selectedViewportId === id && (
+                    <div className="absolute top-1 left-1 z-50">
+                        <OrientationMenu viewportId={id} />
+                    </div>
+                )}
 
                 <ViewportOverlay
                     viewport={thisViewport && thisViewport.getImageIds.length ? thisViewport : null}

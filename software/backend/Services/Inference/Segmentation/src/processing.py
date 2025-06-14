@@ -1,7 +1,12 @@
 import pathlib
+import sys
+import os
+
+# Add the root directory to Python path to allow importing from AI folder
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../..'))
+sys.path.append(root_dir)
 
 from dotenv import load_dotenv
-import os
 import dicomweb_client
 import subprocess
 import json
@@ -13,7 +18,7 @@ import time
 import nibabel as nib
 from pydicom.filereader import dcmread
 from src.colors import GENERIC_ANATOMY_COLORS
-from .Teacher_Inference.Inference import inference
+from AI.Inference import inference
 import redis
 
 load_dotenv()

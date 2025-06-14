@@ -5,9 +5,17 @@ import classnames from 'classnames';
 type TViewportGridProps = {
     numRows: number;
     numCols: number;
+    isSpecialLayout?: boolean;
+    isAxialPrimaryLayoutActive?: boolean;
 };
 
-const ViewportGrid = ({ numRows, numCols, children }: React.PropsWithChildren<TViewportGridProps>) => {
+const ViewportGrid = ({
+    numRows,
+    numCols,
+    isSpecialLayout = false,
+    isAxialPrimaryLayoutActive = false,
+    children
+}: React.PropsWithChildren<TViewportGridProps>) => {
     // check if the number of rows and columns are valid
     if (numRows < 1 || numCols < 1) {
         throw new Error('Invalid number of rows or columns');
@@ -18,7 +26,7 @@ const ViewportGrid = ({ numRows, numCols, children }: React.PropsWithChildren<TV
     //     throw new Error('Number of children does not match the number of rows and columns');
     // }
 
-    const classes = getGridClassnames(numRows, numCols);
+    const classes = getGridClassnames(numRows, numCols, isSpecialLayout, isAxialPrimaryLayoutActive);
 
     return <div className={classnames(classes, 'gap-1 h-full w-full')}>{children}</div>;
 };

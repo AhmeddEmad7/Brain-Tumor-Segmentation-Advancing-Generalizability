@@ -2,24 +2,24 @@
 FROM ubuntu:20.04
 
 # Update the package repository and install required packages
-RUN apt-get update
-RUN apt install -y orthanc
-RUN apt install -y nano
-RUN apt install -y wget
+RUN apt-get update && \
+    apt-get install -y wget nano && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install the latest version of Orthanc from LSB packages
-RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc/1.12.1/Orthanc --output-document /usr/sbin/Orthanc
-RUN chmod +x /usr/sbin/Orthanc
+# Download and install Orthanc directly
+RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc/1.12.1/Orthanc --output-document /usr/sbin/Orthanc && \
+    chmod +x /usr/sbin/Orthanc && \
+    mkdir -p /usr/share/orthanc/plugins
 
-# remove the default plugins and download the latest version of the plugins
-RUN rm -f /usr/share/orthanc/plugins/*.so
-RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc/1.12.1/libServeFolders.so --output-document /usr/share/orthanc/plugins/libServeFolders.so
-RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc/1.12.1/libModalityWorklists.so --output-document /usr/share/orthanc/plugins/libModalityWorklists.so
-RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-dicomweb/1.15/libOrthancDicomWeb.so --output-document /usr/share/orthanc/plugins/libOrthancDicomWeb.so
-RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-neuro/1.0/libOrthancNeuro.so --output-document /usr/share/orthanc/plugins/libOrthancNeuro.so
-RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-webviewer/2.8/libOrthancWebViewer.so --output-document /usr/share/orthanc/plugins/libOrthancWebViewer.so
-RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-postgresql/5.1/libOrthancPostgreSQLIndex.so --output-document /usr/share/orthanc/plugins/libOrthancPostgreSQLIndex.so
-RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-postgresql/5.1/libOrthancPostgreSQLStorage.so --output-document /usr/share/orthanc/plugins/libOrthancPostgreSQLStorage.so
+# Download the plugins
+RUN wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc/1.12.1/libServeFolders.so --output-document /usr/share/orthanc/plugins/libServeFolders.so && \
+    wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc/1.12.1/libModalityWorklists.so --output-document /usr/share/orthanc/plugins/libModalityWorklists.so && \
+    wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-dicomweb/1.15/libOrthancDicomWeb.so --output-document /usr/share/orthanc/plugins/libOrthancDicomWeb.so && \
+    wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-neuro/1.0/libOrthancNeuro.so --output-document /usr/share/orthanc/plugins/libOrthancNeuro.so && \
+    wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-webviewer/2.8/libOrthancWebViewer.so --output-document /usr/share/orthanc/plugins/libOrthancWebViewer.so && \
+    wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-postgresql/5.1/libOrthancPostgreSQLIndex.so --output-document /usr/share/orthanc/plugins/libOrthancPostgreSQLIndex.so && \
+    wget https://orthanc.uclouvain.be/downloads/linux-standard-base/orthanc-postgresql/5.1/libOrthancPostgreSQLStorage.so --output-document /usr/share/orthanc/plugins/libOrthancPostgreSQLStorage.so
 
 # Copy your Orthanc configuration file into the container
 COPY ./config/orthanc.json /etc/orthanc/orthanc.json

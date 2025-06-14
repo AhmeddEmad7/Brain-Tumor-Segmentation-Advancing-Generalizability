@@ -74,8 +74,8 @@ const ViewerToolPanel = () => {
                             </MenuItem>
                         </Menu>
                     </Box>
-                    <Box className="flex-1 p-4 overflow-y-auto overflow-x-auto transition-all duration-300">
-                        <div className="min-w-full">
+                    <Box className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+                        <div className="w-full p-4">
                             {activeTabIndex === 0 && <SegmentationTab />}
                             {activeTabIndex === 1 && <MeasurementsTab />}
                             {activeTabIndex === 2 && <MotionArtifactsCorrectionTab />}

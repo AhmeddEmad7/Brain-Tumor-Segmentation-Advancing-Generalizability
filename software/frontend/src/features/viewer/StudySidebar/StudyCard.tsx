@@ -7,10 +7,15 @@ import { IDicomSeriesData, IDicomStudyData } from '@/models';
 import { useTheme } from '@mui/material/styles';
 import { Box, Button, Typography } from '@mui/material';
 
+const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    return `${dateStr.slice(0, 4)}/${dateStr.slice(4, 6)}/${dateStr.slice(6, 8)}`;
+};
+
 const StudyCard = ({ studyData }: { studyData: IDicomStudyData }) => {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
-    
+
     const [isStudyOpen, setIsStudyOpen] = useState(true);
     const [selectedSeries, setSelectedSeries] = useState(0);
     const [isAllSeriesHidden, setIsAllSeriesHidden] = useState(false);
@@ -30,13 +35,13 @@ const StudyCard = ({ studyData }: { studyData: IDicomStudyData }) => {
         <Box
             className="rounded-lg p-4 transition-all duration-300 shadow-md"
             sx={{
-                background: isDarkMode 
+                background: isDarkMode
                     ? `linear-gradient(to right, #0A192F, #112D4E)`
                     : `linear-gradient(to right, #F8F9FA, #E9ECEF)`,
                 color: isDarkMode ? 'white' : 'black',
-                width: isAllSeriesHidden ? '250px' : '100%', 
+                width: isAllSeriesHidden ? '250px' : '100%',
                 transition: 'width 0.3s ease-in-out, background 0.3s ease-in-out',
-                border: isDarkMode ? '1px solid #2C3E50' : '1px solid #D1D9E6',
+                border: isDarkMode ? '1px solid #2C3E50' : '1px solid #D1D9E6'
             }}
         >
             {/* Study Card Header */}
@@ -53,7 +58,7 @@ const StudyCard = ({ studyData }: { studyData: IDicomStudyData }) => {
                         {studyData.modality}
                     </Typography>
                     <Typography variant="body2" className="opacity-80" title={studyData.studyDate}>
-                        {studyData.studyDate}
+                        {formatDate(studyData.studyDate)}
                     </Typography>
                 </Box>
                 <Box className="flex items-center gap-2">
@@ -69,18 +74,26 @@ const StudyCard = ({ studyData }: { studyData: IDicomStudyData }) => {
                 onClick={() => setIsAllSeriesHidden(!isAllSeriesHidden)}
                 sx={{
                     transition: 'background-color 0.3s ease-in-out',
-                    backgroundColor: isDarkMode 
-                        ? isAllSeriesHidden ? '#005B8C' : '#007BB5'
-                        : isAllSeriesHidden ? '#E0E0E0' : '#6FB3D2',
+                    backgroundColor: isDarkMode
+                        ? isAllSeriesHidden
+                            ? '#005B8C'
+                            : '#007BB5'
+                        : isAllSeriesHidden
+                          ? '#E0E0E0'
+                          : '#6FB3D2',
                     color: isDarkMode ? 'white' : 'black',
-                    '&:hover': { 
-                        backgroundColor: isDarkMode 
-                            ? isAllSeriesHidden ? '#003F6B' : '#005B8C'
-                            : isAllSeriesHidden ? '#D6D6D6' : '#5A99B1' 
-                    },
+                    '&:hover': {
+                        backgroundColor: isDarkMode
+                            ? isAllSeriesHidden
+                                ? '#003F6B'
+                                : '#005B8C'
+                            : isAllSeriesHidden
+                              ? '#D6D6D6'
+                              : '#5A99B1'
+                    }
                 }}
             >
-                {isAllSeriesHidden ? "Show All Series" : "Hide All Series"}
+                {isAllSeriesHidden ? 'Show All Series' : 'Hide All Series'}
             </Button>
 
             {/* Render Series Only If Not Hidden */}

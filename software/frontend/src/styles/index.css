@@ -26,20 +26,45 @@ body,
   
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-    width: 0.5rem;
+    width: 8px;
 }
 
 ::-webkit-scrollbar-track {
     background: #1B2A3B;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: #2E95D3;
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(46, 149, 211, 0.8);
+    background: #1B6B9E;
+}
+
+/* Custom Scrollbar Class */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #2E95D3 #1B2A3B;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #1B2A3B;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #2E95D3;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #1B6B9E;
 }
 
 /* Buttons */

@@ -6,14 +6,21 @@ import ViewportGrid from '@features/viewer/Viewport/ViewportGrid/ViewportGrid.ts
 import { useState } from 'react';
 import * as cornerstone from '@cornerstonejs/core';
 import * as cornerstoneTools from '@cornerstonejs/tools';
+import store from '@/redux/store.ts';
+
+type ViewportOptions = {
+    background?: cornerstone.Types.Point3;
+    orientation?: cornerstone.Enums.OrientationAxis;
+    invert?: boolean;
+    voi?: cornerstone.Types.VOIRange;
+    [key: string]: unknown;
+};
 
 const createViewportInput = (
     viewportId: string,
     currentRef: HTMLDivElement,
     type: cornerstone.Enums.ViewportType,
-    defaultOptions?: {
-        [key: string]: any;
-    }
+    defaultOptions?: ViewportOptions
 ) => {
     return {
         viewportId,
@@ -28,6 +35,11 @@ const ViewportsManager = () => {
     const { numRows, numCols } = useSelector((store: IStore) => store.viewer.layout);
     const { renderingEngineId } = useSelector((store: IStore) => store.viewer);
     const { currentToolGroupId: currentAnnotationToolGroupId } = useSelector((store: IStore) => store.viewer);
+    const isSpecial3DLayout =
+        numRows === 3 && numCols === 2 && store.getState().viewer.is3DPrimaryLayoutActive;
+    const isSpecialAxialLayout =
+        numRows === 3 && numCols === 2 && store.getState().viewer.isAxialPrimaryLayoutActive;
+    const isSpecialLayout = isSpecial3DLayout || isSpecialAxialLayout;
 
     const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
     const annotationToolGroup = cornerstoneTools.ToolGroupManager.getToolGroup(currentAnnotationToolGroupId);
@@ -101,7 +113,7 @@ const ViewportsManager = () => {
     };
 
     return (
-        <ViewportGrid numCols={numCols} numRows={numRows}>
+        <ViewportGrid numCols={numCols} numRows={numRows} isSpecialLayout={isSpecialLayout} isAxialPrimaryLayoutActive={store.getState().viewer.isAxialPrimaryLayoutActive}>
             {renderCornerstoneElements()}
         </ViewportGrid>
     );

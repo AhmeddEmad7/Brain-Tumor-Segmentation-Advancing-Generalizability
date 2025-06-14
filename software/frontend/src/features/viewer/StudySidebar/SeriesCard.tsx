@@ -46,8 +46,8 @@ const SeriesCard = ({ seriesData, seriesIndex, selectedIndex, onSelectedSeriesCh
                     >
                         <Box className="flex justify-between items-center mb-2">
                             <Typography variant="body2" fontWeight="bold" color="inherit">
-                                {/* {seriesData.seriesModality} */}
-                                {"MR"}
+                                {seriesData.seriesModality}
+                                {/* {"MR"} */}
                             </Typography>
                             <Typography variant="body2" color="inherit">
                                 {seriesData.numberOfInstances} images

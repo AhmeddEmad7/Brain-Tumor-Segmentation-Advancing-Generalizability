@@ -20,6 +20,8 @@ export interface IViewportSliceState {
 export interface ILayout {
     numRows: number;
     numCols: number;
+    is3DPrimaryLayoutActive?: boolean;
+    isAxialPrimaryLayoutActive?: boolean;
 }
 
 export interface IAnnotationTool {
@@ -27,7 +29,7 @@ export interface IAnnotationTool {
     mouseBinding: number;
 }
 export interface segmentation3D {
-    scalarData: number[] ;
+    scalarData: number[];
     dimensions: [number, number, number];
     spacing: [number, number, number];
     origin: [number, number, number];

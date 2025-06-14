@@ -312,8 +312,6 @@ export const downloadSegmentation = async () => {
     const viewportVolumeId = viewport.getActorUIDs()[0];
 
     // Retrieve the cached volume data.
-    const cacheVolume = cornerstone.cache.getVolume(viewportVolumeId);
-    const csImages = cacheVolume.getCornerstoneImages();
     // Get the active segmentation representation for the current tool group.
     const activeSegmentationRepresentation =
         cornerstoneTools.segmentation.activeSegmentation.getActiveSegmentationRepresentation(

@@ -1,13 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import wasm from 'vite-plugin-wasm';
 
 export default defineConfig({
     plugins: [
         react(),
+        wasm(),
         {
             name: 'cross-origin-isolation-headers',
-            configureServer(server) {
+            configureServer() {
                 // server.middlewares.use((req, res, next) => {
                 //   // Only apply headers if the host header includes "localhost:707"
                 //   if (req.headers.host && req.headers.host.includes("localhost:7070")) {
@@ -43,5 +45,17 @@ export default defineConfig({
         port: 5000,
         strictPort: false,
         allowedHosts: ['localhost', 'brain-tumor-segmentation-advancing-4zmp.onrender.com']
-    }
+    },
+    optimizeDeps: {
+        exclude: ['@icr/polyseg-wasm']
+    },
+    build: {
+        target: 'esnext',
+        rollupOptions: {
+            output: {
+                format: 'es'
+            }
+        }
+    },
+    assetsInclude: ['**/*.wasm']
 });

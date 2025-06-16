@@ -11,7 +11,7 @@ const ReportHeader = () => {
             {selectedStudy && (
                 <div className={'flex flex-col gap-2'}>
                     <p className={'text-xl font-semibold'}>
-                        Patient {selectedStudy.patientId} - {selectedStudy.modality} Report
+                        Patient {selectedStudy.patientId} - Brain MR Report
                     </p>
                     <div className="flex flex-col gap-0.5 text-base">
                         <p>Patient Name: {selectedStudy.patientName}</p>

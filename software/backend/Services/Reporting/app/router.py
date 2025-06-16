@@ -12,6 +12,9 @@ import os
 import redis
 import json
 from datetime import date
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import Paragraph
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 router = APIRouter()
 redis_host = os.getenv('REDIS_HOST', 'localhost')
@@ -59,35 +62,70 @@ async def generate_pdf(req: PDFRequest, db: Session = Depends(get_db)):
     c = canvas.Canvas(out_path)
     y = 800
     page_width = 595  # A4 width in points
+    margin = 50
+    content_width = page_width - (2 * margin)
+
+    # Create styles
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(
+        name='Preliminary',
+        parent=styles['Normal'],
+        fontName='Helvetica-Oblique',
+        fontSize=10,
+        alignment=TA_CENTER,
+        spaceAfter=7
+    ))
+    styles.add(ParagraphStyle(
+        name='Header',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=12,
+        spaceBefore= 160,
+        spaceAfter=20
+    ))
+    styles.add(ParagraphStyle(
+        name='Body',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=11,
+        spaceAfter=20
+    ))
+    styles.add(ParagraphStyle(
+        name='BodyBold',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=11,
+        spaceAfter=5
+    ))
 
     # Header
     c.setFont("Helvetica-Bold", 14)
-    c.drawString(50, y, f"Patient {req.header.patientId} – {req.header.modality} Report")
-    y -= 20
+    c.drawString(margin, y, f"Patient {req.header.patientId} – {req.header.modality} Report")
+    y -= 30
     c.setFont("Helvetica", 12)
     for label, val in [
         ("Name", req.header.patientName),
-        # ("Birthdate", req.header.patientBirthDate.isoformat()),
         ("Study Date", req.header.studyDate),
     ]:
-        c.drawString(50, y, f"{label}: {val}")
-        y -= 15
-    y -= 20
+        c.drawString(margin, y, f"{label}: {val}")
+        y -= 20
+    y -= 30
 
     # Body
+    preliminary_notice_found = False
     for block in blocks:
         block_type = block.get("type")
         text = ""
 
-        # 👇 Handle images inside either `type: images` or `p > img`
+        # Handle images
         if block_type == "images" or (block_type == "p" and any(child.get("type") == "img" for child in block.get("children", []))):
             images = block.get("data") or [child.get("url") for child in block.get("children", []) if child.get("type") == "img"]
 
             image_width = 120
             image_height = 170
             padding = 10
-            x = 50
-            max_x = page_width - image_width - 50
+            x = margin
+            max_x = page_width - image_width - margin
 
             for img_b64 in images:
                 if img_b64.startswith("data:"):
@@ -97,10 +135,10 @@ async def generate_pdf(req: PDFRequest, db: Session = Depends(get_db)):
                     img = ImageReader(BytesIO(img_bytes))
 
                     if x > max_x:
-                        x = 50
+                        x = margin
                         y -= (image_height + padding)
 
-                    if y - image_height < 50:
+                    if y - image_height < margin:
                         c.showPage()
                         y = 800
 
@@ -110,43 +148,63 @@ async def generate_pdf(req: PDFRequest, db: Session = Depends(get_db)):
                 except Exception as e:
                     print("Image decode failed:", e)
 
-            y -= (image_height + 15)
+            y -= (image_height + 20)
             continue
 
-        # 👇 Headings
+        # Headings
         if block_type == "h2":
             text = " ".join(child.get("text", "") for child in block.get("children", []))
-            wrapped_lines = wrap(text, width=55)  # Adjust width for heading lines
-
-            c.setFont("Helvetica-Bold", 13)
-            for line in wrapped_lines:
-                
-                if y < 60:
-                    c.showPage()
-                    y = 800
-                    c.setFont("Helvetica-Bold", 13)  # Reset font after page break
-
-                c.drawString(50, y, line)
-                y -= 18
-
-            y -= 5  # spacing after heading
+            p = Paragraph(text, styles['Header'])
+            w, h = p.wrap(content_width, y)
+            if y - h < margin:
+                c.showPage()
+                y = 800
+            p.drawOn(c, margin, y - h)
+            y -= h + 5
             continue
 
-        # 👇 Paragraphs with word wrapping
+        # Preliminary Notice (h3)
+        if block_type == "h3":
+            # Get the text from children
+            text = " ".join(child.get("text", "") for child in block.get("children", []))
+            
+            # Position at the start of image section with top margin
+            y = 800 - image_height - 40  # Added more top margin
+            
+            # Create a style for the preliminary notice
+            preliminary_style = ParagraphStyle(
+                'Preliminary',
+                parent=styles['Normal'],
+                fontName='Helvetica-Bold',
+                fontSize=10,
+                spaceAfter=10
+            )
+            
+            # Create paragraph with width limit
+            p = Paragraph(text, preliminary_style)
+            w, h = p.wrap(content_width, y)
+            if y - h < margin:
+                c.showPage()
+                y = 800
+            p.drawOn(c, margin, y - h)
+            y -= h + 10  # Add space after the notice
+            
+            preliminary_notice_found = True
+            continue
+
+        # Paragraphs
         if block_type == "p":
             text = " ".join(child.get("text", "") for child in block.get("children", []))
-            c.setFont("Helvetica", 11)
-            max_line_width = 95  # max characters before wrapping
+            style = styles['BodyBold'] if preliminary_notice_found else styles['Body']
+            p = Paragraph(text, style)
+            w, h = p.wrap(content_width, y)
+            if y - h < margin:
+                c.showPage()
+                y = 800
+            p.drawOn(c, margin, y - h)
+            y -= h + 5
 
-            for line in text.split("\n"):
-                wrapped_lines = wrap(line.strip(), max_line_width)
-                for wrapped in wrapped_lines:
-                    c.drawString(50, y, wrapped)
-                    y -= 15
-
-            y -= 5
-
-        if y < 50:
+        if y < margin:
             c.showPage()
             y = 800
 
@@ -157,7 +215,7 @@ async def generate_pdf(req: PDFRequest, db: Session = Depends(get_db)):
         status="Success",
         message="PDF saved successfully",
         result={"filename": filename, "path": out_path}
-    ).model_dump(exclude_none=True)    
+    ).model_dump(exclude_none=True)
     
 @router.get("/redis/{study_id}")
 async def get_report_from_redis(study_id: str):

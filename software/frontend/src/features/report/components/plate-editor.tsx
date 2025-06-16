@@ -43,7 +43,7 @@ export default function PlateEditor({ initialReport, initialReadOnly }: PlateEdi
             "patientId": selectedStudy.patientId,
             "patientName": selectedStudy.patientName,
             "studyDate":  DicomUtil.formatDate(selectedStudy.studyDate),
-            "modality": selectedStudy.modality,
+            "modality": "Brain MR",
         }
         store.dispatch(generatePdfReportThunk(selectedStudy.studyInstanceUid,headers ,initialReport));
     }

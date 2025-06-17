@@ -80,7 +80,7 @@ async def generate_pdf(req: PDFRequest, db: Session = Depends(get_db)):
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
         fontSize=12,
-        spaceBefore= 160,
+        spaceBefore= 200,
         spaceAfter=20
     ))
     styles.add(ParagraphStyle(
@@ -95,7 +95,7 @@ async def generate_pdf(req: PDFRequest, db: Session = Depends(get_db)):
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
         fontSize=11,
-        spaceAfter=5
+        spaceAfter=20
     ))
 
     # Header
@@ -160,7 +160,7 @@ async def generate_pdf(req: PDFRequest, db: Session = Depends(get_db)):
                 c.showPage()
                 y = 800
             p.drawOn(c, margin, y - h)
-            y -= h + 5
+            y -= h + 10
             continue
 
         # Preliminary Notice (h3)

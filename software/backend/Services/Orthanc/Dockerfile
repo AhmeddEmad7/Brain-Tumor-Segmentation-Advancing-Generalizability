@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 
 # Update the package repository and install required packages
 RUN apt-get update && \
-    apt-get install -y wget nano && \
+    apt-get install -y wget nano tzdata && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

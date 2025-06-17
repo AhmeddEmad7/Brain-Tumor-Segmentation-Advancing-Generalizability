@@ -18,7 +18,7 @@ import time
 import nibabel as nib
 from pydicom.filereader import dcmread
 from src.colors import GENERIC_ANATOMY_COLORS
-from AI.Inference import inference
+from SegmentationModel.Inference import inference
 import redis
 
 load_dotenv()

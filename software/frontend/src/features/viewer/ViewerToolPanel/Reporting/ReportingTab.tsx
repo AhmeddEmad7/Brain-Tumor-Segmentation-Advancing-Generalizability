@@ -218,7 +218,7 @@ const ReportingTab = () => {
             <button onClick={handleCreateSnapshot}>Create Snapshot</button>
 
             {/* Show captured snapshots */}
-            <div>{renderSnapshotContent()}</div>
+            <div className="mt-4">{renderSnapshotContent()}</div>
         </div>
     );
 };

@@ -1,11 +1,11 @@
 import torch
 import nibabel as nib
 import os
-from AI.DynUNet import DynUNet
-from AI.Generate_from_LLM import initialize_llm, prepare_prompt, generate_clinical_data_from_llm
-from Loader import load_sequences_from_paths
+from SegmentationModel.DynUNet import DynUNet
+from SegmentationModel.Generate_from_LLM import initialize_llm, prepare_prompt, generate_clinical_data_from_llm
+from SegmentationModel.Loader import load_sequences_from_paths
 from monai.inferers import sliding_window_inference
-from Reporting import extract_tumor_features, generate_report, generate_pdf
+from SegmentationModel.Reporting import extract_tumor_features, generate_report, generate_pdf
 from pathlib import Path
 
 def load_model(model_path):
@@ -43,7 +43,8 @@ def save_nifti_volumes(int_volumes, metadata, output_dir):
         nib.save(nifti_image, file_path)
         print(f"Saved: {file_path}")
 
-def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
+def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, 
+              model_path='./model/Final_KD_Student_Model_v2.pth'):
     input_data, int_volumes, metadata, brain_volume = load_sequences_from_paths(t1c_path, t1n_path, t2f_path, t2w_path)
     save_nifti_volumes(int_volumes, metadata, output_dir)
     
@@ -69,14 +70,16 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
     print("Prediction shape:", prediction.shape)
 
     ## Saving prediction ##
+    ## Saving prediction ##    prediction_file_path = os.path.join(output_dir, "prediction_label.nii.gz")
+    prediction_file_path = os.path.join(output_dir, "prediction_label.nii.gz")
     nifti_pred = nib.Nifti1Image(prediction, affine=metadata[0]['affine'])
     nifti_pred.header.set_intent('label', name='Label Map')
-    nib.save(nifti_pred, os.path.join(output_dir, f"prediction_label.nii.gz"))
+    nib.save(nifti_pred, prediction_file_path)
 
     ## Starting report generation ##
     print("Starting report generation...")
     print("Loading LLM...")
-    generator = initialize_llm("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") #Put in .env
+    generator = initialize_llm(os.getenv('HUGGINGFACE_API_KEY')) #Get API key from .env
     print("LLM ready!")
 
     print("Extracting tumor features...")
@@ -96,8 +99,11 @@ def inference(t1c_path, t1n_path, t2f_path, t2w_path, output_dir, model_path):
     # patient = metadata[0]['filename_or_obj'].split('/')[5]
     # generate_pdf(report_data, patient)
     # print("\n==== Generated Report as PDF file ====\n")
-
-    return prediction, report_data
+    
+    # return nifti file path and report data
+    print("Inference completed successfully!")
+    print(f"Prediction saved at: {prediction_file_path}")
+    return prediction_file_path, report_data
 
 
 ## Doing inference here

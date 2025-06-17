@@ -19,18 +19,19 @@ interface SeriesCardProps {
 const SeriesCard = ({ seriesData, seriesIndex, selectedIndex, onSelectedSeriesChange }: SeriesCardProps) => {
     const theme = useTheme();
     const [isDeleting, setIsDeleting] = useState(false);
-    
+
     const isDarkMode = theme.palette.mode === 'dark';
 
     const backgroundGradient = isDarkMode
         ? 'linear-gradient(to right, #0A192F, #112D4E)' // Dark mode colors
         : 'linear-gradient(to right, #F3F4F6, #E5E7EB)'; // Light mode colors
 
-    const borderColor = selectedIndex === seriesIndex
-        ? isDarkMode 
-            ? '#00A8E8' // Highlight color in dark mode
-            : '#1E40AF' // Highlight color in light mode
-        : 'none';
+    const borderColor =
+        selectedIndex === seriesIndex
+            ? isDarkMode
+                ? '#00A8E8' // Highlight color in dark mode
+                : '#1E40AF' // Highlight color in light mode
+            : 'none';
 
     return (
         <>
@@ -41,13 +42,13 @@ const SeriesCard = ({ seriesData, seriesIndex, selectedIndex, onSelectedSeriesCh
                         sx={{
                             background: backgroundGradient,
                             color: isDarkMode ? 'white' : '#1F2937', // Text color
-                            border: `2px solid ${borderColor}`,
+                            border: `2px solid ${borderColor}`
                         }}
                     >
                         <Box className="flex justify-between items-center mb-2">
                             <Typography variant="body2" fontWeight="bold" color="inherit">
-                                {seriesData.seriesModality}
-                                {/* {"MR"} */}
+                                {/* {seriesData.seriesModality} */}
+                                {'MR'}
                             </Typography>
                             <Typography variant="body2" color="inherit">
                                 {seriesData.numberOfInstances} images
@@ -60,7 +61,9 @@ const SeriesCard = ({ seriesData, seriesIndex, selectedIndex, onSelectedSeriesCh
                             className="rounded-lg transition-all duration-300 hover:scale-105"
                             src={`${gatewayUrl}/dicom/studies/${seriesData.studyInstanceUid}/series/${seriesData.seriesInstanceUid}/image`}
                             alt="Series Thumbnail"
-                            onDoubleClick={() => onSelectedSeriesChange(seriesIndex, seriesData.seriesInstanceUid)}
+                            onDoubleClick={() =>
+                                onSelectedSeriesChange(seriesIndex, seriesData.seriesInstanceUid)
+                            }
                         />
 
                         <Typography

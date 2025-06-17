@@ -207,7 +207,7 @@ export const saveSegmentation = async () => {
 
     // Generate label maps
     const labelmapData = Cornerstone3D.Segmentation.generateLabelMaps2DFrom3D(cacheSegmentationVolume);
-    const segmentsMetadata = {};
+    const segmentsMetadata: Record<number, any> = {};
 
     // Generate metadata for each segment
     labelmapData.segmentsOnLabelmap.forEach((segmentIndex) => {

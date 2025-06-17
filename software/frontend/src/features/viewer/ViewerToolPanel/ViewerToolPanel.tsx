@@ -32,7 +32,7 @@ const ViewerToolPanel = () => {
 
     return (
         <Box className="h-full">
-            <SidePanel title={'Tools'}>
+            <SidePanel title={'Tools'} >
                 <Box className="flex flex-col h-full">
                     <Box className="flex justify-between items-center p-2">
                         <Box className="flex gap-4">

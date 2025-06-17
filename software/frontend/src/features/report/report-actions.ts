@@ -9,7 +9,7 @@ import { urlToDataURL } from '../report/components/toBase64';
  * The URL for the reporting API.
  */
 // const REPORTING_API_URL = import.meta.env.VITE_REPORTING_API_URL;
- const REPORTING_API_URL = "http://localhost:9000";
+const REPORTING_API_URL = 'http://localhost:9000';
 
 const templateReportContent = `[
     {"id":"1","children":[{"text":"{Doctor's info}\\n"}],"type":"p"},
@@ -32,25 +32,30 @@ function formatTextToSlateBlocks(text: string) {
 
     lines.forEach((line) => {
         if (
-            line.startsWith("Findings:") ||
-            line.startsWith("Composition analysis:") ||
-            line.startsWith("Quantitative analysis:") ||
-            line.startsWith("Impression*:") ||
-            line.startsWith("Likely Diagnosis*:") ||
-            line.startsWith("Recommendations*:")||
-            line.startsWith("* These sections are preliminar")
+            line.startsWith('Findings:') ||
+            line.startsWith('Composition analysis:') ||
+            line.startsWith('Quantitative analysis:') ||
+            line.startsWith('Impression*:') ||
+            line.startsWith('Likely Diagnosis*:') ||
+            line.startsWith('Recommendations*:')
         ) {
             blocks.push({
                 id: crypto.randomUUID(),
-                type: "h2",
+                type: 'h2',
                 children: [{ text: line }]
             });
-        } 
-        else {
+        } else if (line.startsWith('* These sections are preliminar')) {
+            // Split the text into two balanced line
             blocks.push({
                 id: crypto.randomUUID(),
-                type: "p",
-                children: [{ text: "    " + line }]
+                type: 'h3',
+                children: [{ text: line }]
+            });
+        } else {
+            blocks.push({
+                id: crypto.randomUUID(),
+                type: 'p',
+                children: [{ text: '    ' + line }]
             });
         }
     });
@@ -61,87 +66,87 @@ function formatTextToSlateBlocks(text: string) {
 export const generatePdfReportThunk = (
     studyInstanceUid: string,
     header: {
-      patientName: string,
-      patientId: string;
-      modality: string;
+        patientName: string;
+        patientId: string;
+        modality: string;
     },
     blocks: any[]
-  ) => {
+) => {
     return async (dispatch: Dispatch) => {
-      try {
-        const blocksCopy = [...blocks];
-        const imageBlockIndex = blocksCopy.findIndex((b) => b.type === 'images');
-  
-        if (imageBlockIndex !== -1) {
-          const imageBlock = blocksCopy[imageBlockIndex];
-  
-          const dataURIs = await Promise.all(
-            imageBlock.images.map((imgUrl: string) => urlToDataURL(imgUrl))
-          );
-  
-          blocksCopy[imageBlockIndex] = {
-            ...imageBlock,
-            data: dataURIs,
-          };
-          delete blocksCopy[imageBlockIndex].images;
+        try {
+            const blocksCopy = [...blocks];
+            const imageBlockIndex = blocksCopy.findIndex((b) => b.type === 'images');
+
+            if (imageBlockIndex !== -1) {
+                const imageBlock = blocksCopy[imageBlockIndex];
+
+                const dataURIs = await Promise.all(
+                    imageBlock.images.map((imgUrl: string) => urlToDataURL(imgUrl))
+                );
+
+                blocksCopy[imageBlockIndex] = {
+                    ...imageBlock,
+                    data: dataURIs
+                };
+                delete blocksCopy[imageBlockIndex].images;
+            }
+            console.log('blocksCopy', blocksCopy);
+            console.log('JSON blocksCopy', JSON.stringify(blocksCopy));
+            const response = await AxiosUtil.sendRequest({
+                method: 'POST',
+                url: `${REPORTING_API_URL}/report/generate-pdf`,
+                data: {
+                    studyId: studyInstanceUid,
+                    header: header,
+                    content: JSON.stringify(blocksCopy)
+                }
+            });
+
+            if (response?.code === 200) {
+                dispatch(
+                    uiSliceActions.setNotification({
+                        type: 'success',
+                        content: '📄 PDF has been generated and saved on the server!'
+                    })
+                );
+            } else {
+                throw new Error('Backend response status not success');
+            }
+        } catch (err) {
+            console.error('PDF generation error:', err);
+            dispatch(
+                uiSliceActions.setNotification({
+                    type: 'error',
+                    content: '❌ Failed to generate PDF!'
+                })
+            );
         }
-        console.log('blocksCopy', blocksCopy);
-        console.log('JSON blocksCopy', JSON.stringify(blocksCopy));
-        const response = await AxiosUtil.sendRequest({
-          method: 'POST',
-          url: `${REPORTING_API_URL}/report/generate-pdf`,
-          data: {
-            studyId: studyInstanceUid,
-            header: header,
-            content: JSON.stringify(blocksCopy),
-          },
-        });
-  
-        if (response?.code === 200 ) {
-          dispatch(
-            uiSliceActions.setNotification({
-              type: 'success',
-              content: '📄 PDF has been generated and saved on the server!',
-            })
-          );
-        } else {
-          throw new Error('Backend response status not success');
-        }
-      } catch (err) {
-        console.error('PDF generation error:', err);
-        dispatch(
-          uiSliceActions.setNotification({
-            type: 'error',
-            content: '❌ Failed to generate PDF!',
-          })
-        );
-      }
     };
-  };
-  
+};
+
 export const createReportThunk = (studyInstanceUid: string, navigate: any, snapshots: any) => {
     return async (dispatch: Dispatch) => {
         // 1. Try to get the report content from Redis
         const redisRes = await AxiosUtil.sendRequest({
             method: 'GET',
-            url: `${REPORTING_API_URL}/report/redis/${studyInstanceUid}`,
+            url: `${REPORTING_API_URL}/report/redis/${studyInstanceUid}`
         });
 
         let reportContent: any;
         console.log('redisRes', redisRes);
         console.log('studyInstanceUid', studyInstanceUid);
- if (redisRes && typeof redisRes.content === 'string' && redisRes.content.trim().length > 0) {
-    console.log('✅ Found Redis report. Formatting...');
-    reportContent = formatTextToSlateBlocks(redisRes.content);
-} else {
-    console.warn('⚠️ Redis is empty or error occurred. Using template.');
-    reportContent = JSON.parse(templateReportContent);
-}
+        if (redisRes && typeof redisRes.content === 'string' && redisRes.content.trim().length > 0) {
+            console.log('✅ Found Redis report. Formatting...');
+            reportContent = formatTextToSlateBlocks(redisRes.content);
+        } else {
+            console.warn('⚠️ Redis is empty or error occurred. Using template.');
+            reportContent = JSON.parse(templateReportContent);
+        }
 
         // 2. Add snapshot element (images)
         const snapshotsElements = {
-            id: "snapshots",
-            type: "images",
+            id: 'snapshots',
+            type: 'images',
             images: snapshots.map((s: any) => s.image)
         };
 
@@ -172,7 +177,6 @@ export const createReportThunk = (studyInstanceUid: string, navigate: any, snaps
         navigate(`/report/${res.data.result.id}/study/${studyInstanceUid}`);
     };
 };
-
 
 /**
  * Updates the report content for the specified study.

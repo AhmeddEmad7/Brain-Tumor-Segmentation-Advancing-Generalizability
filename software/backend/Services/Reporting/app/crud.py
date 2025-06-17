@@ -15,12 +15,6 @@ def create_report(db: Session, report: RequestReport):
         print(f"❌ Error creating report: {e}")
         return None
 
-def get_reports_by_study_id(db: Session, study_id: str):
-    try:
-        reports = db.query(Report).filter(Report.studyId == study_id).all()
-        return reports
-    except:
-        return None
 def get_reports(db: Session):
     try:
         return db.query(Report).all()

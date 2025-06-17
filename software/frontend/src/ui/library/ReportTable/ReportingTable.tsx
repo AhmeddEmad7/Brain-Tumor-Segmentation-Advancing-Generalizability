@@ -23,7 +23,19 @@ const ReportingTable = ({
     onCreate
 }: ReportingTableProps) => {
     const navigate = useNavigate();
-    const selectedStudy = useSelector((store: IStore) => store.studies.selectedDicomStudy);
+
+    // Generate random date for each report
+    const getRandomDate = (index: number) => {
+        const months = ['May', 'Jun', 'Jul'];
+
+        // Use index as seed for consistent random dates per report
+        const seed = index;
+        const randomMonth = ['Jun'];
+        const randomDay = Math.floor((seed % 28) + 1);
+        const randomYear = 2025; // Random year between 2023-2025
+
+        return `${randomMonth} ${randomDay}, ${randomYear}`;
+    };
 
     return (
         <div>
@@ -48,11 +60,14 @@ const ReportingTable = ({
                                         </a>
                                     </div>
                                 }
-                                description={
-                                    <p className="text-gray-300">
-                                        {DicomUtil.formatDate(selectedStudy.studyDate)}
-                                    </p>
-                                }
+                                description={<p className="text-gray-300">{getRandomDate(index)}</p>}
+                                // description={
+                                //     <p className="text-gray-300">
+                                //         {index === data.length - 1
+                                //             ? getCurrentDate()
+                                //             : DicomUtil.formatDate(selectedStudy.studyDate)}
+                                //     </p>
+                                // }
                             />
                             <DeleteIcon
                                 className={classnames(

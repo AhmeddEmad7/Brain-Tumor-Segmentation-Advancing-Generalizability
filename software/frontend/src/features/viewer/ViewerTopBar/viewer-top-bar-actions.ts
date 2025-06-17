@@ -211,7 +211,7 @@ export const toggleMPRMode = async (
             }
         }
     });
-    store.dispatch(viewerSliceActions.removeClickedSeries());
+    // store.dispatch(viewerSliceActions.removeClickedSeries());
 };
 
 export const toggleViewportOverlayShown = () => {

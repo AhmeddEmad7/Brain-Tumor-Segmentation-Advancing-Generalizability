@@ -1,0 +1,142 @@
+# Version control
+.git
+.gitignore
+.husky
+.gitattributes
+.gitmodules
+
+# IDE files
+.idea
+.vscode
+*.swp
+*.swo
+*.sublime-*
+.project
+.classpath
+.settings/
+
+# Node.js
+node_modules
+package.json
+package-lock.json
+yarn.lock
+.npm
+.yarn
+.next
+.nuxt
+dist
+build
+coverage
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.pytest_cache/
+cover/
+*.egg
+MANIFEST
+
+# Documentation
+*.md
+docs/
+*.rst
+*.txt
+!requirements.txt
+!README.md
+LICENSE
+CHANGELOG
+AUTHORS
+CONTRIBUTING
+
+# Test files
+test/
+tests/
+*.test.js
+*.spec.js
+*.test.py
+*.spec.py
+fixtures/
+mocks/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Large data files
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.model
+*.weights
+*.bin
+*.pt
+*.pth
+*.onnx
+*.tflite
+
+# Dataset files
+data/
+datasets/
+raw_data/
+processed_data/
+*.csv
+*.tsv
+*.json
+*.xml
+*.yaml
+*.yml
+!config.yaml
+!config.yml
+
+# Model checkpoints and weights
+checkpoints/
+weights/
+models/
+saved_models/
+*.ckpt
+*.pt
+*.pth
+*.h5
+*.hdf5
+*.onnx
+*.pb
+*.tflite
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Docker
+.docker
+docker-compose*.yml
+!docker-compose.yml 

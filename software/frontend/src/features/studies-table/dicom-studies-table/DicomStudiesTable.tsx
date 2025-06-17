@@ -166,7 +166,7 @@ const StudiesDataTable = ({ data }: { data: IDicomTableStudy[] }) => {
                                     </StyledTableCell>
 
                                     <StyledTableCell component="th" align="left" sx={{ width: '20%' }}>
-                                        {row.studyDescription}
+                                        {""}
                                     </StyledTableCell>
 
                                     <StyledTableCell component="th" align="left" sx={{ width: '10%' }}>

@@ -8,16 +8,16 @@ The framework is designed for reproducibility and ease of use, incorporating fle
 
 ## Model Architecture
 ### 1. UNet-based Network
-![Model Architecture](/assets/network.png)
+![Model Architecture](AI/assets/network.png)
 
 ### 2. KD Framework
-![Knowledge Distillation](/assets/kd.png)
+![Knowledge Distillation](AI/assets/kd.png)
 
 ### 3. Student-Teacher Knowledge Transfer
-![Student-Teacher Knowledge Transfer](/assets/student_teacher_knowledge_transfer.png)
+![Student-Teacher Knowledge Transfer](AI/assets/student_teacher_knowledge_transfer.png)
 
 ### 4. Student Inference
-![Student Inference](/assets/student_inference.png)
+![Student Inference](AI/assets/student_inference.png)
 
 ## Project Structure
 ```
@@ -78,7 +78,6 @@ AI/
 │ ├── training_utils.py # Core training loop utilities
 │ └── tsne_visualization.py # t-SNE visualization scripts
 │
-├── README.md
 └── requirements.txt 
 ```
 

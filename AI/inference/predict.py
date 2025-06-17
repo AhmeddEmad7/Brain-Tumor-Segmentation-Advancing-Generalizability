@@ -19,7 +19,7 @@ def load_inference_model(model_path: str, device: str = 'cuda') -> DynUNet:
         DynUNet: The loaded model in evaluation mode.
     """
     model_path = Path(model_path)
-    model = DynUNet( spatial_dims=3, in_channels=4, out_channels=4, deep_supervision=False)
+    model = DynUNet(spatial_dims=3, in_channels=4, out_channels=4, deep_supervision=False)
 
     if model_path.is_file():
         print(f"Found model checkpoint: {model_path}")

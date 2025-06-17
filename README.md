@@ -78,6 +78,7 @@ AI/
 │ ├── training_utils.py # Core training loop utilities
 │ └── tsne_visualization.py # t-SNE visualization scripts
 │
+├── README.md
 └── requirements.txt 
 ```
 
@@ -113,7 +114,43 @@ Install the required Python packages:
 pip install -r requirements.txt
 ```
 
-### 4. Download Datasets
+### 4. Configure [ClearML](https://clear.ml) Credentials
+
+#### Option A: Using `clearml-init` (Recommended for first-time setup)
+
+Run the following command in your terminal. It will prompt you for your ClearML API server URL, access key, and secret key. You can find these details on your ClearML server's UI under **Settings -> Workspace -> API Credentials**.
+
+```bash
+clearml-init
+```
+This command will create a `clearml.conf` file in your user's home directory. The content of this file will look similar to this:
+
+```ini
+api {
+  web_server: https://app.clear.ml/
+  api_server: https://api.clear.ml
+  files_server: https://files.clear.ml
+  credentials {
+    "access_key" = "YOUR_ACCESS_KEY"
+    "secret_key" = "YOUR_SECRET_KEY"
+  }
+}
+```
+
+#### Option B: Using Environment Variables
+
+Alternatively, you can set the following environment variables.
+
+```bash
+export CLEARML_API_SERVER=https://app.clear.ml/
+export CLEARML_API_HOST=https://api.clear.ml
+export CLEARML_FILES_HOST=https://files.clear.ml
+export CLEARML_API_ACCESS_KEY=YOUR_ACCESS_KEY
+export CLEARML_API_SECRET_KEY=YOUR_SECRET_KEY
+```
+Remember to replace the placeholders with your actual ClearML credentials. If you set these in your shell profile (e.g., `.bashrc`, `.zshrc`), they will persist across sessions.
+
+### 5. Download Datasets
 
 The raw medical imaging datasets are too large to host on Git. You need to download them manually.
 
@@ -179,7 +216,7 @@ The raw medical imaging datasets are too large to host on Git. You need to downl
             ...    └──...
 
 
-### 5. Download Pre-trained Teacher/Student Models
+### 6. Download Pre-trained Teacher/Student Models
 
 The pre-trained teacher models and the initial student model checkpoint are also hosted externally.
 
@@ -232,7 +269,7 @@ python scripts/test.py test [OPTIONS]
 
 **Example:**
 ```bash
-python scripts/test.py test --student_model_path checkpoints/student_model/my_custom_student_model_epoch_100.pth --test_batch_size 2
+python scripts/test.py test --student_model_path checkpoints/student_model/Student_Model_Checkpoint.pth
 ```
 Test results (e.g., metrics in CSV) will be saved in `testing/results/`.
 
@@ -265,7 +302,7 @@ python scripts/infer.py inference \
     --t1w_path /path/to/patient/T1w.nii.gz \
     --t2f_path /path/to/patient/T2F.nii.gz \
     --t2w_path /path/to/patient/T2W.nii.gz \
-    --output_dir ./my_patient_predictions/ \
+    --output_dir /inference/outputs/ \
     --inference_model_path checkpoints/student_model/Student_Model_Checkpoint.pth
 ```
 

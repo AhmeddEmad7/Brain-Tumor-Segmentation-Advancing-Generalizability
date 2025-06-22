@@ -310,7 +310,7 @@ python scripts/infer.py inference \
 
 **Beyond the core AI functionality, this project is part of a larger initiative that includes the development of a full-fledged medical imaging platform.** This platform is designed to provide a comprehensive solution for medical image viewing, analysis, and management, with deep integration of the AI segmentation model developed here. It offers a rich user interface, advanced visualization capabilities, and streamlined workflows for medical professionals.
 
-For more detailed information about the medical imaging platform, its features, and how to set it up, please refer to the [Medical Imaging Platform README](Software/README.md).
+For more detailed information about the medical imaging platform, its features, and how to set it up, please refer to the [Medical Imaging Platform README](software/README.md).
 
 ## Team Members
 

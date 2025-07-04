@@ -1,23 +1,31 @@
-# Advancing Generalizability Across Brain Tumor Populations with KD
+# Advancing Generalizability Across Brain Tumor Populations with Knowledge Distillation
 
 ## Project Overview
 
 This project implements a Knowledge Distillation (KD) framework for medical image segmentation, specifically targeting the segmentation of tumors across multiple distinct populations (Adult Glioma, Sub-Saharan African, Pediatric, Meningioma, and Metastatic). The goal is to leverage the knowledge from large, complex "teacher" models, pre-trained on individual tumor types, to train a more compact and efficient "student" model capable of generalizing across all five populations.
 
+![Dataset](AI/assets/Dataset.png)
+
 The framework is designed for reproducibility and ease of use, incorporating flexible command-line configuration, ClearML for experiment tracking, and organized data/model handling.
+
+<!-- ## Scientific Paper Link
+
+[Link to the paper](https://www.biorxiv.org/content/10.1101/2025.06.28.546900v1) -->
+
+
 
 ## Model Architecture
 ### 1. UNet-based Network
 ![Model Architecture](AI/assets/network.png)
 
-### 2. KD Framework
-![Knowledge Distillation](AI/assets/kd.png)
+### 2. KD Framework with Stratified Batch Sampling Strategy
+![Knowledge Distillation](AI/assets/MTSS.png)
 
-### 3. Student-Teacher Knowledge Transfer
-![Student-Teacher Knowledge Transfer](AI/assets/student_teacher_knowledge_transfer.png)
+### 3. Teacher-Student Knowledge Transfer
+![Teacher-Student Knowledge Transfer](AI/assets/KD.png)
 
 ### 4. Student Inference
-![Student Inference](AI/assets/student_inference.png)
+![Student Inference](AI/assets/inference.png)
 
 ## Project Structure
 ```
@@ -334,7 +342,19 @@ Gratitude goes out to all team members for their valuable contributions to this 
     </a>
 </div>
 
+<!-- ## Citation
 
+If you find this work useful, please consider citing:
+
+```bibtex
+@article{emad2025advancing,
+  title={Advancing generalizability across brain tumor populations with knowledge distillation},
+  author={Emad, Ahmed and Zakariasaad, Hazem and Ahmed, Nourhan and Magdi, Mariem and Tayeh, Mina},
+  journal={bioRxiv},
+  year={2025},
+  publisher={Cold Spring Harbor Laboratory}
+}
+``` -->
 
 ## Contributing
 

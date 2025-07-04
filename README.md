@@ -25,7 +25,7 @@ The framework is designed for reproducibility and ease of use, incorporating fle
 ![Teacher-Student Knowledge Transfer](AI/assets/KD.png)
 
 ### 4. Student Inference
-![Student Inference](AI/assets/inference.png)
+![Student Inference](AI/assets/Inference.png)
 
 ## Project Structure
 ```

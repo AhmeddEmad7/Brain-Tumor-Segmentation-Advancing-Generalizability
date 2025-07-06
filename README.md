@@ -323,7 +323,7 @@ For more detailed information about the medical imaging platform, its features, 
 ## Team Members and Supervisors
 
 Gratitude goes out to all team members and supervisors for their valuable contributions to this project.
-### Members:
+### Team Members:
 <div align="left">
     <a href="https://github.com/AhmeddEmad7">
     <img src="https://github.com/AhmeddEmad7.png" width="100px" alt="@AhmeddEmad7">
@@ -344,10 +344,10 @@ Gratitude goes out to all team members and supervisors for their valuable contri
 
 ### Supervisors:
 <a href="https://github.com/MeenaMakary">
-    <img src="https://github.com/MeenaMakary.png" width="100px" alt="@AhmeddEmad7">
+    <img src="https://github.com/MeenaMakary.png" width="100px" alt="@MeenaMakary">
   </a>
     <a href="https://github.com/Al-masni">
-      <img src="https://github.com/Al-masni.png" width="100px" alt="@hazemzakariasaad">
+      <img src="https://github.com/Al-masni.png" width="100px" alt="@Al-masni">
     </a>
 
 

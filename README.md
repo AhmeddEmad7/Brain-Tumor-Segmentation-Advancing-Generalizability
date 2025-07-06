@@ -1,6 +1,6 @@
 # Advancing Generalizability Across Brain Tumor Populations with Knowledge Distillation
 
-## Project Overview
+## 1. Project Overview
 
 This project implements a Knowledge Distillation (KD) framework for medical image segmentation, specifically targeting the segmentation of tumors across multiple distinct populations (Adult Glioma, Sub-Saharan African, Pediatric, Meningioma, and Metastatic). The goal is to leverage the knowledge from large, complex "teacher" models, pre-trained on individual tumor types, to train a more compact and efficient "student" model capable of generalizing across all five populations.
 
@@ -8,23 +8,23 @@ This project implements a Knowledge Distillation (KD) framework for medical imag
 
 The framework is designed for reproducibility and ease of use, incorporating flexible command-line configuration, ClearML for experiment tracking, and organized data/model handling.
 
-## Project Demo
-### 🔗 [Watch on YouTube](https://www.youtube.com/watch?v=yBBn2nINEwE)
-
-## Manuscript
+## 2. Submitted Manuscript to "Nature Communications"
 ### 📄 [Paper Link](https://drive.google.com/file/d/1cwqEfoXRF_o3KiE6mDQVj227MSsWufQA/view)
 
-## Model Architecture
-### 1. UNet-based Network
+## 3. Project Demo
+### 🔗 [Watch on YouTube](https://www.youtube.com/watch?v=yBBn2nINEwE)
+
+## 4. Model Architecture
+### 4.1 UNet-based Network
 ![Model Architecture](AI/assets/network.png)
 
-### 2. KD Framework with Stratified Batch Sampling Strategy
+### 4.2 KD Framework with Stratified Batch Sampling Strategy
 ![Knowledge Distillation](AI/assets/MTSS.png)
 
-### 3. Teacher-Student Knowledge Transfer
+### 4.3 Teacher-Student Knowledge Transfer
 ![Teacher-Student Knowledge Transfer](AI/assets/KD.png)
 
-### 4. Student Inference
+### 4.4 Student Inference
 ![Student Inference](AI/assets/Inference.png)
 
 ## Project Structure
@@ -90,7 +90,7 @@ AI/
 └── requirements.txt 
 ```
 
-## Setup and Installation
+## 5. Setup and Installation
 
 ### Prerequisites
 
@@ -98,14 +98,14 @@ AI/
 *   Python 3.8+
 *   CUDA-compatible GPU (version 12.0 or higher)
 
-### 1. Clone the Repository
+### 5.1 Clone the Repository
 
 ```bash
 git clone https://github.com/AhmeddEmad7/Brain-Tumor-Segmentation-Advancing-Generalizability.git
 cd AI
 ```
 
-### 2. Set up Virtual Environment
+### 5.2 Set up Virtual Environment
 
 It is highly recommended to use a virtual environment to manage dependencies.
 
@@ -114,7 +114,7 @@ python -m venv venv
 source venv/bin/activate # On Windows: .\venv\Scripts\activate
 ```
 
-### 3. Install Dependencies
+### 5.3 Install Dependencies
 
 Install the required Python packages:
 
@@ -122,7 +122,7 @@ Install the required Python packages:
 pip install -r requirements.txt
 ```
 
-### 4. Configure [ClearML](https://clear.ml) Credentials
+### 5.4 Configure [ClearML](https://clear.ml) Credentials
 
 #### Option A: Using `clearml-init` (Recommended for first-time setup)
 
@@ -158,7 +158,7 @@ export CLEARML_API_SECRET_KEY=YOUR_SECRET_KEY
 ```
 Remember to replace the placeholders with your actual ClearML credentials. If you set these in your shell profile (e.g., `.bashrc`, `.zshrc`), they will persist across sessions.
 
-### 5. Download Datasets
+### 5.5 Download Datasets
 
 The raw medical imaging datasets are too large to host on Git. You need to download them manually.
 
@@ -224,7 +224,7 @@ The raw medical imaging datasets are too large to host on Git. You need to downl
             ...    └──...
 
 
-### 6. Download Pre-trained Teacher/Student Models
+### 5.6 Download Pre-trained Teacher/Student Models
 
 The pre-trained teacher models and the initial student model checkpoint are also hosted externally.
 
@@ -233,13 +233,13 @@ The pre-trained teacher models and the initial student model checkpoint are also
     *   Teacher models go into `checkpoints/teacher_models/` (e.g., `GLI_Teacher_Checkpoint.pth`).
 3. The student base model (if used for resuming training) goes into `checkpoints/student_model/` (e.g., `Student_Model_Checkpoint.pth`).
 
-## Usage
+## 6. Usage
 
 ### Configuration
 
 All configurable parameters (hyperparameters, paths) are managed in `config/default_config.py`. This file defines the command-line arguments for each mode.
 
-### 1. Training (Knowledge Distillation)
+### 6.1 Training (Knowledge Distillation)
 
 To start the Knowledge Distillation training process:
 
@@ -261,7 +261,7 @@ python scripts/train_kd.py train [OPTIONS]
 python scripts/train_kd.py train --epochs 50 --learning_rate 0.0001 --train_batch_size 10
 ```
 
-### 2. Testing (Model Evaluation)
+### 6.2 Testing (Model Evaluation)
 
 To evaluate a trained student model:
 
@@ -281,7 +281,7 @@ python scripts/test.py test --student_model_path checkpoints/student_model/Stude
 ```
 Test results (e.g., metrics in CSV) will be saved in `testing/results/`.
 
-### 3. Inference (Prediction on New Data)
+### 6.3 Inference (Prediction on New Data)
 
 To perform inference on new 3D NIfTI brain MRI images:
 
@@ -314,16 +314,16 @@ python scripts/infer.py inference \
     --inference_model_path checkpoints/student_model/Student_Model_Checkpoint.pth
 ```
 
-## Cloud-based Medical Imaging Platform
+## 7. Cloud-based Medical Imaging Platform
 
 **Beyond the core AI functionality, this project is part of a larger initiative that includes the development of a full-fledged medical imaging platform.** This platform is designed to provide a comprehensive solution for medical image viewing, analysis, and management, with deep integration of the AI segmentation model developed here. It offers a rich user interface, advanced visualization capabilities, and streamlined workflows for medical professionals.
 
 For more detailed information about the medical imaging platform, its features, and how to set it up, please refer to the [Medical Imaging Platform README](software/README.md).
 
-## Team Members
+## Team Members and Supervisors
 
-Gratitude goes out to all team members for their valuable contributions to this project.
-
+Gratitude goes out to all team members and supervisors for their valuable contributions to this project.
+### Members:
 <div align="left">
     <a href="https://github.com/AhmeddEmad7">
     <img src="https://github.com/AhmeddEmad7.png" width="100px" alt="@AhmeddEmad7">
@@ -341,6 +341,15 @@ Gratitude goes out to all team members for their valuable contributions to this 
       <img src="https://github.com/Mina-A-Tayeh.png" width="100px" alt="@Mina-A-Tayeh">
     </a>
 </div>
+
+### Supervisors:
+<a href="https://github.com/AhmeddEmad7">
+    <img src="https://github.com/AhmeddEmad7.png" width="100px" alt="@AhmeddEmad7">
+  </a>
+    <a href="https://github.com/hazemzakariasaad">
+      <img src="https://github.com/hazemzakariasaad.png" width="100px" alt="@hazemzakariasaad">
+    </a>
+
 
 <!-- ## Citation
 

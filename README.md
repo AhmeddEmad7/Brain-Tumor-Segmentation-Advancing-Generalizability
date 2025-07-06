@@ -343,11 +343,11 @@ Gratitude goes out to all team members and supervisors for their valuable contri
 </div>
 
 ### Supervisors:
-<a href="https://github.com/AhmeddEmad7">
-    <img src="https://github.com/AhmeddEmad7.png" width="100px" alt="@AhmeddEmad7">
+<a href="https://github.com/MeenaMakary">
+    <img src="https://github.com/MeenaMakary.png" width="100px" alt="@AhmeddEmad7">
   </a>
-    <a href="https://github.com/hazemzakariasaad">
-      <img src="https://github.com/hazemzakariasaad.png" width="100px" alt="@hazemzakariasaad">
+    <a href="https://github.com/Al-masni">
+      <img src="https://github.com/Al-masni.png" width="100px" alt="@hazemzakariasaad">
     </a>
 
 

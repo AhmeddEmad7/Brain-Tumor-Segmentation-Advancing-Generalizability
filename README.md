@@ -8,7 +8,7 @@ This project implements a Knowledge Distillation (KD) framework for medical imag
 
 The framework is designed for reproducibility and ease of use, incorporating flexible command-line configuration, ClearML for experiment tracking, and organized data/model handling.
 
-## 2. Submitted Manuscript to "Nature Communications"
+## 2. Submitted Manuscript to "NeuroImage"
 ### 📄 [Paper Link](https://drive.google.com/file/d/1cwqEfoXRF_o3KiE6mDQVj227MSsWufQA/view)
 
 ## 3. Project Demo

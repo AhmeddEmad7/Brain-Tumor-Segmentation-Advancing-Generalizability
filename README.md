@@ -320,10 +320,26 @@ python scripts/infer.py inference \
 
 For more detailed information about the medical imaging platform, its features, and how to set it up, please refer to the [Medical Imaging Platform README](software/README.md).
 
+## Citation
+
+If you find our paper and code useful for your research and applications, please cite our paper:
+```bibtex 
+@article{
+  title={Distilling population specific expertise into a unified model for generalizable brain tumor segmentation},
+  author={Ahmed Elzayat and Nourhan Ahmed and Mariem Magdy and Hazem Zakaria and Mina Tayeh},
+  journal={Scientific Reports},
+  volume={16},
+  number={1},
+  year={2026},
+  journal={Scientific Reports},
+  doi={10.1038/s41598-026-35627-x},
+  url={https://doi.org/10.1038/s41598-026-35627-x}
+}
+```
+
 ## Team Members and Supervisors
 
 Gratitude goes out to all team members and supervisors for their valuable contributions to this project.
-### Team Members:
 <div align="left">
     <a href="https://github.com/AhmeddEmad7">
     <img src="https://github.com/AhmeddEmad7.png" width="100px" alt="@AhmeddEmad7">
@@ -340,31 +356,10 @@ Gratitude goes out to all team members and supervisors for their valuable contri
     <a href="https://github.com/Mina-A-Tayeh">
       <img src="https://github.com/Mina-A-Tayeh.png" width="100px" alt="@Mina-A-Tayeh">
     </a>
-</div>
-
-### Supervisors:
-<a href="https://github.com/MeenaMakary">
+    <a href="https://github.com/MeenaMakary">
     <img src="https://github.com/MeenaMakary.png" width="100px" alt="@MeenaMakary">
   </a>
     <a href="https://github.com/Al-masni">
       <img src="https://github.com/Al-masni.png" width="100px" alt="@Al-masni">
     </a>
-
-
-<!-- ## Citation
-
-If you find this work useful, please consider citing:
-
-```bibtex
-@article{emad2025advancing,
-  title={Advancing generalizability across brain tumor populations with knowledge distillation},
-  author={Emad, Ahmed and Zakariasaad, Hazem and Ahmed, Nourhan and Magdi, Mariem and Tayeh, Mina},
-  journal={bioRxiv},
-  year={2025},
-  publisher={Cold Spring Harbor Laboratory}
-}
-``` -->
-
-## Contributing
-
-Contributions are welcome! Please feel free to open issues or submit pull requests.
+</div>
